@@ -1,234 +1,157 @@
 import { useState } from "react";
-import { Search, ShoppingCart, Menu, Phone, MessageCircle, User, LogOut } from "lucide-react";
+import { Search, Menu, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import CartButton from "@/components/CartButton";
 import ThemeToggle from "@/components/ThemeToggle";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import CategoryChips from "@/components/CategoryChips";
+
+const categories = [
+  "Phones", "Laptops", "Apple", "Consoles & Games",
+  "Headphones", "Accessories", "Controllers & Cables",
+];
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  const categories = [
-    "Consoles & Games",
-    "Phones",
-    "Laptops", 
-    "Accessories",
-    "Apple",
-    "Headphones",
-    "Controllers & Cables"
-  ];
-
   return (
     <>
-      {/* Top bar - Mobile hidden for cleaner look */}
-      <div className="hidden md:block bg-primary text-primary-foreground py-2 px-4">
-        <div className="container mx-auto flex justify-between items-center text-sm">
-          <div className="flex items-center gap-4">
-            <span>📍 24 Adegbola Street, Ikeja, Lagos</span>
-            <span>⏰ Mon-Sat 9AM-7PM</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <a href="tel:+2347067894474" className="flex items-center gap-1 hover:text-accent transition-colors">
-              <Phone size={14} />
-              <span>+234 706 789 4474</span>
-            </a>
-          </div>
-        </div>
-      </div>
+      <AnnouncementBar />
 
-      {/* Main header */}
-      <header className="border-b bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-md border-b border-border">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex items-center gap-3 md:gap-6 h-14 md:h-16">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <img 
-                src="/lovable-uploads/335cb308-9043-47a5-9ea4-82bc3bbed7cc.png" 
-                alt="Gadget360.ng Logo" 
-                className="h-10 w-auto md:h-12"
-              />
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-bold text-foreground">Gadget360.ng</h1>
-                <p className="text-xs text-muted-foreground">Your Tech Store</p>
-              </div>
+            <Link to="/" className="flex items-center gap-2 shrink-0">
+              <img src="/favicon.png" alt="Gadget360.ng" className="h-7 w-7 rounded-md" />
+              <span className="font-display font-bold text-base md:text-lg tracking-tight">Gadget360<span className="text-primary">.ng</span></span>
             </Link>
 
-            {/* Search bar - desktop */}
-            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+            {/* Desktop search */}
+            <div className="hidden md:flex flex-1 max-w-xl mx-auto">
               <div className="relative w-full">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={20} />
-                <Input 
-                  placeholder="Search for gadgets, phones, laptops..." 
-                  className="pl-12 pr-24 h-12 rounded-full border-2 border-border focus:border-primary transition-colors"
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+                <Input
+                  placeholder="Search for phones, laptops, consoles…"
+                  className="pl-10 pr-4 h-10 rounded-full bg-muted border-transparent focus:bg-background focus:border-border text-sm"
                 />
-                <Button className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 rounded-full bg-primary hover:bg-primary/90">
-                  Search
-                </Button>
               </div>
             </div>
 
-            {/* Right side actions */}
-            <div className="flex items-center gap-2">
-              {/* Social Media Icons - Mobile */}
-              <div className="flex items-center gap-2 md:hidden">
-                <a 
-                  href="https://wa.me/2347067894474" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-whatsapp/20 hover:bg-whatsapp/40 transition-all duration-300 hover:scale-110"
-                >
-                  <img src="/lovable-uploads/c9fd8577-52ae-4feb-bdf2-503f9e458bdc.png" className="w-4 h-4 opacity-80" alt="WhatsApp" />
-                </a>
-                <a 
-                  href="https://www.facebook.com/share/1AFDYyR6RC/?mibextid=wwXIfr" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-muted/30 hover:bg-primary/20 transition-all duration-300 hover:scale-110"
-                >
-                  <img src="/lovable-uploads/4b216da9-22ab-450e-acb1-bb3dbc10b238.png" className="w-4 h-4 opacity-80" alt="Facebook" />
-                </a>
-                <a 
-                  href="https://www.instagram.com/gadget360ngbackuppage?igsh=MTBscG91aXV6Z3d4cw%3D%3D&utm_source=qr" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-muted/30 hover:bg-primary/20 transition-all duration-300 hover:scale-110"
-                >
-                  <img src="/lovable-uploads/cbe3d69a-9a8d-4e4c-84f8-857386f55748.png" className="w-4 h-4 opacity-80" alt="Instagram" />
-                </a>
-              </div>
-
-              <a 
-                href="https://wa.me/2347067894474" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="hidden md:block"
-              >
-                <Button className="bg-whatsapp hover:bg-whatsapp/90 rounded-full shadow-elegant">
-                  <img src="/lovable-uploads/c9fd8577-52ae-4feb-bdf2-503f9e458bdc.png" className="w-4 h-4 mr-2 brightness-0 invert" alt="WhatsApp" />
+            {/* Right actions */}
+            <div className="ml-auto flex items-center gap-1.5 md:gap-2">
+              <a href="https://wa.me/2347067894474" target="_blank" rel="noopener noreferrer" className="hidden md:block">
+                <Button className="h-9 px-4 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-glow-crimson">
                   WhatsApp Order
                 </Button>
               </a>
-              
-              {/* Cart Button */}
-              <CartButton />
 
-              {/* User Menu */}
+              <CartButton />
+              <div className="hidden md:block"><ThemeToggle /></div>
+
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
+                    <Button variant="ghost" size="icon" className="rounded-full h-9 w-9">
                       <User className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => navigate("/profile")}>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
+                      <User className="mr-2 h-4 w-4" /> Profile
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
+                      <LogOut className="mr-2 h-4 w-4" /> Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button variant="outline" onClick={() => navigate("/auth")}>
+                <Button variant="outline" onClick={() => navigate("/auth")} className="hidden md:inline-flex h-9 rounded-full text-xs">
                   Sign In
                 </Button>
               )}
 
-              {/* Mobile menu */}
               <Sheet open={isOpen} onOpenChange={setIsOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" className="md:hidden">
-                    <Menu size={20} />
+                  <Button variant="ghost" size="icon" className="md:hidden rounded-full h-9 w-9">
+                    <Menu size={18} />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80">
                   <div className="flex flex-col gap-4 mt-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-bold">Menu</h2>
+                    <div className="flex items-center justify-between mb-2">
+                      <h2 className="font-display text-lg font-bold">Menu</h2>
                       <ThemeToggle />
                     </div>
-                    <Link to="/" onClick={() => setIsOpen(false)} className="text-lg font-medium">
-                      Home
-                    </Link>
-                    <Link to="/shop" onClick={() => setIsOpen(false)} className="text-lg font-medium">
-                      Shop
-                    </Link>
-                    <Link to="/contact" onClick={() => setIsOpen(false)} className="text-lg font-medium">
-                      Contact
-                    </Link>
-                    <hr />
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-primary">Categories</h3>
-                      {categories.map((category) => (
-                        <Link 
-                          key={category}
-                          to={`/shop?category=${encodeURIComponent(category)}`}
+                    <Link to="/" onClick={() => setIsOpen(false)} className="text-sm font-medium">Home</Link>
+                    <Link to="/shop" onClick={() => setIsOpen(false)} className="text-sm font-medium">Shop</Link>
+                    <Link to="/contact" onClick={() => setIsOpen(false)} className="text-sm font-medium">Contact</Link>
+                    {!user && (
+                      <Link to="/auth" onClick={() => setIsOpen(false)} className="text-sm font-medium">Sign In</Link>
+                    )}
+                    <hr className="border-border" />
+                    <div className="space-y-1">
+                      <h3 className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Categories</h3>
+                      {categories.map((c) => (
+                        <Link
+                          key={c}
+                          to={`/shop?category=${encodeURIComponent(c)}`}
                           onClick={() => setIsOpen(false)}
-                          className="block py-2 text-sm hover:text-primary"
+                          className="block py-1.5 text-sm hover:text-primary transition-colors"
                         >
-                          {category}
+                          {c}
                         </Link>
                       ))}
                     </div>
+                    <a
+                      href="https://wa.me/2347067894474"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4"
+                    >
+                      <Button className="w-full h-11 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white">
+                        WhatsApp to Order
+                      </Button>
+                    </a>
                   </div>
                 </SheetContent>
               </Sheet>
             </div>
           </div>
 
-          {/* Mobile search */}
-          <div className="md:hidden mt-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
-              <Input 
-                placeholder="Search gadgets..." 
-                className="pl-10 h-10 rounded-full bg-muted border-0 focus:bg-background focus:ring-2 focus:ring-primary"
-              />
-            </div>
-          </div>
+          {/* Desktop category nav */}
+          <nav className="hidden md:flex items-center gap-1 py-2 border-t border-border/60 overflow-x-auto scrollbar-hide">
+            {categories.map((c) => (
+              <Link
+                key={c}
+                to={`/shop?category=${encodeURIComponent(c)}`}
+                className="shrink-0 px-3 h-8 inline-flex items-center rounded-full text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              >
+                {c}
+              </Link>
+            ))}
+            <Link
+              to="/shop"
+              className="ml-auto shrink-0 px-3 h-8 inline-flex items-center rounded-full text-[12px] font-medium text-foreground"
+            >
+              All Products →
+            </Link>
+          </nav>
         </div>
-
-        {/* Desktop navigation */}
-        <nav className="hidden md:block border-t bg-card/50 backdrop-blur-sm">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between py-4">
-              <div className="flex items-center space-x-6">
-                {categories.map((category) => (
-                  <Link 
-                    key={category}
-                    to={`/shop?category=${encodeURIComponent(category)}`}
-                    className="text-sm font-medium hover:text-primary transition-colors relative group px-2 py-1 rounded-md hover:bg-primary/10"
-                  >
-                    {category}
-                    <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
-                  </Link>
-                ))}
-              </div>
-              <div className="flex items-center gap-6 text-sm">
-                <Link to="/shop" className="hover:text-primary font-medium transition-colors">All Products</Link>
-                <Link to="/contact" className="hover:text-primary font-medium transition-colors">Contact</Link>
-                <ThemeToggle />
-              </div>
-            </div>
-          </div>
-        </nav>
       </header>
+
+      <CategoryChips />
     </>
   );
 };
