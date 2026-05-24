@@ -1,36 +1,35 @@
-import { Home, Search, ShoppingCart, User, Grid3X3 } from "lucide-react";
+import { Home, Store, Heart, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+
+const navItems = [
+  { icon: Home, label: "Home", path: "/" },
+  { icon: Store, label: "Shop", path: "/shop" },
+  { icon: Heart, label: "Favourites", path: "/profile" },
+  { icon: User, label: "Profile", path: "/profile" },
+];
 
 const MobileNavigation = () => {
   const location = useLocation();
 
-  const navItems = [
-    { icon: Home, label: "Home", path: "/" },
-    { icon: Grid3X3, label: "Shop", path: "/shop" },
-    { icon: Search, label: "Search", path: "/search" },
-    { icon: ShoppingCart, label: "Cart", path: "/cart" },
-    { icon: User, label: "Profile", path: "/profile" },
-  ];
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border md:hidden z-50">
+    <div
+      className="fixed bottom-3 left-3 right-3 md:hidden z-50 glass-strong rounded-2xl"
+      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+    >
       <div className="flex items-center justify-around px-2 py-2">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
-          
           return (
             <Link
-              key={item.path}
+              key={item.label}
               to={item.path}
-              className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${
-                isActive
-                  ? "text-primary bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground"
+              className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 rounded-xl transition-all ${
+                isActive ? "bg-foreground text-background" : "text-muted-foreground"
               }`}
             >
-              <Icon size={20} />
-              <span className="text-xs mt-1">{item.label}</span>
+              <Icon size={18} strokeWidth={1.75} />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}

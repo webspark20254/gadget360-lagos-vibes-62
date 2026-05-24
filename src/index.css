@@ -2,102 +2,112 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Gadget360 design system — light-default, premium crimson, thin & refined */
 
 @layer base {
   :root {
-    --background: 0 0% 6%;
-    --foreground: 210 40% 98%;
-
-    --card: 0 0% 10%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 0 0% 10%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 0 84% 60%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 0 0% 16%;
-    --secondary-foreground: 210 40% 88%;
-
-    --muted: 0 0% 16%;
-    --muted-foreground: 217 10% 65%;
-
-    --accent: 0 90% 60%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 0 84% 60%;
-
-    --whatsapp: 142 70% 49%;
-    --whatsapp-foreground: 210 40% 98%;
-    
-    --success: 142 76% 36%;
-    --success-foreground: 210 40% 98%;
-
-    --radius: 1rem;
-    
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 6%), hsl(0 84% 12%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 10%), hsl(0 84% 10%));
-    --gradient-accent: linear-gradient(135deg, hsl(0 84% 60%), hsl(0 90% 50%));
-    --shadow-elegant: 0 25px 50px -12px hsl(0 84% 60% / 0.25), 0 15px 30px -5px hsl(0 0% 0% / 0.4);
-    --shadow-card: 0 8px 25px -5px hsl(0 84% 60% / 0.15), 0 4px 15px -2px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 40px hsl(0 84% 60% / 0.2);
-
-    --sidebar-background: 220 13% 16%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 14 100% 65%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 13% 22%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 220 13% 25%;
-    --sidebar-ring: 14 100% 65%;
-  }
-
-  .light {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 7%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 7%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 7%;
 
-    --primary: 14 100% 65%;
+    --primary: 352 78% 52%;
     --primary-foreground: 0 0% 100%;
+    --primary-glow: 352 92% 62%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 14 100% 65%;
+    --accent: 30 8% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 14 100% 65%;
-    
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 91%;
+    --input: 0 0% 91%;
+    --ring: 352 78% 52%;
+
+    --whatsapp: 142 70% 45%;
+    --whatsapp-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --radius: 0.75rem;
+
+    --gradient-crimson: linear-gradient(135deg, hsl(352 78% 52%), hsl(352 92% 62%));
+    --gradient-hero-light: radial-gradient(80% 60% at 70% 30%, hsl(352 92% 96%) 0%, hsl(0 0% 100%) 60%);
+    --gradient-hero-dark: radial-gradient(80% 60% at 70% 30%, hsl(352 60% 14%) 0%, hsl(0 0% 5%) 60%);
+    --gradient-dark: linear-gradient(180deg, hsl(0 0% 7%), hsl(0 0% 4%));
+
+    --shadow-soft: 0 1px 0 hsl(0 0% 0% / 0.04), 0 8px 24px -12px hsl(0 0% 0% / 0.12);
+    --shadow-card: 0 1px 0 hsl(0 0% 0% / 0.03), 0 12px 28px -16px hsl(0 0% 0% / 0.18);
+    --shadow-glow-crimson: 0 12px 40px -10px hsl(352 78% 52% / 0.35);
+    --shadow-elegant: 0 20px 50px -20px hsl(352 78% 52% / 0.25);
+    --shadow-glow: 0 0 30px hsl(352 78% 52% / 0.25);
+
+    --glass-bg: hsla(0, 0%, 100%, 0.6);
+    --glass-border: hsla(0, 0%, 100%, 0.6);
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 352 78% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 352 78% 52%;
+  }
+
+  .dark {
+    --background: 0 0% 5%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 352 88% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 352 92% 68%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 30 8% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 352 88% 58%;
+
+    --glass-bg: hsla(0, 0%, 8%, 0.55);
+    --glass-border: hsla(0, 0%, 100%, 0.08);
+
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 85%;
+    --sidebar-primary: 352 88% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 352 88% 58%;
   }
 }
 
@@ -106,52 +116,69 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Syne', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
   .no-scrollbar::-webkit-scrollbar,
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-
-  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar,
   .scrollbar-hide {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
-  /* Custom gradient utilities */
-  .bg-gradient-card {
-    background: var(--gradient-card);
+  .bg-gradient-crimson { background: var(--gradient-crimson); }
+  .bg-gradient-hero-light { background: var(--gradient-hero-light); }
+  .bg-gradient-hero-dark { background: var(--gradient-hero-dark); }
+  .bg-gradient-dark { background: var(--gradient-dark); }
+  .bg-gradient-card { background: linear-gradient(180deg, hsl(var(--card)), hsl(var(--muted))); }
+  .bg-gradient-accent { background: var(--gradient-crimson); }
+
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-glow { box-shadow: var(--shadow-glow); }
+  .shadow-glow-crimson { box-shadow: var(--shadow-glow-crimson); }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid var(--glass-border);
   }
-  
-  .bg-gradient-accent {
-    background: var(--gradient-accent);
+  .glass-strong {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 40px -10px hsl(0 0% 0% / 0.12);
   }
-  
-  .shadow-elegant {
-    box-shadow: var(--shadow-elegant);
-  }
-  
-  .shadow-glow {
-    box-shadow: var(--shadow-glow);
-  }
-  
-  /* Line clamp utilities */
+
+  .text-balance { text-wrap: balance; }
+
   .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    overflow: hidden; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 1;
   }
-  
   .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    overflow: hidden; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   }
 }
