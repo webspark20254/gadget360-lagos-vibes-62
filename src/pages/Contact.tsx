@@ -3,12 +3,14 @@ import { MapPin, Phone, Mail, MessageCircle, Clock, Send, CheckCircle } from "lu
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LiveChat from "@/components/LiveChat";
+import Seo from "@/components/Seo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -53,7 +55,28 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo
+        title="Contact Gadget360.ng — Lagos Stores, WhatsApp & Phone"
+        description="Visit Gadget360.ng in Ikeja and Computer Village, Lagos. Call +234 810 841 8727 or WhatsApp for instant help with phones, laptops, consoles and accessories."
+        canonical="/contact"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name: "Gadget360.ng",
+          image: "https://gadget360.ng/favicon.png",
+          telephone: "+2348108418727",
+          email: "gadget360ng@gmail.com",
+          url: "https://gadget360.ng/contact",
+          priceRange: "₦₦",
+          address: [
+            { "@type": "PostalAddress", streetAddress: "24 Adegbola Street, Opposite Railway Line", addressLocality: "Ikeja", addressRegion: "Lagos", addressCountry: "NG" },
+            { "@type": "PostalAddress", streetAddress: "8 Oshitelu Street, Opposite GT Bank, Computer Village", addressLocality: "Ikeja", addressRegion: "Lagos", addressCountry: "NG" },
+          ],
+          openingHoursSpecification: [{ "@type": "OpeningHoursSpecification", dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], opens: "09:00", closes: "19:00" }],
+        }}
+      />
       <Header />
+
       
       {/* Hero Section */}
       <section className="relative h-[500px] mb-16 overflow-hidden bg-gradient-hero">
