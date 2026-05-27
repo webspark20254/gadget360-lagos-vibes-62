@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import OptimizedImage from "@/components/OptimizedImage";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
+import { waOrderUrl, waQuoteUrl, formatNaira } from "@/lib/whatsapp";
 
 interface ProductCardProps {
   id: string;
@@ -23,14 +25,9 @@ interface ProductCardProps {
 
 const ProductCard = ({
   id, name, price, originalPrice, image, category,
-  rating = 4.5, inStock = true, isNew = false, specs,
+  rating = 4.5, inStock = true, isNew = false,
   isFeatured = false, badgeText, badgeColor,
 }: ProductCardProps) => {
-  const formatPrice = (a: number) => `₦${a.toLocaleString()}`;
-  const whatsappUrl = `https://wa.me/2347067894474?text=${encodeURIComponent(
-    `Hi! I'm interested in the ${name} (${formatPrice(price)}). Please share more details.`
-  )}`;
-
   return (
     <Card className="group relative overflow-hidden rounded-2xl border border-border bg-card hover:border-foreground/20 hover:-translate-y-1 hover:shadow-card transition-all duration-300">
       <Link to={`/product/${id}`} className="block">
@@ -41,7 +38,6 @@ const ProductCard = ({
             className="w-full h-full p-4 group-hover:scale-105 transition-transform duration-500"
           />
 
-          {/* Badges top-left */}
           <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
             {isFeatured && (
               <Badge className="bg-foreground text-background text-[10px] font-medium px-2 py-0.5 rounded-full border-0">Featured</Badge>
@@ -61,7 +57,6 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Wishlist top-right */}
           <button
             onClick={(e) => e.preventDefault()}
             className="absolute top-2.5 right-2.5 h-8 w-8 grid place-items-center rounded-full glass text-foreground hover:text-primary transition-colors"
@@ -95,26 +90,37 @@ const ProductCard = ({
           </span>
         </div>
 
-        <div className="flex items-end justify-between pt-1">
-          <div className="min-w-0">
+        <div className="pt-1 space-y-2">
+          <div className="flex items-baseline gap-2">
             <div className="font-display font-bold text-base md:text-lg text-foreground leading-none">
-              {formatPrice(price)}
+              {formatNaira(price)}
             </div>
             {originalPrice && (
-              <div className="text-[11px] text-muted-foreground line-through mt-0.5">
-                {formatPrice(originalPrice)}
+              <div className="text-[11px] text-muted-foreground line-through">
+                {formatNaira(originalPrice)}
               </div>
             )}
           </div>
-          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-            <Button
-              size="sm"
-              disabled={!inStock}
-              className="h-8 px-3 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-[11px] font-medium"
-            >
-              Order
-            </Button>
-          </a>
+          <div className="flex gap-1.5">
+            <a href={waOrderUrl(name, price)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1">
+              <Button
+                size="sm"
+                disabled={!inStock}
+                className="w-full h-9 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-[11px] font-semibold gap-1.5"
+              >
+                <WhatsAppIcon size={12} /> Order
+              </Button>
+            </a>
+            <a href={waQuoteUrl(name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1">
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full h-9 rounded-full border-foreground/20 text-[11px] font-semibold gap-1.5"
+              >
+                <WhatsAppIcon size={12} /> Quote
+              </Button>
+            </a>
+          </div>
         </div>
       </div>
     </Card>

@@ -1,5 +1,6 @@
 import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
-import logo from "@/assets/gadget360-logo.png";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
+
 
 const Footer = () => (
   <footer className="bg-ink text-ink-foreground relative overflow-hidden">
@@ -15,9 +16,10 @@ const Footer = () => (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
         <div className="col-span-2 space-y-4">
           <div className="flex items-center gap-2.5">
-            <img src={logo} alt="Gadget360.ng" className="h-10 w-10 object-contain" />
-            <span className="font-display font-bold text-lg tracking-tight">Gadget360<span className="text-primary-glow">.ng</span></span>
+            <span className="grid place-items-center h-10 w-10 rounded-2xl bg-gradient-crimson text-primary-foreground font-display font-bold text-lg shadow-soft">G</span>
+            <span className="font-display font-bold text-lg tracking-tight">Gadget360<span className="font-serif-display text-primary-glow">.ng</span></span>
           </div>
+
           <p className="text-ink-foreground/60 text-sm leading-relaxed max-w-sm">
             Your trusted gadget plug in Lagos. Authentic phones, laptops, consoles & accessories — buy, sell, swap with warranty.
           </p>
@@ -51,10 +53,11 @@ const Footer = () => (
             <a href="tel:+2348108418727" className="flex items-center gap-2 text-ink-foreground/75 hover:text-primary-glow transition-colors"><Phone size={14} /> +234 810 841 8727</a>
             <a href="mailto:gadget360ng@gmail.com" className="flex items-center gap-2 text-ink-foreground/75 hover:text-primary-glow transition-colors"><Mail size={14} /> gadget360ng@gmail.com</a>
           </div>
-          <a href="https://wa.me/2347067894474" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 h-10 px-4 mt-3 rounded-full bg-primary hover:bg-primary-glow text-primary-foreground text-xs font-semibold transition-colors">
-            WhatsApp Us <ArrowUpRight size={14} />
+          <a href="https://wa.me/2348108418727" target="_blank" rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 h-10 px-4 mt-3 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-xs font-semibold transition-colors">
+            <WhatsAppIcon size={13} /> WhatsApp Us <ArrowUpRight size={14} />
           </a>
+
         </div>
       </div>
 
