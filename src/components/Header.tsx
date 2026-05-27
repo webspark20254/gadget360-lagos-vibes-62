@@ -11,12 +11,24 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import CartButton from "@/components/CartButton";
 import ThemeToggle from "@/components/ThemeToggle";
-import logo from "@/assets/gadget360-logo.png";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
+import { waGeneralUrl } from "@/lib/whatsapp";
 
 const categories = [
   "Phones", "Laptops", "Apple", "Consoles & Games",
   "Headphones", "Accessories", "Controllers & Cables",
 ];
+
+// Inline brand mark — readable on any background
+const BrandMark = ({ size = 40 }: { size?: number }) => (
+  <span
+    className="grid place-items-center rounded-2xl bg-gradient-crimson text-primary-foreground font-display font-bold shadow-soft shrink-0"
+    style={{ width: size, height: size, fontSize: size * 0.5 }}
+    aria-hidden="true"
+  >
+    G
+  </span>
+);
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,15 +36,15 @@ const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border/60">
+    <header className="sticky top-0 z-40 bg-background/85 backdrop-blur-xl border-b border-border/60">
       <div className="container mx-auto px-5 md:px-8">
         <div className="flex items-center gap-4 md:gap-8 h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <img src={logo} alt="Gadget360.ng" className="h-10 w-10 md:h-11 md:w-11 object-contain" />
-            <div className="hidden sm:block leading-none">
-              <div className="font-display font-bold text-lg md:text-xl tracking-tight">Gadget360</div>
-              <div className="font-serif-display text-[11px] text-primary -mt-0.5">.ng</div>
+          <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Gadget360.ng home">
+            <BrandMark size={40} />
+            <div className="hidden sm:flex items-baseline gap-0.5 leading-none">
+              <span className="font-display font-bold text-xl md:text-2xl tracking-tight text-foreground">Gadget360</span>
+              <span className="font-serif-display text-base text-primary">.ng</span>
             </div>
           </Link>
 
@@ -57,9 +69,9 @@ const Header = () => {
 
           {/* Right actions */}
           <div className="ml-auto md:ml-0 flex items-center gap-1.5">
-            <a href="https://wa.me/2347067894474" target="_blank" rel="noopener noreferrer" className="hidden md:block">
-              <Button className="h-10 px-4 rounded-full bg-primary hover:bg-primary-glow text-primary-foreground text-xs font-semibold shadow-glow-crimson">
-                Order on WhatsApp
+            <a href={waGeneralUrl()} target="_blank" rel="noopener noreferrer" className="hidden md:block">
+              <Button className="h-10 px-4 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-xs font-semibold shadow-soft gap-2">
+                <WhatsAppIcon size={14} /> Order on WhatsApp
               </Button>
             </a>
 
@@ -99,8 +111,8 @@ const Header = () => {
                 <div className="flex flex-col gap-1 mt-8">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <img src={logo} alt="" className="h-8 w-8" />
-                      <span className="font-display font-bold text-lg">Gadget360<span className="text-primary">.ng</span></span>
+                      <BrandMark size={36} />
+                      <span className="font-display font-bold text-lg">Gadget360<span className="font-serif-display text-primary">.ng</span></span>
                     </div>
                     <ThemeToggle />
                   </div>
@@ -133,9 +145,9 @@ const Header = () => {
                       </Link>
                     ))}
                   </div>
-                  <a href="https://wa.me/2347067894474" target="_blank" rel="noopener noreferrer" className="mt-6">
-                    <Button className="w-full h-12 rounded-full bg-primary hover:bg-primary-glow text-primary-foreground font-semibold">
-                      Order on WhatsApp
+                  <a href={waGeneralUrl()} target="_blank" rel="noopener noreferrer" className="mt-6">
+                    <Button className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
+                      <WhatsAppIcon size={16} /> Order on WhatsApp
                     </Button>
                   </a>
                 </div>
