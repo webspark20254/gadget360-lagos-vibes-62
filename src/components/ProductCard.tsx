@@ -101,21 +101,22 @@ const ProductCard = ({
               </div>
             )}
           </div>
+          {/* Mobile: single Order button. Desktop (sm+): Order + Quote */}
           <div className="flex gap-1.5">
             <a href={waOrderUrl(name, price)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1">
               <Button
                 size="sm"
                 disabled={!inStock}
-                className="w-full h-9 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-[11px] font-semibold gap-1.5"
+                className="w-full h-9 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-[11px] font-semibold gap-1.5 px-2"
               >
                 <WhatsAppIcon size={12} /> Order
               </Button>
             </a>
-            <a href={waQuoteUrl(name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1">
+            <a href={waQuoteUrl(name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="hidden sm:block flex-1">
               <Button
                 size="sm"
                 variant="outline"
-                className="w-full h-9 rounded-full border-foreground/20 text-[11px] font-semibold gap-1.5"
+                className="w-full h-9 rounded-full border-foreground/20 text-[11px] font-semibold gap-1.5 px-2"
               >
                 <WhatsAppIcon size={12} /> Quote
               </Button>

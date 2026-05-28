@@ -1,14 +1,14 @@
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Smartphone, Laptop, Gamepad2, Headphones, Cable, Apple, Watch } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { CATEGORIES } from "@/lib/categories";
 
-const categories = [
-  { name: "Phones", icon: Smartphone, count: "120+", tone: "bg-cream text-foreground" },
-  { name: "Laptops", icon: Laptop, count: "60+", tone: "bg-foreground text-background" },
-  { name: "Apple", icon: Apple, count: "80+", tone: "bg-primary text-primary-foreground" },
-  { name: "Consoles & Games", icon: Gamepad2, count: "45+", tone: "bg-card text-foreground border border-border" },
-  { name: "Headphones", icon: Headphones, count: "35+", tone: "bg-card text-foreground border border-border" },
-  { name: "Accessories", icon: Watch, count: "150+", tone: "bg-cream text-foreground" },
-  { name: "Controllers & Cables", icon: Cable, count: "70+", tone: "bg-foreground text-background" },
+const tones = [
+  "bg-cream text-foreground md:row-span-2",
+  "bg-foreground text-background",
+  "bg-primary text-primary-foreground md:col-span-2",
+  "bg-card text-foreground border border-border",
+  "bg-card text-foreground border border-border",
+  "bg-cream text-foreground",
 ];
 
 const CategoryShowcase = () => (
@@ -27,14 +27,13 @@ const CategoryShowcase = () => (
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[120px] md:auto-rows-[180px]">
-        {categories.map((c, i) => {
+        {CATEGORIES.map((c, i) => {
           const Icon = c.icon;
-          const span = i === 0 ? "md:row-span-2" : i === 2 ? "md:col-span-2" : "";
           return (
             <Link
-              key={c.name}
-              to={`/shop?category=${encodeURIComponent(c.name)}`}
-              className={`group relative rounded-3xl p-4 md:p-6 overflow-hidden flex flex-col justify-between transition-all hover:scale-[1.02] hover:shadow-card ${c.tone} ${span}`}
+              key={c.slug}
+              to={`/shop?category=${encodeURIComponent(c.slug)}`}
+              className={`group relative rounded-3xl p-4 md:p-6 overflow-hidden flex flex-col justify-between transition-all hover:scale-[1.02] hover:shadow-card ${tones[i % tones.length]}`}
             >
               <div className="flex items-start justify-between">
                 <Icon size={22} strokeWidth={1.5} className="opacity-90" />
@@ -42,7 +41,7 @@ const CategoryShowcase = () => (
               </div>
               <div>
                 <div className="font-display font-bold text-lg md:text-2xl leading-tight">{c.name}</div>
-                <div className="text-[11px] opacity-70 mt-0.5">{c.count} items</div>
+                <div className="text-[11px] opacity-70 mt-0.5">Shop now</div>
               </div>
             </Link>
           );
