@@ -1,5 +1,6 @@
 import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
+import BrandLogo from "@/components/BrandLogo";
 
 
 const Footer = () => (
@@ -16,7 +17,7 @@ const Footer = () => (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
         <div className="col-span-2 space-y-4">
           <div className="flex items-center gap-2.5">
-            <span className="grid place-items-center h-10 w-10 rounded-2xl bg-gradient-crimson text-primary-foreground font-display font-bold text-lg shadow-soft">G</span>
+            <BrandLogo size={44} variant="dark" />
             <span className="font-display font-bold text-lg tracking-tight">Gadget360<span className="font-serif-display text-primary-glow">.ng</span></span>
           </div>
 

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Filter, Search, SlidersHorizontal, X } from "lucide-react";
+import { Filter, SlidersHorizontal, X } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import LiveChat from "@/components/LiveChat";
+import GeminiChat from "@/components/GeminiChat";
 import ProductCard from "@/components/ProductCard";
 import Seo from "@/components/Seo";
+import SearchAutocomplete from "@/components/SearchAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -13,12 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { formatNaira } from "@/lib/whatsapp";
-
-const CATEGORIES = [
-  "Phones", "Laptops", "Apple", "Consoles & Games",
-  "Headphones", "Accessories", "Controllers & Cables",
-];
+import { CATEGORIES, CATEGORY_NAMES } from "@/lib/categories";
 
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -31,12 +27,16 @@ const Shop = () => {
   const { toast } = useToast();
 
   const categoryFromUrl = searchParams.get("category");
+  const searchFromUrl = searchParams.get("search");
 
   useEffect(() => {
-    if (categoryFromUrl && !selectedCategories.includes(categoryFromUrl)) {
-      setSelectedCategories([categoryFromUrl]);
-    }
+    if (categoryFromUrl) setSelectedCategories([categoryFromUrl]);
+    else setSelectedCategories([]);
   }, [categoryFromUrl]);
+
+  useEffect(() => {
+    if (searchFromUrl !== null) setSearchQuery(searchFromUrl);
+  }, [searchFromUrl]);
 
   useEffect(() => {
     (async () => {
@@ -73,9 +73,10 @@ const Shop = () => {
 
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase();
+    const sel = selectedCategories.map((s) => s.toLowerCase());
     const arr = products.filter((p) => {
-      const match = !q || p.name.toLowerCase().includes(q) || p.specs?.toLowerCase().includes(q);
-      const cat = selectedCategories.length === 0 || selectedCategories.includes(p.category);
+      const match = !q || p.name.toLowerCase().includes(q) || (p.specs || "").toLowerCase().includes(q);
+      const cat = sel.length === 0 || sel.includes((p.category || "").toLowerCase());
       const price = p.price >= priceRange.min && p.price <= priceRange.max;
       return match && cat && price;
     });
@@ -92,6 +93,20 @@ const Shop = () => {
   const toggleCategory = (c: string) =>
     setSelectedCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]));
 
+  const setOnly = (c: string | null) => {
+    if (c === null) {
+      setSelectedCategories([]);
+      const sp = new URLSearchParams(searchParams);
+      sp.delete("category");
+      setSearchParams(sp);
+    } else {
+      setSelectedCategories([c]);
+      const sp = new URLSearchParams(searchParams);
+      sp.set("category", c);
+      setSearchParams(sp);
+    }
+  };
+
   const clearFilters = () => {
     setSelectedCategories([]);
     setPriceRange({ min: 0, max: 5000000 });
@@ -99,12 +114,12 @@ const Shop = () => {
     setSearchParams({});
   };
 
-  const FilterContent = () => (
+  const FilterContent = ({ onApply }: { onApply?: () => void }) => (
     <div className="space-y-6">
       <div>
         <h3 className="font-display font-semibold text-sm mb-3 uppercase tracking-wider">Categories</h3>
         <div className="space-y-2.5">
-          {CATEGORIES.map((c) => (
+          {CATEGORY_NAMES.map((c) => (
             <label key={c} className="flex items-center gap-2.5 cursor-pointer text-sm hover:text-primary transition-colors">
               <Checkbox checked={selectedCategories.includes(c)} onCheckedChange={() => toggleCategory(c)} />
               {c}
@@ -119,7 +134,10 @@ const Shop = () => {
           <Input type="number" placeholder="Max" value={priceRange.max || ""} onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) || 5000000 })} className="h-10 rounded-xl" />
         </div>
       </div>
-      <Button onClick={clearFilters} variant="outline" className="w-full h-10 rounded-full">Clear all</Button>
+      <div className="flex gap-2">
+        <Button onClick={clearFilters} variant="outline" className="flex-1 h-10 rounded-full">Clear</Button>
+        {onApply && <Button onClick={onApply} className="flex-1 h-10 rounded-full">Apply</Button>}
+      </div>
     </div>
   );
 
@@ -171,7 +189,7 @@ const Shop = () => {
           {/* Quick category chips */}
           <div className="flex overflow-x-auto gap-2 mt-6 pb-1 scrollbar-hide">
             <button
-              onClick={() => setSelectedCategories([])}
+              onClick={() => setOnly(null)}
               className={`shrink-0 px-4 h-9 rounded-full text-xs font-medium border transition-all ${
                 selectedCategories.length === 0
                   ? "bg-foreground text-background border-foreground"
@@ -180,19 +198,22 @@ const Shop = () => {
             >
               All
             </button>
-            {CATEGORIES.map((c) => (
-              <button
-                key={c}
-                onClick={() => setSelectedCategories([c])}
-                className={`shrink-0 px-4 h-9 rounded-full text-xs font-medium border transition-all ${
-                  selectedCategories.includes(c)
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-background border-border hover:border-foreground/40"
-                }`}
-              >
-                {c}
-              </button>
-            ))}
+            {CATEGORIES.map((c) => {
+              const active = selectedCategories.includes(c.slug);
+              return (
+                <button
+                  key={c.slug}
+                  onClick={() => setOnly(active ? null : c.slug)}
+                  className={`shrink-0 px-4 h-9 rounded-full text-xs font-medium border transition-all ${
+                    active
+                      ? "bg-foreground text-background border-foreground"
+                      : "bg-background border-border hover:border-foreground/40"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -214,29 +235,11 @@ const Shop = () => {
           <div className="flex-1 min-w-0">
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row gap-2.5 mb-6">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
-                <Input
-                  placeholder="Search products…"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 h-11 rounded-full bg-muted/60 border-transparent focus:bg-background focus:border-border text-sm"
-                />
-              </div>
+              <SearchAutocomplete className="flex-1" placeholder="Search products…" />
               <div className="flex gap-2">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="lg:hidden h-11 rounded-full px-4 border-foreground/20">
-                      <Filter size={14} className="mr-2" /> Filters
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-80 bg-background">
-                    <div className="mt-8">
-                      <h2 className="font-display font-bold text-xl mb-5">Filters</h2>
-                      <FilterContent />
-                    </div>
-                  </SheetContent>
-                </Sheet>
+                <MobileFilters>
+                  <FilterContent />
+                </MobileFilters>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger className="h-11 rounded-full px-4 w-[160px] border-foreground/20">
                     <SelectValue />
@@ -293,8 +296,34 @@ const Shop = () => {
       </main>
 
       <Footer />
-      <LiveChat />
+      <GeminiChat />
     </div>
+  );
+};
+
+// Wrapper that controls open state so "Apply" can close the sheet
+const MobileFilters = ({ children }: { children: React.ReactNode }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" className="lg:hidden h-11 rounded-full px-4 border-foreground/20">
+          <Filter size={14} className="mr-2" /> Filters
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-80 bg-background overflow-y-auto">
+        <div className="mt-8">
+          <h2 className="font-display font-bold text-xl mb-5">Filters</h2>
+          {/* render children with onApply by cloning isn't trivial; just close on background tap */}
+          <div onClickCapture={(e) => {
+            const t = e.target as HTMLElement;
+            if (t.tagName === "BUTTON" && (t.textContent || "").toLowerCase().includes("apply")) setOpen(false);
+          }}>
+            {children}
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
 

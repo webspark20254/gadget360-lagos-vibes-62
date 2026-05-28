@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Search, Menu, User, LogOut, ShoppingBag } from "lucide-react";
+import { Menu, User, LogOut, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -9,26 +8,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import CartButton from "@/components/CartButton";
+import MiniCart from "@/components/MiniCart";
 import ThemeToggle from "@/components/ThemeToggle";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
+import BrandLogo from "@/components/BrandLogo";
+import SearchAutocomplete from "@/components/SearchAutocomplete";
 import { waGeneralUrl } from "@/lib/whatsapp";
-
-const categories = [
-  "Phones", "Laptops", "Apple", "Consoles & Games",
-  "Headphones", "Accessories", "Controllers & Cables",
-];
-
-// Inline brand mark — readable on any background
-const BrandMark = ({ size = 40 }: { size?: number }) => (
-  <span
-    className="grid place-items-center rounded-2xl bg-gradient-crimson text-primary-foreground font-display font-bold shadow-soft shrink-0"
-    style={{ width: size, height: size, fontSize: size * 0.5 }}
-    aria-hidden="true"
-  >
-    G
-  </span>
-);
+import { CATEGORIES } from "@/lib/categories";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,7 +27,7 @@ const Header = () => {
         <div className="flex items-center gap-4 md:gap-8 h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="Gadget360.ng home">
-            <BrandMark size={40} />
+            <BrandLogo size={42} variant="light" withLink={false} />
             <div className="hidden sm:flex items-baseline gap-0.5 leading-none">
               <span className="font-display font-bold text-xl md:text-2xl tracking-tight text-foreground">Gadget360</span>
               <span className="font-serif-display text-base text-primary">.ng</span>
@@ -52,19 +38,12 @@ const Header = () => {
           <nav className="hidden lg:flex items-center gap-1 ml-4">
             <Link to="/" className="px-3 h-9 inline-flex items-center text-sm font-medium hover:text-primary transition-colors">Home</Link>
             <Link to="/shop" className="px-3 h-9 inline-flex items-center text-sm font-medium hover:text-primary transition-colors">Shop</Link>
-            <Link to="/shop" className="px-3 h-9 inline-flex items-center text-sm font-medium hover:text-primary transition-colors">Categories</Link>
             <Link to="/contact" className="px-3 h-9 inline-flex items-center text-sm font-medium hover:text-primary transition-colors">Contact</Link>
           </nav>
 
           {/* Desktop search */}
           <div className="hidden md:flex flex-1 max-w-md ml-auto">
-            <div className="relative w-full">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={15} />
-              <Input
-                placeholder="Search phones, laptops, consoles…"
-                className="pl-10 pr-4 h-10 rounded-full bg-muted/60 border-transparent focus:bg-background focus:border-border text-sm"
-              />
-            </div>
+            <SearchAutocomplete className="w-full" />
           </div>
 
           {/* Right actions */}
@@ -75,7 +54,7 @@ const Header = () => {
               </Button>
             </a>
 
-            <CartButton />
+            <MiniCart />
             <div className="hidden md:block"><ThemeToggle /></div>
 
             {user ? (
@@ -111,11 +90,16 @@ const Header = () => {
                 <div className="flex flex-col gap-1 mt-8">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <BrandMark size={36} />
+                      <BrandLogo size={36} withLink={false} />
                       <span className="font-display font-bold text-lg">Gadget360<span className="font-serif-display text-primary">.ng</span></span>
                     </div>
                     <ThemeToggle />
                   </div>
+
+                  <div className="mb-3">
+                    <SearchAutocomplete placeholder="Search…" onNavigate={() => setIsOpen(false)} />
+                  </div>
+
                   {[
                     { l: "Home", to: "/" },
                     { l: "Shop", to: "/shop" },
@@ -134,14 +118,14 @@ const Header = () => {
                   ))}
                   <h3 className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-6 mb-2">Categories</h3>
                   <div className="grid grid-cols-2 gap-2">
-                    {categories.map((c) => (
+                    {CATEGORIES.map((c) => (
                       <Link
-                        key={c}
-                        to={`/shop?category=${encodeURIComponent(c)}`}
+                        key={c.slug}
+                        to={`/shop?category=${encodeURIComponent(c.slug)}`}
                         onClick={() => setIsOpen(false)}
                         className="px-3 py-2.5 rounded-xl bg-muted text-xs font-medium hover:bg-primary hover:text-primary-foreground transition-colors"
                       >
-                        {c}
+                        {c.name}
                       </Link>
                     ))}
                   </div>
@@ -158,13 +142,13 @@ const Header = () => {
 
         {/* Desktop category strip */}
         <nav className="hidden md:flex items-center gap-1 py-2 border-t border-border/40 overflow-x-auto scrollbar-hide">
-          {categories.map((c) => (
+          {CATEGORIES.map((c) => (
             <Link
-              key={c}
-              to={`/shop?category=${encodeURIComponent(c)}`}
+              key={c.slug}
+              to={`/shop?category=${encodeURIComponent(c.slug)}`}
               className="shrink-0 px-3 h-8 inline-flex items-center rounded-full text-[12px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
-              {c}
+              {c.name}
             </Link>
           ))}
           <Link
