@@ -1,56 +1,34 @@
 import { useState } from "react";
-import { MapPin, Phone, Mail, MessageCircle, Clock, Send, CheckCircle } from "lucide-react";
+import { MapPin, Phone, Mail, Clock, Send, ArrowUpRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import LiveChat from "@/components/LiveChat";
+import GeminiChat from "@/components/GeminiChat";
 import Seo from "@/components/Seo";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-
+import { waGeneralUrl } from "@/lib/whatsapp";
 
 const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    message: "",
-    preferredContact: ""
-  });
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "", message: "", preferredContact: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Simulate form submission
     setTimeout(() => {
-      toast({
-        title: "Message sent successfully!",
-        description: "We will reply within 24 hours. For faster response, WhatsApp +2348108418727.",
-        duration: 5000,
-      });
-      
-      setFormData({
-        name: "",
-        phone: "",
-        email: "",
-        message: "",
-        preferredContact: ""
-      });
+      toast({ title: "Message sent!", description: "We'll reply within 24 hours. For faster response, WhatsApp +234 810 841 8727." });
+      setFormData({ name: "", phone: "", email: "", message: "", preferredContact: "" });
       setIsSubmitting(false);
-    }, 2000);
+    }, 1200);
   };
 
   return (
@@ -77,339 +55,149 @@ const Contact = () => {
       />
       <Header />
 
-      
-      {/* Hero Section */}
-      <section className="relative h-[500px] mb-16 overflow-hidden bg-gradient-hero">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20"></div>
-        <img 
-          src="/lovable-uploads/80264eaa-7e4a-4fe9-a38a-7862d5d2f2c6.png" 
-          alt="Gadget360.ng Contact Hero" 
-          className="w-full h-full object-cover opacity-30"
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center text-foreground max-w-4xl px-4">
-            <h1 className="text-6xl md:text-7xl font-bold mb-6 bg-gradient-accent bg-clip-text text-transparent">Contact Us</h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Visit our premium stores in Lagos or connect with us digitally. Experience excellence in tech retail.
-            </p>
+      {/* Editorial hero */}
+      <section className="bg-gradient-warm border-b border-border/60 grain relative overflow-hidden">
+        <div className="container mx-auto px-5 md:px-8 py-12 md:py-24">
+          <div className="flex items-center justify-between text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-4">
+            <span>Get in touch</span>
+            <span>Ikeja · Lagos</span>
+          </div>
+          <h1 className="font-display font-bold text-[40px] sm:text-6xl md:text-8xl leading-[0.95] tracking-tight max-w-4xl">
+            Talk to the <span className="font-serif-display text-primary">humans</span> behind Gadget360.
+          </h1>
+          <p className="text-sm md:text-base text-muted-foreground mt-4 max-w-xl">
+            Drop into our Lagos stores, send a message, or skip the queue — WhatsApp us and a real person replies in under 5 minutes.
+          </p>
+          <div className="flex flex-wrap gap-2 mt-6">
+            <a href={waGeneralUrl()} target="_blank" rel="noopener noreferrer">
+              <Button className="h-11 px-5 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-sm font-medium gap-2">
+                <WhatsAppIcon size={15} /> WhatsApp +234 810 841 8727
+              </Button>
+            </a>
+            <a href="tel:+2348108418727">
+              <Button variant="outline" className="h-11 px-5 rounded-full border-foreground/30 hover:bg-foreground hover:text-background text-sm font-medium gap-2">
+                <Phone size={14} /> Call us
+              </Button>
+            </a>
           </div>
         </div>
       </section>
 
-      <main className="container mx-auto px-4 py-8">
-
-        <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Information */}
-          <div className="space-y-8">
-            {/* Store Locations */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="text-primary" size={24} />
-                  Our Store Locations
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="border-l-4 border-primary pl-4">
-                  <h3 className="font-semibold text-lg">Main Store - Adegbola</h3>
-                  <p className="text-muted-foreground">
-                    No 24, Adegbola Street<br />
-                    Opposite Railway Line<br />
-                    Ikeja, Lagos State
-                  </p>
-                  <div className="mt-2">
-                    <a 
-                      href="https://wa.me/2348108418727" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-whatsapp hover:underline"
-                    >
-                      WhatsApp: +234 810 841 8727
-                    </a>
-                  </div>
-                </div>
-
-                <div className="border-l-4 border-accent pl-4">
-                  <h3 className="font-semibold text-lg">Computer Village Branch</h3>
-                  <p className="text-muted-foreground">
-                    No 8, Oshitelu Street<br />
-                    Opposite GT Bank<br />
-                    Computer Village, Ikeja, Lagos
-                  </p>
-                  <div className="mt-2">
-                    <a 
-                      href="tel:+2347067894474" 
-                      className="text-primary hover:underline"
-                    >
-                      Phone: +234 706 789 4474
-                    </a>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Methods */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Get in Touch</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <MessageCircle className="text-whatsapp" size={20} />
-                  <div>
-                    <p className="font-medium">WhatsApp (Primary)</p>
-                    <a 
-                      href="https://wa.me/2348108418727" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-whatsapp hover:underline"
-                    >
-                      +234 810 841 8727
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Phone className="text-primary" size={20} />
-                  <div>
-                    <p className="font-medium">Phone Lines</p>
-                    <div className="space-y-1">
-                      <a href="tel:+2348108418727" className="block text-primary hover:underline">
-                        +234 810 841 8727
-                      </a>
-                      <a href="tel:+2347067894474" className="block text-primary hover:underline">
-                        +234 706 789 4474
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Mail className="text-primary" size={20} />
-                  <div>
-                    <p className="font-medium">Email</p>
-                    <a 
-                      href="mailto:gadget360ng@gmail.com" 
-                      className="text-primary hover:underline"
-                    >
-                      gadget360ng@gmail.com
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <Clock className="text-primary" size={20} />
-                  <div>
-                    <p className="font-medium">Store Hours</p>
-                    <p className="text-muted-foreground">
-                      Monday - Saturday: 9:00 AM - 7:00 PM<br />
-                      Sunday: Closed
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick WhatsApp */}
-            <Card className="bg-whatsapp text-whatsapp-foreground">
-              <CardContent className="p-6 text-center">
-                <MessageCircle className="mx-auto mb-4" size={48} />
-                <h3 className="text-xl font-semibold mb-2">Need Quick Help?</h3>
-                <p className="mb-4 opacity-90">
-                  Chat with us on WhatsApp for instant responses about products, prices, and availability.
-                </p>
-                <a 
-                  href="https://wa.me/2348108418727" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button className="bg-white text-whatsapp hover:bg-white/90">
-                    <MessageCircle className="mr-2" size={20} />
-                    Start WhatsApp Chat
-                  </Button>
-                </a>
-              </CardContent>
-            </Card>
+      <main className="container mx-auto px-5 md:px-8 py-10 md:py-16">
+        {/* Bento grid */}
+        <div className="grid md:grid-cols-12 gap-4 md:gap-5 mb-12">
+          {/* Stores */}
+          <div className="md:col-span-7 rounded-[28px] border border-border bg-card p-6 md:p-8">
+            <div className="text-[11px] uppercase tracking-[0.25em] text-primary mb-3">Visit us</div>
+            <h2 className="font-display font-bold text-2xl md:text-4xl tracking-tight mb-6">Two Lagos stores. <span className="font-serif-display">Walk in.</span></h2>
+            <div className="grid sm:grid-cols-2 gap-5">
+              <div className="rounded-2xl bg-muted/40 p-5">
+                <MapPin className="text-primary mb-3" size={18} />
+                <h3 className="font-display font-semibold text-base mb-1">Adegbola Main</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">24 Adegbola Street<br/>Opp. Railway Line<br/>Ikeja, Lagos</p>
+                <a href="tel:+2348108418727" className="inline-flex items-center gap-1 text-xs font-medium text-primary mt-3 hover:underline">Call <ArrowUpRight size={12} /></a>
+              </div>
+              <div className="rounded-2xl bg-muted/40 p-5">
+                <MapPin className="text-primary mb-3" size={18} />
+                <h3 className="font-display font-semibold text-base mb-1">Computer Village</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">8 Oshitelu Street<br/>Opp. GT Bank<br/>Computer Village, Ikeja</p>
+                <a href="tel:+2347067894474" className="inline-flex items-center gap-1 text-xs font-medium text-primary mt-3 hover:underline">Call <ArrowUpRight size={12} /></a>
+              </div>
+            </div>
           </div>
 
-          {/* Contact Form */}
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Send us a Message</CardTitle>
-                <p className="text-muted-foreground">
-                  Fill out the form below and we'll get back to you within 24 hours.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="name" className="block text-sm font-medium mb-2">
-                        Full Name *
-                      </label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="Your full name"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                        Phone Number *
-                      </label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        placeholder="+234 xxx xxxx xxx"
-                      />
-                    </div>
-                  </div>
+          {/* WhatsApp card */}
+          <div className="md:col-span-5 rounded-[28px] bg-whatsapp text-white p-6 md:p-8 relative overflow-hidden">
+            <WhatsAppIcon size={180} className="absolute -right-10 -bottom-10 opacity-15" />
+            <div className="text-[11px] uppercase tracking-[0.25em] opacity-80 mb-3">Instant help</div>
+            <h2 className="font-display font-bold text-2xl md:text-4xl leading-tight">WhatsApp us — replies in &lt; 5 min.</h2>
+            <p className="text-sm opacity-90 mt-3 max-w-xs">Quotes, stock checks, swaps and orders. Real humans, no bots.</p>
+            <a href={waGeneralUrl()} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-5 h-11 px-5 rounded-full bg-white text-whatsapp text-sm font-semibold">
+              <WhatsAppIcon size={14} /> Start WhatsApp chat
+            </a>
+          </div>
 
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium mb-2">
-                      Email Address
-                    </label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="your.email@example.com"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="preferredContact" className="block text-sm font-medium mb-2">
-                      Preferred Contact Method
-                    </label>
-                    <Select value={formData.preferredContact} onValueChange={(value) => 
-                      setFormData({...formData, preferredContact: value})
-                    }>
-                      <SelectTrigger>
-                        <SelectValue placeholder="How would you like us to respond?" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="whatsapp">WhatsApp</SelectItem>
-                        <SelectItem value="phone">Phone Call</SelectItem>
-                        <SelectItem value="email">Email</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium mb-2">
-                      Message *
-                    </label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleInputChange}
-                      required
-                      rows={5}
-                      placeholder="Tell us about the gadgets you're looking for, any questions you have, or how we can help you..."
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="mr-2" size={16} />
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-sm text-muted-foreground text-center">
-                    * Required fields. We typically respond within 24 hours.
-                    <br />
-                    For faster response, <a href="https://wa.me/2348108418727" target="_blank" rel="noopener noreferrer" className="text-whatsapp hover:underline">WhatsApp us directly</a>.
-                  </p>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Store Photos */}
-            <Card className="mt-8">
-              <CardHeader>
-                <CardTitle>Visit Our Stores</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <img 
-                    src="/lovable-uploads/578a900c-f54f-4321-8b33-489982e1be95.png" 
-                    alt="Gadget360.ng Store Interior" 
-                    className="rounded-lg aspect-video object-cover"
-                  />
-                  <img 
-                    src="/lovable-uploads/c99bd10d-f2ba-4c6f-adaf-538d39fb3233.png" 
-                    alt="Product Display" 
-                    className="rounded-lg aspect-video object-cover"
-                  />
-                </div>
-                <div className="mt-4 p-4 bg-muted rounded-lg">
-                  <h4 className="font-semibold mb-2">Directions to Computer Village Store:</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Located in the heart of Ikeja Computer Village, our store is directly opposite GT Bank on Oshitelu Street. 
-                    Look for the red Gadget360.ng signage. Free parking available on weekdays.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Phone */}
+          <div className="md:col-span-4 rounded-[28px] bg-cream p-6">
+            <Phone className="mb-3" size={18} />
+            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Phone</div>
+            <div className="space-y-1 mt-2">
+              <a href="tel:+2348108418727" className="block font-display font-semibold text-lg hover:text-primary">+234 810 841 8727</a>
+              <a href="tel:+2347067894474" className="block font-display font-semibold text-lg hover:text-primary">+234 706 789 4474</a>
+            </div>
+          </div>
+          {/* Email */}
+          <div className="md:col-span-4 rounded-[28px] bg-foreground text-background p-6">
+            <Mail className="mb-3" size={18} />
+            <div className="text-[11px] uppercase tracking-[0.2em] opacity-60">Email</div>
+            <a href="mailto:gadget360ng@gmail.com" className="block font-display font-semibold text-lg mt-2 hover:text-primary-glow break-all">gadget360ng@gmail.com</a>
+          </div>
+          {/* Hours */}
+          <div className="md:col-span-4 rounded-[28px] border border-border bg-card p-6">
+            <Clock className="text-primary mb-3" size={18} />
+            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Store hours</div>
+            <div className="mt-2 text-sm leading-relaxed">
+              <div className="font-medium">Mon – Sat</div>
+              <div className="text-muted-foreground">9:00 AM – 7:00 PM</div>
+              <div className="font-medium mt-2">Sunday</div>
+              <div className="text-muted-foreground">Closed</div>
+            </div>
           </div>
         </div>
 
-        {/* Map Section */}
-        <div className="mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle>Find Us on the Map</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="mx-auto mb-2 text-primary" size={48} />
-                  <p className="text-lg font-medium">Interactive Map</p>
-                  <p className="text-muted-foreground">
-                    24, Adegbola Street, Ikeja, Lagos
-                  </p>
-                  <a 
-                    href="https://maps.google.com/?q=24+Adegbola+Street+Ikeja+Lagos" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    <Button className="mt-4">
-                      View on Google Maps
-                    </Button>
-                  </a>
-                </div>
+        {/* Form */}
+        <div className="grid md:grid-cols-12 gap-6 md:gap-10">
+          <div className="md:col-span-5">
+            <div className="text-[11px] uppercase tracking-[0.25em] text-primary mb-3">Drop a line</div>
+            <h2 className="font-display font-bold text-3xl md:text-5xl tracking-tight leading-[1.05]">
+              Prefer to <span className="font-serif-display">write?</span>
+            </h2>
+            <p className="text-sm text-muted-foreground mt-3 max-w-sm">
+              Tell us what you're looking for and we'll reply within 24 hours. For instant help, WhatsApp is fastest.
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="md:col-span-7 rounded-[28px] border border-border bg-card p-6 md:p-8 space-y-4">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Name *</label>
+                <Input name="name" value={formData.name} onChange={handleInputChange} required placeholder="Your full name" className="h-11 rounded-xl" />
               </div>
-            </CardContent>
-          </Card>
+              <div>
+                <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Phone *</label>
+                <Input name="phone" type="tel" value={formData.phone} onChange={handleInputChange} required placeholder="+234 …" className="h-11 rounded-xl" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Email</label>
+              <Input name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="you@example.com" className="h-11 rounded-xl" />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Preferred reply</label>
+              <Select value={formData.preferredContact} onValueChange={(v) => setFormData({ ...formData, preferredContact: v })}>
+                <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Message *</label>
+              <Textarea name="message" value={formData.message} onChange={handleInputChange} required rows={5} placeholder="What gadget are you looking for?" className="rounded-xl" />
+            </div>
+            <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-full bg-foreground hover:bg-foreground/90 text-background gap-2 font-semibold">
+              {isSubmitting ? "Sending…" : (<><Send size={15} /> Send message</>)}
+            </Button>
+            <p className="text-[11px] text-muted-foreground text-center">
+              * Required. For faster reply, <a href={waGeneralUrl()} className="text-primary hover:underline">WhatsApp us</a>.
+            </p>
+          </form>
         </div>
       </main>
 
       <Footer />
-      <LiveChat />
+      <GeminiChat />
     </div>
   );
 };

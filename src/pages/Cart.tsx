@@ -1,27 +1,21 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import WhatsAppIcon from "@/components/WhatsAppIcon";
+import { WHATSAPP_NUMBER, formatNaira } from "@/lib/whatsapp";
 
 interface CartItem {
   id: string;
   quantity: number;
-  product: {
-    id: string;
-    name: string;
-    price: number;
-    image_url: string;
-    stock_quantity: number;
-  };
+  product: { id: string; name: string; price: number; image_url: string; stock_quantity: number };
 }
 
 const Cart = () => {
@@ -32,136 +26,58 @@ const Cart = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!user) {
-      navigate("/auth");
-      return;
-    }
+    if (!user) { navigate("/auth"); return; }
     loadCartItems();
   }, [user, navigate]);
 
   const loadCartItems = async () => {
     if (!user) return;
-
     try {
       const { data, error } = await supabase
-        .from('cart_items')
-        .select(`
-          id,
-          quantity,
-          product:products(
-            id,
-            name,
-            price,
-            image_url,
-            stock_quantity
-          )
-        `)
-        .eq('user_id', user.id);
-
-      if (error) {
-        console.error('Error loading cart items:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load cart items",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const normalized = (data || []).map(item => ({
+        .from("cart_items")
+        .select("id, quantity, product:products(id, name, price, image_url, stock_quantity)")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      const norm = (data || []).map((item: any) => ({
         ...item,
-        product: Array.isArray(item.product) ? item.product[0] : item.product
+        product: Array.isArray(item.product) ? item.product[0] : item.product,
       })) as CartItem[];
-
-      setCartItems(normalized);
-    } catch (error) {
-      console.error('Error loading cart items:', error);
+      setCartItems(norm.filter((i) => i.product));
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Error", description: "Failed to load cart", variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
-  const updateQuantity = async (itemId: string, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      await removeItem(itemId);
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .update({ quantity: newQuantity })
-        .eq('id', itemId);
-
-      if (error) {
-        throw error;
-      }
-
-      setCartItems(items =>
-        items.map(item =>
-          item.id === itemId ? { ...item, quantity: newQuantity } : item
-        )
-      );
-    } catch (error) {
-      console.error('Error updating quantity:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update quantity",
-        variant: "destructive"
-      });
-    }
+  const updateQuantity = async (id: string, qty: number) => {
+    if (qty <= 0) return removeItem(id);
+    setCartItems((prev) => prev.map((i) => (i.id === id ? { ...i, quantity: qty } : i)));
+    await supabase.from("cart_items").update({ quantity: qty }).eq("id", id);
   };
 
-  const removeItem = async (itemId: string) => {
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('id', itemId);
-
-      if (error) {
-        throw error;
-      }
-
-      setCartItems(items => items.filter(item => item.id !== itemId));
-      
-      toast({
-        title: "Item removed",
-        description: "Item has been removed from your cart"
-      });
-    } catch (error) {
-      console.error('Error removing item:', error);
-      toast({
-        title: "Error",
-        description: "Failed to remove item",
-        variant: "destructive"
-      });
-    }
+  const removeItem = async (id: string) => {
+    setCartItems((prev) => prev.filter((i) => i.id !== id));
+    await supabase.from("cart_items").delete().eq("id", id);
+    toast({ title: "Item removed" });
   };
 
-  const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
-  };
+  const total = cartItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
 
-  const handleCheckout = () => {
-    const total = getTotalPrice();
-    const itemsList = cartItems.map(item => 
-      `• ${item.product.name} - Quantity: ${item.quantity} - Price: ₦${(item.product.price * item.quantity).toLocaleString()}`
-    ).join('\n');
-
-    const message = `Hi I ordered this product on your website and I want to get it delivered:\n\n📦 ORDER DETAILS:\n${itemsList}\n\n💰 Total Amount: ₦${total.toLocaleString()}\n\n📍 Please confirm availability and provide delivery details.\n\nThank you!`;
-    
-    const whatsappUrl = `https://wa.me/2347067894474?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+  const sendOnWhatsApp = () => {
+    const lines = cartItems
+      .map((i) => `• ${i.product.name} ×${i.quantity} — ${formatNaira(i.product.price * i.quantity)}`)
+      .join("\n");
+    const text = `Hi Gadget360.ng! I'd like to order the following:\n\n${lines}\n\nTotal: ${formatNaira(total)}\n\nPlease confirm availability & delivery. Thank you!`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <p>Loading cart...</p>
-        </div>
+        <div className="container mx-auto px-4 py-16 text-center text-sm text-muted-foreground">Loading cart…</div>
         <Footer />
       </div>
     );
@@ -171,13 +87,11 @@ const Cart = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center">
-          <ShoppingBag className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
-          <p className="text-muted-foreground mb-6">Add some items to get started</p>
-          <Button onClick={() => navigate("/shop")}>
-            Continue Shopping
-          </Button>
+        <div className="container mx-auto px-5 py-20 text-center">
+          <ShoppingBag className="mx-auto h-14 w-14 text-muted-foreground mb-4" />
+          <h2 className="font-display font-bold text-3xl mb-2">Your cart is empty</h2>
+          <p className="text-muted-foreground mb-6 text-sm">Add a gadget you love to get started.</p>
+          <Button onClick={() => navigate("/shop")} className="rounded-full h-11 px-6">Browse Shop</Button>
         </div>
         <Footer />
       </div>
@@ -185,111 +99,99 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-36 lg:pb-0">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-        
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
+      <div className="container mx-auto px-5 md:px-8 py-6 md:py-10">
+        <Link to="/shop" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4">
+          <ArrowLeft size={14} /> Continue shopping
+        </Link>
+        <h1 className="font-display font-bold text-3xl md:text-5xl tracking-tight mb-6 md:mb-10">
+          Your <span className="font-serif-display text-primary">cart</span>
+        </h1>
+
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-10">
+          {/* Items */}
+          <div className="lg:col-span-2 space-y-3">
             {cartItems.map((item) => (
-              <Card key={item.id}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    <img
-                      src={item.product.image_url}
-                      alt={item.product.name}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-semibold">{item.product.name}</h3>
-                      <p className="text-lg font-bold text-primary">
-                        ₦{item.product.price.toLocaleString()}
-                      </p>
-                      {item.product.stock_quantity < 10 && (
-                        <Badge variant="destructive" className="mt-1">
-                          Only {item.product.stock_quantity} left!
-                        </Badge>
-                      )}
+              <div key={item.id} className="rounded-2xl border border-border bg-card p-3 md:p-4">
+                <div className="flex gap-3 md:gap-4">
+                  <Link to={`/product/${item.product.id}`} className="h-20 w-20 md:h-24 md:w-24 rounded-xl bg-muted overflow-hidden shrink-0">
+                    <img src={item.product.image_url} alt={item.product.name} className="w-full h-full object-contain p-1.5" />
+                  </Link>
+                  <div className="flex-1 min-w-0 flex flex-col">
+                    <div className="flex items-start justify-between gap-2">
+                      <Link to={`/product/${item.product.id}`} className="text-sm md:text-base font-semibold leading-snug line-clamp-2 hover:text-primary">
+                        {item.product.name}
+                      </Link>
+                      <button onClick={() => removeItem(item.id)} className="text-muted-foreground hover:text-destructive p-1 -mr-1" aria-label="Remove">
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      >
-                        <Minus className="h-4 w-4" />
-                      </Button>
-                      <Input
-                        type="number"
-                        value={item.quantity}
-                        onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 1)}
-                        className="w-16 text-center"
-                        min="1"
-                        max={item.product.stock_quantity}
-                      />
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={item.quantity >= item.product.stock_quantity}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div className="font-display font-bold text-primary text-base md:text-lg mt-0.5">
+                      {formatNaira(item.product.price)}
+                    </div>
+                    {item.product.stock_quantity < 10 && (
+                      <Badge variant="destructive" className="mt-1 self-start text-[10px] rounded-full">
+                        Only {item.product.stock_quantity} left
+                      </Badge>
+                    )}
+                    <div className="mt-auto pt-2 flex items-center justify-between">
+                      <div className="inline-flex items-center rounded-full bg-muted">
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="h-8 w-8 grid place-items-center rounded-full hover:bg-muted-foreground/10">
+                          <Minus size={14} />
+                        </button>
+                        <span className="px-3 text-sm font-semibold tabular-nums">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.product.stock_quantity} className="h-8 w-8 grid place-items-center rounded-full hover:bg-muted-foreground/10 disabled:opacity-40">
+                          <Plus size={14} />
+                        </button>
+                      </div>
+                      <div className="text-sm font-semibold tabular-nums">
+                        {formatNaira(item.product.price * item.quantity)}
+                      </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span>{item.product.name} x{item.quantity}</span>
-                      <span>₦{(item.product.price * item.quantity).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-                
-                <Separator />
-                
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span>₦{getTotalPrice().toLocaleString()}</span>
-                </div>
-                
-                <Button 
-                  className="w-full bg-whatsapp hover:bg-whatsapp/90"
-                  onClick={handleCheckout}
-                >
-                  <MessageCircle className="mr-2 h-4 w-4" />
-                  Order via WhatsApp
-                </Button>
-                
-                <p className="text-xs text-muted-foreground text-center">
-                  Orders are processed through WhatsApp for personalized service
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Summary (desktop) */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 rounded-2xl border border-border bg-card p-6 space-y-4">
+              <h2 className="font-display font-bold text-xl">Order summary</h2>
+              <div className="space-y-2 text-sm">
+                {cartItems.map((i) => (
+                  <div key={i.id} className="flex justify-between gap-3">
+                    <span className="text-muted-foreground truncate">{i.product.name} ×{i.quantity}</span>
+                    <span className="font-medium shrink-0">{formatNaira(i.product.price * i.quantity)}</span>
+                  </div>
+                ))}
+              </div>
+              <Separator />
+              <div className="flex items-end justify-between">
+                <span className="text-xs uppercase tracking-wider text-muted-foreground">Total</span>
+                <span className="font-display font-bold text-2xl">{formatNaira(total)}</span>
+              </div>
+              <Button onClick={sendOnWhatsApp} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
+                <WhatsAppIcon size={16} /> Order on WhatsApp
+              </Button>
+              <p className="text-[11px] text-muted-foreground text-center">Orders are processed personally on WhatsApp.</p>
+            </div>
+          </aside>
         </div>
       </div>
+
+      {/* Mobile sticky checkout bar */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-border/60 px-4 py-3">
+        <div className="flex items-end justify-between mb-2">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</span>
+          <span className="font-display font-bold text-xl">{formatNaira(total)}</span>
+        </div>
+        <Button onClick={sendOnWhatsApp} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
+          <WhatsAppIcon size={16} /> Order on WhatsApp
+        </Button>
+      </div>
+
       <Footer />
     </div>
   );
