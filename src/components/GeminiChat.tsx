@@ -1,17 +1,32 @@
 import { useState, useEffect, useRef } from "react";
-import { X, Send, Sparkles } from "lucide-react";
+import { X, Send, Sparkles, GripVertical } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
-import ChatIcon from "@/components/ChatIcon";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { WHATSAPP_NUMBER, waGeneralUrl } from "@/lib/whatsapp";
 
 interface Message { id: string; text: string; isBot: boolean; timestamp: Date }
 
-// Friendly bot avatar illustration (inline SVG)
+/** Friendly assistant glyph — circular avatar with smile + spark accent. */
+const AssistantGlyph = ({ size = 28 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 40 40" fill="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="ag-bg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stopColor="#fff" stopOpacity="0.25" />
+        <stop offset="100%" stopColor="#fff" stopOpacity="0" />
+      </linearGradient>
+    </defs>
+    <circle cx="20" cy="20" r="18" fill="url(#ag-bg)" />
+    <circle cx="14.5" cy="18" r="2" fill="currentColor" />
+    <circle cx="25.5" cy="18" r="2" fill="currentColor" />
+    <path d="M13 24c1.8 2.2 4.3 3.3 7 3.3s5.2-1.1 7-3.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+    <path d="M31.5 8.5l.9 1.9 1.9.9-1.9.9-.9 1.9-.9-1.9-1.9-.9 1.9-.9.9-1.9Z" fill="currentColor" opacity="0.9" />
+  </svg>
+);
+
 const BotAvatar = ({ size = 56 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 64 64" fill="none" aria-hidden="true">
     <defs>
@@ -20,7 +35,7 @@ const BotAvatar = ({ size = 56 }: { size?: number }) => (
         <stop offset="100%" stopColor="hsl(var(--primary-glow))" />
       </linearGradient>
     </defs>
-    <rect x="6" y="14" width="52" height="40" rx="14" fill="url(#bot-g)" />
+    <rect x="6" y="14" width="52" height="40" rx="18" fill="url(#bot-g)" />
     <circle cx="32" cy="10" r="3" fill="hsl(var(--foreground))" />
     <rect x="31" y="6" width="2" height="6" fill="hsl(var(--foreground))" />
     <circle cx="23" cy="34" r="4.5" fill="white" />
@@ -30,6 +45,8 @@ const BotAvatar = ({ size = 56 }: { size?: number }) => (
     <rect x="26" y="42" width="12" height="3" rx="1.5" fill="white" opacity="0.85" />
   </svg>
 );
+
+const STORAGE_KEY = "g360.chatLauncherPos";
 
 const GeminiChat = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -45,8 +62,45 @@ const GeminiChat = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
+  // Draggable launcher position (offsets from bottom-right)
+  const [pos, setPos] = useState<{ x: number; y: number }>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return { x: 20, y: 20 };
+  });
+  const dragRef = useRef<{ active: boolean; sx: number; sy: number; ox: number; oy: number; moved: boolean }>({
+    active: false, sx: 0, sy: 0, ox: 0, oy: 0, moved: false,
+  });
+
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { setSessionId(crypto.randomUUID()); }, []);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+    dragRef.current = { active: true, sx: e.clientX, sy: e.clientY, ox: pos.x, oy: pos.y, moved: false };
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.sx;
+    const dy = e.clientY - dragRef.current.sy;
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) dragRef.current.moved = true;
+    // Convert to bottom-right offset (subtract movement from offsets)
+    const next = {
+      x: Math.max(8, Math.min(window.innerWidth - 80, dragRef.current.ox - dx)),
+      y: Math.max(8, Math.min(window.innerHeight - 80, dragRef.current.oy - dy)),
+    };
+    setPos(next);
+  };
+  const onPointerUp = () => {
+    if (dragRef.current.active) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pos)); } catch {}
+      const wasMoved = dragRef.current.moved;
+      dragRef.current.active = false;
+      if (!wasMoved) setIsOpen(true);
+    }
+  };
 
   const createChatSession = async () => {
     const { data, error } = await supabase
@@ -94,25 +148,36 @@ const GeminiChat = () => {
 
   return (
     <>
-      {/* Launcher */}
+      {/* Draggable launcher */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open chat"
-          className="fixed bottom-5 right-5 z-50 group"
+        <div
+          className="fixed z-50 select-none touch-none"
+          style={{ right: pos.x, bottom: pos.y }}
         >
-          <span className="absolute inset-0 rounded-full bg-primary/30 blur-xl animate-pulse" />
-          <span className="relative grid place-items-center h-14 w-14 rounded-full bg-gradient-crimson text-primary-foreground shadow-glow-crimson ring-1 ring-primary/30 hover:scale-105 transition-transform">
-            <ChatIcon size={26} />
-          </span>
-          <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-whatsapp ring-2 ring-background" />
-        </button>
+          <button
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+            aria-label="Open chat (drag to move)"
+            className="group relative block cursor-grab active:cursor-grabbing"
+          >
+            <span className="absolute inset-0 rounded-full bg-primary/25 blur-2xl animate-pulse" />
+            <span className="relative grid place-items-center h-16 w-16 rounded-full bg-gradient-crimson text-primary-foreground shadow-glow-crimson ring-1 ring-primary/30 group-hover:scale-105 transition-transform">
+              <AssistantGlyph size={32} />
+            </span>
+            <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-whatsapp ring-2 ring-background" />
+            <span className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-foreground text-background text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+              <GripVertical size={8} /> drag
+            </span>
+          </button>
+        </div>
       )}
 
       {/* Window */}
       {isOpen && (
         <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:right-5 sm:bottom-5 sm:w-[380px] h-[560px] max-h-[85vh] z-50 rounded-3xl overflow-hidden border border-border bg-background shadow-elegant flex flex-col">
-          {/* Header — illustrated gradient banner */}
+          {/* Header */}
           <div className="relative bg-gradient-crimson text-primary-foreground px-5 pt-4 pb-5 overflow-hidden">
             <svg className="absolute -right-6 -bottom-8 opacity-20" width="180" height="180" viewBox="0 0 200 200" fill="none">
               <circle cx="100" cy="100" r="80" stroke="white" strokeWidth="1" />
@@ -122,7 +187,7 @@ const GeminiChat = () => {
             <div className="flex items-start justify-between relative">
               <div className="flex items-center gap-3">
                 <div className="grid place-items-center h-10 w-10 rounded-2xl bg-white/15 backdrop-blur">
-                  <ChatIcon size={20} />
+                  <AssistantGlyph size={22} />
                 </div>
                 <div>
                   <div className="font-display font-bold text-lg leading-tight">Gadget Assistant</div>
@@ -165,8 +230,8 @@ const GeminiChat = () => {
                   {messages.map((m) => (
                     <div key={m.id} className={`flex items-end gap-2 ${m.isBot ? "justify-start" : "justify-end"}`}>
                       {m.isBot && (
-                        <div className="h-7 w-7 rounded-full bg-gradient-crimson grid place-items-center shrink-0">
-                          <ChatIcon size={14} className="text-primary-foreground" />
+                        <div className="h-7 w-7 rounded-full bg-gradient-crimson grid place-items-center shrink-0 text-primary-foreground">
+                          <AssistantGlyph size={16} />
                         </div>
                       )}
                       <div className={`max-w-[78%] px-3.5 py-2.5 text-sm leading-snug rounded-2xl ${
@@ -180,7 +245,7 @@ const GeminiChat = () => {
                   ))}
                   {loading && (
                     <div className="flex items-end gap-2">
-                      <div className="h-7 w-7 rounded-full bg-gradient-crimson grid place-items-center"><ChatIcon size={14} className="text-primary-foreground" /></div>
+                      <div className="h-7 w-7 rounded-full bg-gradient-crimson grid place-items-center text-primary-foreground"><AssistantGlyph size={16} /></div>
                       <div className="px-3.5 py-2.5 rounded-2xl rounded-bl-md bg-background border border-border">
                         <div className="flex gap-1">
                           <span className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
