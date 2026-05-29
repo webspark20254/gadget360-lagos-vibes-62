@@ -105,8 +105,8 @@ const ProductDetail = () => {
     toast({ title: "Added to cart", description: `${product.name} ×${qty}` });
   };
 
-  return (
-    <div className="min-h-screen bg-background pb-28 md:pb-0">
+    <div className="min-h-screen bg-background">
+
       <Seo
         title={`${product.name} — ${formatNaira(product.price)} | Gadget360.ng`}
         description={`${product.name} in Lagos. ${product.description?.slice(0, 140) || "Authentic product with warranty."} Order on WhatsApp.`}
@@ -231,31 +231,32 @@ const ProductDetail = () => {
           {activeTab === "reviews" && <ProductReviews productId={product.id} />}
         </div>
 
-        {/* Sticky bottom: total + qty + Add to Cart + Buy (WhatsApp) */}
-        <div className="fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-border/60 px-4 py-3">
-          <div className="flex items-center gap-3 mb-2">
+        {/* Checkout section — inline (no longer pinned) */}
+        <section className="mx-5 mt-2 mb-8 rounded-[28px] bg-foreground text-background p-5 shadow-elegant">
+          <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 min-w-0">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Total</div>
-              <div className="font-display font-bold text-xl leading-none mt-0.5">{formatNaira(totalPrice)}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] opacity-60">Total</div>
+              <div className="font-display font-bold text-3xl leading-none mt-1">{formatNaira(totalPrice)}</div>
+              <div className="text-[11px] opacity-60 mt-1">{qty} × {formatNaira(product.price)}</div>
             </div>
-            <div className="inline-flex items-center rounded-full bg-muted">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-9 w-9 grid place-items-center rounded-full"><Minus size={14} /></button>
-              <span className="px-2 text-sm font-semibold tabular-nums w-6 text-center">{qty}</span>
-              <button onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-9 w-9 grid place-items-center rounded-full"><Plus size={14} /></button>
+            <div className="inline-flex items-center rounded-full bg-background/10 ring-1 ring-background/20">
+              <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background/10"><Minus size={14} /></button>
+              <span className="px-2 text-sm font-semibold tabular-nums w-7 text-center">{qty}</span>
+              <button onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background/10"><Plus size={14} /></button>
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={addToCart} disabled={!inStock} variant="outline" className="flex-1 h-12 rounded-full border-foreground/20 font-semibold text-xs">
+            <Button onClick={addToCart} disabled={!inStock} variant="outline" className="flex-1 h-12 rounded-full border-background/30 bg-transparent text-background hover:bg-background hover:text-foreground font-semibold text-xs">
               Add to Cart
             </Button>
             <a href={waOrderUrl(product.name, totalPrice)} target="_blank" rel="noopener noreferrer" className="flex-[1.2]">
-              <Button disabled={!inStock} className="w-full h-12 rounded-full bg-foreground text-background hover:bg-foreground/90 font-semibold gap-2 text-xs">
+              <Button disabled={!inStock} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2 text-xs">
                 <WhatsAppIcon size={14} /> Buy Now
               </Button>
             </a>
           </div>
-        </div>
-      </div>
+        </section>
+
 
       {/* ===== DESKTOP LAYOUT ===== */}
       <main className="hidden md:block container mx-auto px-8 py-10">
