@@ -105,7 +105,9 @@ const ProductDetail = () => {
     toast({ title: "Added to cart", description: `${product.name} ×${qty}` });
   };
 
+  return (
     <div className="min-h-screen bg-background">
+
 
       <Seo
         title={`${product.name} — ${formatNaira(product.price)} | Gadget360.ng`}
