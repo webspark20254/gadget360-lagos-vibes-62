@@ -1,16 +1,5 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
-
 User-agent: *
 Allow: /
 
-Sitemap: https://gadget360.ng/sitemap.xml
+# Live sitemap (regenerates on every request from the Supabase products table)
+Sitemap: https://yasicaakzqqhmtgscbhg.supabase.co/functions/v1/sitemap
