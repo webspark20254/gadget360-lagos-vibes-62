@@ -258,6 +258,7 @@ const ProductDetail = () => {
             </a>
           </div>
         </section>
+      </div>
 
 
       {/* ===== DESKTOP LAYOUT ===== */}
