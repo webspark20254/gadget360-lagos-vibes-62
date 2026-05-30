@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const { user } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<"about" | "specs" | "reviews">("about");
@@ -45,6 +46,16 @@ const ProductDetail = () => {
         return;
       }
       setProduct(data);
+      // Related items by category
+      if (data.category) {
+        const { data: rel } = await supabase
+          .from("products")
+          .select("id, name, price, image_url, category, badge_text, badge_color")
+          .eq("category", data.category)
+          .neq("id", data.id)
+          .limit(4);
+        setRelated(rel || []);
+      }
     } catch (e) {
       console.error(e);
       navigate("/shop");
