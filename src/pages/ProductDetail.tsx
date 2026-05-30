@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const { user } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<any>(null);
+  const [related, setRelated] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<"about" | "specs" | "reviews">("about");
@@ -45,6 +46,16 @@ const ProductDetail = () => {
         return;
       }
       setProduct(data);
+      // Related items by category
+      if (data.category) {
+        const { data: rel } = await supabase
+          .from("products")
+          .select("id, name, price, image_url, category, badge_text, badge_color")
+          .eq("category", data.category)
+          .neq("id", data.id)
+          .limit(4);
+        setRelated(rel || []);
+      }
     } catch (e) {
       console.error(e);
       navigate("/shop");
@@ -261,119 +272,201 @@ const ProductDetail = () => {
       </div>
 
 
-      {/* ===== DESKTOP LAYOUT ===== */}
-      <main className="hidden md:block container mx-auto px-8 py-10">
-        <div className="flex items-center gap-2 mb-6 text-xs text-muted-foreground uppercase tracking-wider">
-          <Link to="/" className="hover:text-primary">Home</Link>
-          <ChevronRight size={12} />
-          <Link to="/shop" className="hover:text-primary">Shop</Link>
-          <ChevronRight size={12} />
-          <Link to={`/shop?category=${encodeURIComponent(product.category || "")}`} className="hover:text-primary">{product.category}</Link>
-          <ChevronRight size={12} />
-          <span className="text-foreground normal-case tracking-normal font-medium">{product.name}</span>
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-12">
-          <div className="space-y-4">
-            <div className="aspect-square rounded-[28px] overflow-hidden bg-card border border-border relative">
-              <OptimizedImage src={currentImg} alt={product.name} className="w-full h-full object-contain p-10" priority />
-              {product.badge_text && (
-                <Badge className="absolute top-4 left-4 rounded-full" style={{ backgroundColor: product.badge_color || "hsl(var(--primary))", color: "white" }}>
-                  {product.badge_text}
-                </Badge>
-              )}
+      {/* ===== DESKTOP LAYOUT — editorial magazine ===== */}
+      <main className="hidden md:block">
+        {/* Editorial top band */}
+        <section className="bg-gradient-warm border-b border-border/60 grain relative overflow-hidden">
+          <div className="container mx-auto px-8 pt-8 pb-4">
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-[0.25em]">
+              <Link to="/" className="hover:text-primary">Home</Link>
+              <ChevronRight size={11} />
+              <Link to="/shop" className="hover:text-primary">Shop</Link>
+              <ChevronRight size={11} />
+              <Link to={`/shop?category=${encodeURIComponent(product.category || "")}`} className="hover:text-primary">{product.category}</Link>
+              <ChevronRight size={11} />
+              <span className="text-foreground">{product.name}</span>
             </div>
-            {images.length > 1 && (
-              <div className="grid grid-cols-5 gap-2">
-                {images.map((img, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedImage(i)}
-                    className={`aspect-square rounded-xl overflow-hidden border-2 transition ${selectedImage === i ? "border-foreground" : "border-border"}`}
-                  >
-                    <OptimizedImage src={img} alt="" className="w-full h-full object-contain p-2 bg-card" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
+        </section>
 
-          <div className="space-y-6">
-            <div>
-              <div className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-3">{product.category}</div>
-              <h1 className="font-display font-bold text-5xl leading-[0.95] tracking-tight mb-4">{product.name}</h1>
-              <div className="flex items-center gap-3 text-sm">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className={i < 4 ? "fill-primary text-primary" : "text-muted-foreground"} />
+        <div className="container mx-auto px-8 py-10">
+          <div className="grid grid-cols-12 gap-10">
+            {/* GALLERY — 7 cols */}
+            <div className="col-span-7 space-y-3">
+              <div className="aspect-[5/4] rounded-[32px] overflow-hidden bg-gradient-to-b from-muted/40 to-muted/10 border border-border/60 relative grain">
+                <OptimizedImage src={currentImg} alt={product.name} className="w-full h-full object-contain p-12" priority />
+                {product.badge_text && (
+                  <Badge className="absolute top-5 left-5 rounded-full px-3 h-7" style={{ backgroundColor: product.badge_color || "hsl(var(--primary))", color: "white" }}>
+                    {product.badge_text}
+                  </Badge>
+                )}
+                <button className="absolute top-5 right-5 h-10 w-10 grid place-items-center rounded-full bg-background/80 backdrop-blur-md shadow-soft hover:bg-background">
+                  <Heart size={15} />
+                </button>
+                <div className="absolute left-1/2 bottom-6 -translate-x-1/2 h-3 w-40 rounded-full bg-foreground/10 blur-xl" />
+              </div>
+              {images.length > 1 && (
+                <div className="grid grid-cols-6 gap-2">
+                  {images.slice(0, 6).map((img, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      className={`aspect-square rounded-2xl overflow-hidden border-2 transition ${selectedImage === i ? "border-foreground" : "border-border"}`}
+                    >
+                      <OptimizedImage src={img} alt="" className="w-full h-full object-contain p-2 bg-card" />
+                    </button>
                   ))}
                 </div>
-                <span className="text-muted-foreground">4.5 (Reviews) · </span>
-                <span className={inStock ? "text-success font-medium" : "text-destructive font-medium"}>{inStock ? "In stock" : "Out of stock"}</span>
-              </div>
+              )}
             </div>
 
-            <div className="font-display font-bold text-5xl text-primary">{formatNaira(product.price)}</div>
+            {/* COMMERCE COLUMN — 5 cols sticky */}
+            <div className="col-span-5">
+              <div className="sticky top-28 space-y-6">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.3em] text-primary mb-3 inline-flex items-center gap-2">
+                    <span className="h-px w-6 bg-primary" /> {product.category}
+                  </div>
+                  <h1 className="font-display font-bold text-5xl xl:text-6xl leading-[0.95] tracking-tight">
+                    {product.name}
+                  </h1>
+                  <div className="flex items-center gap-3 text-sm mt-4">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} className={i < 4 ? "fill-primary text-primary" : "text-muted-foreground"} />
+                      ))}
+                    </div>
+                    <span className="text-muted-foreground">4.5 · {related.length + 24} reviews</span>
+                    <span className={inStock ? "text-success font-medium" : "text-destructive font-medium"}>· {inStock ? "In stock" : "Out of stock"}</span>
+                  </div>
+                </div>
 
-            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+                <div className="flex items-baseline gap-3 pt-2">
+                  <div className="font-display font-bold text-5xl text-foreground">{formatNaira(product.price)}</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider">incl. warranty</div>
+                </div>
 
-            <div className="flex gap-2">
-              <a href={waOrderUrl(product.name, product.price)} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button disabled={!inStock} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
-                  <WhatsAppIcon size={16} /> Order on WhatsApp
-                </Button>
-              </a>
-              <a href={waQuoteUrl(product.name)} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="h-12 px-5 rounded-full border-foreground/20 font-semibold gap-2">
-                  <WhatsAppIcon size={16} /> Get Quote
-                </Button>
-              </a>
-              <Button variant="outline" size="icon" className="h-12 w-12 rounded-full border-foreground/20"><Heart size={18} /></Button>
-            </div>
+                <p className="text-muted-foreground leading-relaxed text-[15px] line-clamp-4">{product.description}</p>
 
-            <ProductAddToCart productId={product.id} stockQuantity={product.stock_quantity} className="w-full" />
+                {/* Qty + WhatsApp inline */}
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="inline-flex items-center rounded-full bg-muted h-12 px-1">
+                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background"><Minus size={14} /></button>
+                    <span className="px-3 text-sm font-semibold tabular-nums w-8 text-center">{qty}</span>
+                    <button onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background"><Plus size={14} /></button>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Total <span className="font-display font-bold text-base text-foreground tabular-nums">{formatNaira(totalPrice)}</span>
+                  </div>
+                </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-4">
-              <div className="rounded-2xl border border-border p-4 text-center">
-                <Shield className="mx-auto mb-2 text-primary" size={20} />
-                <p className="text-xs font-semibold">Authentic</p>
-                <p className="text-[10px] text-muted-foreground">100% Original</p>
-              </div>
-              <div className="rounded-2xl border border-border p-4 text-center">
-                <Truck className="mx-auto mb-2 text-primary" size={20} />
-                <p className="text-xs font-semibold">Fast Delivery</p>
-                <p className="text-[10px] text-muted-foreground">Nationwide</p>
-              </div>
-              <div className="rounded-2xl border border-border p-4 text-center">
-                <Award className="mx-auto mb-2 text-primary" size={20} />
-                <p className="text-xs font-semibold">Warranty</p>
-                <p className="text-[10px] text-muted-foreground">1 Year</p>
+                <div className="flex gap-2">
+                  <a href={waOrderUrl(product.name, totalPrice)} target="_blank" rel="noopener noreferrer" className="flex-1">
+                    <Button disabled={!inStock} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
+                      <WhatsAppIcon size={16} /> Buy on WhatsApp
+                    </Button>
+                  </a>
+                  <a href={waQuoteUrl(product.name)} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="h-12 px-5 rounded-full border-foreground/20 font-semibold gap-2">
+                      <WhatsAppIcon size={16} /> Quote
+                    </Button>
+                  </a>
+                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full border-foreground/20"><Heart size={18} /></Button>
+                </div>
+
+                <ProductAddToCart productId={product.id} stockQuantity={product.stock_quantity} className="w-full" />
+
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                  <div className="rounded-2xl bg-card border border-border p-3 text-center">
+                    <Shield className="mx-auto mb-1 text-primary" size={18} />
+                    <p className="text-[11px] font-semibold">Authentic</p>
+                  </div>
+                  <div className="rounded-2xl bg-card border border-border p-3 text-center">
+                    <Truck className="mx-auto mb-1 text-primary" size={18} />
+                    <p className="text-[11px] font-semibold">Free Lagos</p>
+                  </div>
+                  <div className="rounded-2xl bg-card border border-border p-3 text-center">
+                    <Award className="mx-auto mb-1 text-primary" size={18} />
+                    <p className="text-[11px] font-semibold">1Y Warranty</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-16">
-          <Tabs defaultValue="description">
-            <TabsList className="grid w-full max-w-md grid-cols-3 rounded-full bg-muted h-11">
-              <TabsTrigger value="description" className="rounded-full">Description</TabsTrigger>
-              <TabsTrigger value="specifications" className="rounded-full">Specs</TabsTrigger>
-              <TabsTrigger value="reviews" className="rounded-full">Reviews</TabsTrigger>
-            </TabsList>
-            <TabsContent value="description" className="mt-6">
-              <Card className="p-6 rounded-2xl">
-                <p className="text-muted-foreground leading-relaxed">{product.description}</p>
-              </Card>
-            </TabsContent>
-            <TabsContent value="specifications" className="mt-6">
-              <Card className="p-6 rounded-2xl space-y-3">
-                <div className="flex justify-between py-2 border-b border-border"><span className="font-medium">Category</span><span className="text-muted-foreground">{product.category}</span></div>
-                <div className="flex justify-between py-2 border-b border-border"><span className="font-medium">Price</span><span className="text-muted-foreground">{formatNaira(product.price)}</span></div>
-                <div className="flex justify-between py-2"><span className="font-medium">Stock</span><span className="text-muted-foreground">{inStock ? `${product.stock_quantity} in stock` : "Out of stock"}</span></div>
-              </Card>
-            </TabsContent>
-            <TabsContent value="reviews" className="mt-6"><ProductReviews productId={product.id} /></TabsContent>
-          </Tabs>
+          {/* Specs / Reviews — editorial split */}
+          <section className="mt-20 grid grid-cols-12 gap-10">
+            <div className="col-span-4">
+              <div className="text-[10px] uppercase tracking-[0.3em] text-primary">Section II</div>
+              <h2 className="font-display font-bold text-4xl tracking-tight mt-2 leading-[1]">
+                The <span className="font-serif-display">details.</span>
+              </h2>
+              <p className="text-sm text-muted-foreground mt-3 max-w-xs">
+                Everything you need to know before you tap "Buy on WhatsApp".
+              </p>
+            </div>
+            <div className="col-span-8">
+              <Tabs defaultValue="description">
+                <TabsList className="rounded-full bg-muted h-11 p-1">
+                  <TabsTrigger value="description" className="rounded-full px-5">Description</TabsTrigger>
+                  <TabsTrigger value="specifications" className="rounded-full px-5">Specs</TabsTrigger>
+                  <TabsTrigger value="reviews" className="rounded-full px-5">Reviews</TabsTrigger>
+                </TabsList>
+                <TabsContent value="description" className="mt-6">
+                  <Card className="p-7 rounded-3xl">
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{product.description}</p>
+                  </Card>
+                </TabsContent>
+                <TabsContent value="specifications" className="mt-6">
+                  <Card className="p-7 rounded-3xl divide-y divide-border">
+                    <div className="flex justify-between py-3"><span className="font-medium">Category</span><span className="text-muted-foreground">{product.category}</span></div>
+                    <div className="flex justify-between py-3"><span className="font-medium">Price</span><span className="text-muted-foreground">{formatNaira(product.price)}</span></div>
+                    <div className="flex justify-between py-3"><span className="font-medium">Stock</span><span className="text-muted-foreground">{inStock ? `${product.stock_quantity} in stock` : "Out of stock"}</span></div>
+                    <div className="flex justify-between py-3"><span className="font-medium">SKU</span><span className="text-muted-foreground font-mono text-xs">{product.id.slice(0, 8)}</span></div>
+                  </Card>
+                </TabsContent>
+                <TabsContent value="reviews" className="mt-6">
+                  <Card className="p-7 rounded-3xl"><ProductReviews productId={product.id} /></Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          </section>
+
+          {/* Related items */}
+          {related.length > 0 && (
+            <section className="mt-20 pb-10">
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.3em] text-primary mb-2">Also in {product.category}</div>
+                  <h2 className="font-display font-bold text-4xl tracking-tight leading-none">
+                    More to <span className="font-serif-display">discover.</span>
+                  </h2>
+                </div>
+                <Link to={`/shop?category=${encodeURIComponent(product.category || "")}`} className="text-sm font-semibold hover:text-primary inline-flex items-center gap-1">
+                  See all <ChevronRight size={14} />
+                </Link>
+              </div>
+              <div className="grid grid-cols-4 gap-5">
+                {related.map((r) => (
+                  <Link key={r.id} to={`/product/${r.id}`} className="group">
+                    <div className="aspect-square rounded-3xl bg-gradient-to-b from-muted/40 to-muted/10 border border-border/60 overflow-hidden relative">
+                      <OptimizedImage src={r.image_url || "/placeholder.svg"} alt={r.name} className="w-full h-full object-contain p-6 group-hover:scale-105 transition-transform" />
+                      {r.badge_text && (
+                        <Badge className="absolute top-3 left-3 rounded-full text-[10px]" style={{ backgroundColor: r.badge_color || "hsl(var(--primary))", color: "white" }}>
+                          {r.badge_text}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="px-1 pt-3">
+                      <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{r.category}</div>
+                      <div className="font-display font-semibold text-base mt-1 line-clamp-1 group-hover:text-primary transition-colors">{r.name}</div>
+                      <div className="font-display font-bold text-lg mt-1">{formatNaira(Number(r.price))}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </main>
 

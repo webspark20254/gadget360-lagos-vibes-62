@@ -14,12 +14,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
-import { 
-  Package, 
-  Users, 
-  MessageSquare, 
-  ShoppingCart, 
+import AnalyticsPanel from "@/components/admin/AnalyticsPanel";
+import {
+  Package,
+  Users,
+  MessageSquare,
+  ShoppingCart,
   TrendingUp,
+  BarChart3,
   Plus,
   Edit,
   Trash2,
@@ -662,68 +664,73 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Button onClick={() => navigate("/")} variant="outline">
-              Back to Store
-            </Button>
+      {/* Editorial header band */}
+      <section className="bg-gradient-warm border-b border-border/60 grain relative overflow-hidden">
+        <div className="container mx-auto px-5 md:px-8 py-8 md:py-12">
+          <div className="flex items-center justify-between text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-muted-foreground mb-3">
+            <span>Admin · Gadget360.ng</span>
+            <span>{new Date().toLocaleDateString(undefined, { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
+          </div>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <h1 className="font-display font-bold text-4xl md:text-6xl tracking-tight leading-[0.95]">
+              The <span className="font-serif-display text-primary">control</span> room.
+            </h1>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <Button onClick={() => navigate("/")} variant="outline" className="rounded-full h-10 border-foreground/30">
+                Back to Store
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="container mx-auto px-5 md:px-8 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
+          <div className="rounded-2xl bg-cream text-cream-foreground p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Products</div>
+              <Package size={16} className="text-muted-foreground" />
+            </div>
+            <div className="font-display font-bold text-3xl mt-2 tabular-nums">{stats.totalProducts}</div>
+          </div>
+          <div className="rounded-2xl bg-foreground text-background p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-[0.2em] opacity-60">Users</div>
+              <Users size={16} className="opacity-60" />
+            </div>
+            <div className="font-display font-bold text-3xl mt-2 tabular-nums">{stats.totalUsers}</div>
+          </div>
+          <div className="rounded-2xl bg-card border border-border p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Orders</div>
+              <ShoppingCart size={16} className="text-muted-foreground" />
+            </div>
+            <div className="font-display font-bold text-3xl mt-2 tabular-nums">{stats.totalOrders}</div>
+          </div>
+          <div className="rounded-2xl bg-primary text-primary-foreground p-5">
+            <div className="flex items-center justify-between">
+              <div className="text-[10px] uppercase tracking-[0.2em] opacity-80">Revenue</div>
+              <TrendingUp size={16} className="opacity-80" />
+            </div>
+            <div className="font-display font-bold text-2xl md:text-3xl mt-2 tabular-nums truncate">₦{stats.totalRevenue.toLocaleString()}</div>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProducts}</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalOrders}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">₦{stats.totalRevenue.toLocaleString()}</div>
-            </CardContent>
-          </Card>
-        </div>
-
         {/* Main Content */}
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="chat">Live Chat</TabsTrigger>
+        <Tabs defaultValue="analytics" className="space-y-6">
+          <TabsList className="rounded-full bg-muted h-12 p-1 flex flex-wrap">
+            <TabsTrigger value="analytics" className="rounded-full px-4 gap-1.5"><BarChart3 size={14} /> Analytics</TabsTrigger>
+            <TabsTrigger value="products" className="rounded-full px-4 gap-1.5"><Package size={14} /> Products</TabsTrigger>
+            <TabsTrigger value="users" className="rounded-full px-4 gap-1.5"><Users size={14} /> Users</TabsTrigger>
+            <TabsTrigger value="orders" className="rounded-full px-4 gap-1.5"><ShoppingCart size={14} /> Orders</TabsTrigger>
+            <TabsTrigger value="chat" className="rounded-full px-4 gap-1.5"><MessageSquare size={14} /> Live Chat</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsPanel />
+          </TabsContent>
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
