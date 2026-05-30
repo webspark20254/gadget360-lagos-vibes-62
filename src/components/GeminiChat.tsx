@@ -163,11 +163,11 @@ const GeminiChat = () => {
             className="group relative block cursor-grab active:cursor-grabbing"
           >
             <span className="absolute inset-0 rounded-full bg-primary/25 blur-2xl animate-pulse" />
-            <span className="relative grid place-items-center h-16 w-16 rounded-full bg-gradient-crimson text-primary-foreground shadow-glow-crimson ring-1 ring-primary/30 group-hover:scale-105 transition-transform">
-              <AssistantGlyph size={32} />
+            <span className="relative grid place-items-center h-12 w-12 sm:h-16 sm:w-16 rounded-full bg-gradient-crimson text-primary-foreground shadow-glow-crimson ring-1 ring-primary/30 group-hover:scale-105 transition-transform">
+              <AssistantGlyph size={22} />
             </span>
-            <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-whatsapp ring-2 ring-background" />
-            <span className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-foreground text-background text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+            <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full bg-whatsapp ring-2 ring-background" />
+            <span className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-foreground text-background text-[9px] px-1.5 py-0.5 rounded-full hidden sm:flex items-center gap-0.5">
               <GripVertical size={8} /> drag
             </span>
           </button>
