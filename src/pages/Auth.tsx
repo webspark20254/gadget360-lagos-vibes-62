@@ -145,6 +145,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title="Sign In or Create Account — Gadget360.ng" description="Sign in to your Gadget360.ng account or register to track orders, save favourites and check out faster on Nigeria's trusted gadget store." canonical="/auth" />
       <Header />
       <div className="container mx-auto px-4 py-16">
         <Card className="max-w-md mx-auto">
