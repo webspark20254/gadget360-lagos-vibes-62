@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Activity, Eye, TrendingUp, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 
-type Row = { created_at: string; path: string; session_id: string | null };
+type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -16,11 +16,10 @@ const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    // last 90 days
     const since = new Date(); since.setDate(since.getDate() - 90);
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("page_visits")
-      .select("created_at, path, session_id")
+      .select("created_at, path, session_id, country, country_code, city")
       .gte("created_at", since.toISOString())
       .order("created_at", { ascending: true })
       .limit(5000);
@@ -183,6 +182,43 @@ const AnalyticsPanel = () => {
           </div>
         )}
       </Card>
+
+      {/* Countries */}
+      {(() => {
+        const countryCounts = new Map<string, number>();
+        rows.filter((r) => new Date(r.created_at) >= last30 && r.country).forEach((r) => {
+          const key = `${r.country_code || ""}|${r.country}`;
+          countryCounts.set(key, (countryCounts.get(key) || 0) + 1);
+        });
+        const topCountries = [...countryCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const max = topCountries[0]?.[1] || 1;
+        const flag = (cc: string) => cc ? String.fromCodePoint(...cc.toUpperCase().split("").map(c => 0x1f1a5 + c.charCodeAt(0))) : "🌍";
+        return (
+          <Card className="p-5 rounded-3xl">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Geography</div>
+            <h3 className="font-display font-bold text-xl mb-3">Visitors by country (30d)</h3>
+            {topCountries.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No geo data yet — appears as visitors arrive.</p>
+            ) : (
+              <div className="space-y-2">
+                {topCountries.map(([key, n]) => {
+                  const [cc, name] = key.split("|");
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <div className="text-lg w-6 text-center">{flag(cc)}</div>
+                      <div className="text-sm w-40 truncate">{name}</div>
+                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-foreground rounded-full" style={{ width: `${(n / max) * 100}%` }} />
+                      </div>
+                      <div className="text-sm font-semibold tabular-nums w-12 text-right">{n}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        );
+      })()}
     </div>
   );
 };

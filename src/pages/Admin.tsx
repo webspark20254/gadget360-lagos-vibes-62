@@ -720,13 +720,15 @@ const Admin = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="analytics" className="space-y-6">
-          <TabsList className="rounded-full bg-muted h-12 p-1 flex flex-wrap">
-            <TabsTrigger value="analytics" className="rounded-full px-4 gap-1.5"><BarChart3 size={14} /> Analytics</TabsTrigger>
-            <TabsTrigger value="products" className="rounded-full px-4 gap-1.5"><Package size={14} /> Products</TabsTrigger>
-            <TabsTrigger value="users" className="rounded-full px-4 gap-1.5"><Users size={14} /> Users</TabsTrigger>
-            <TabsTrigger value="orders" className="rounded-full px-4 gap-1.5"><ShoppingCart size={14} /> Orders</TabsTrigger>
-            <TabsTrigger value="chat" className="rounded-full px-4 gap-1.5"><MessageSquare size={14} /> Live Chat</TabsTrigger>
-          </TabsList>
+          <div className="-mx-5 md:mx-0 overflow-x-auto no-scrollbar">
+            <TabsList className="rounded-full bg-muted h-11 md:h-12 p-1 inline-flex w-max md:w-auto mx-5 md:mx-0">
+              <TabsTrigger value="analytics" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><BarChart3 size={14} /> Analytics</TabsTrigger>
+              <TabsTrigger value="products" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Package size={14} /> Products</TabsTrigger>
+              <TabsTrigger value="users" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Users size={14} /> Users</TabsTrigger>
+              <TabsTrigger value="orders" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><ShoppingCart size={14} /> Orders</TabsTrigger>
+              <TabsTrigger value="chat" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><MessageSquare size={14} /> Chat</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="analytics" className="space-y-6">
             <AnalyticsPanel />
@@ -1202,7 +1204,7 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle>All Products ({products.length})</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
