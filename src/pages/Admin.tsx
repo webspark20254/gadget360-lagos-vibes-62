@@ -15,6 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ThemeToggle from "@/components/ThemeToggle";
 import AnalyticsPanel from "@/components/admin/AnalyticsPanel";
+import Seo from "@/components/Seo";
 import {
   Package,
   Users,
@@ -664,6 +665,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Seo title="Admin Console — Gadget360.ng" description="Internal Gadget360.ng admin dashboard for managing products, orders, customers and live traffic analytics." canonical="/admin" />
       {/* Editorial header band */}
       <section className="bg-gradient-warm border-b border-border/60 grain relative overflow-hidden">
         <div className="container mx-auto px-5 md:px-8 py-8 md:py-12">

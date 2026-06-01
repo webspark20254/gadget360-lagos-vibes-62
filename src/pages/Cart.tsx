@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Seo from "@/components/Seo";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { WHATSAPP_NUMBER, formatNaira } from "@/lib/whatsapp";
 
@@ -86,6 +87,7 @@ const Cart = () => {
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-background">
+        <Seo title="Your Cart — Gadget360.ng" description="Review the gadgets in your Gadget360.ng cart and send your order to our Lagos team on WhatsApp for fast checkout." canonical="/cart" />
         <Header />
         <div className="container mx-auto px-5 py-20 text-center">
           <ShoppingBag className="mx-auto h-14 w-14 text-muted-foreground mb-4" />
@@ -100,6 +102,7 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-background pb-36 lg:pb-0">
+      <Seo title="Your Cart — Gadget360.ng" description="Review the gadgets in your Gadget360.ng cart and send your order to our Lagos team on WhatsApp for fast checkout." canonical="/cart" />
       <Header />
       <div className="container mx-auto px-5 md:px-8 py-6 md:py-10">
         <Link to="/shop" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4">

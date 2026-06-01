@@ -134,11 +134,11 @@ const MiniCart = () => {
                     <div className="text-sm font-display font-semibold text-primary mt-0.5">{formatNaira(it.product.price)}</div>
                     <div className="flex items-center justify-between mt-1.5">
                       <div className="inline-flex items-center rounded-full bg-muted">
-                        <button onClick={() => update(it.id, it.quantity - 1)} className="h-7 w-7 grid place-items-center rounded-full hover:bg-muted-foreground/10"><Minus size={12} /></button>
+                        <button aria-label="Decrease quantity" onClick={() => update(it.id, it.quantity - 1)} className="h-7 w-7 grid place-items-center rounded-full hover:bg-muted-foreground/10"><Minus size={12} /></button>
                         <span className="px-2 text-xs font-semibold tabular-nums">{it.quantity}</span>
-                        <button onClick={() => update(it.id, it.quantity + 1)} disabled={it.quantity >= it.product.stock_quantity} className="h-7 w-7 grid place-items-center rounded-full hover:bg-muted-foreground/10 disabled:opacity-40"><Plus size={12} /></button>
+                        <button aria-label="Increase quantity" onClick={() => update(it.id, it.quantity + 1)} disabled={it.quantity >= it.product.stock_quantity} className="h-7 w-7 grid place-items-center rounded-full hover:bg-muted-foreground/10 disabled:opacity-40"><Plus size={12} /></button>
                       </div>
-                      <button onClick={() => remove(it.id)} className="text-muted-foreground hover:text-destructive p-1" aria-label="Remove"><Trash2 size={14} /></button>
+                      <button onClick={() => remove(it.id)} className="text-muted-foreground hover:text-destructive p-1" aria-label="Remove item from cart"><Trash2 size={14} /></button>
                     </div>
                   </div>
                 </div>

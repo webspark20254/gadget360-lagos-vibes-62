@@ -60,7 +60,7 @@ const Header = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full h-10 w-10">
+                  <Button variant="ghost" size="icon" className="rounded-full h-10 w-10" aria-label="Open account menu">
                     <User className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -82,7 +82,7 @@ const Header = () => {
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden rounded-full h-10 w-10">
+                <Button variant="ghost" size="icon" className="lg:hidden rounded-full h-10 w-10" aria-label="Open navigation menu">
                   <Menu size={20} />
                 </Button>
               </SheetTrigger>

@@ -26,12 +26,12 @@ const Footer = () => (
           </p>
           <div className="flex gap-2 pt-2">
             {[
-              { href: "https://www.facebook.com/share/1AFDYyR6RC/?mibextid=wwXIfr", src: "/lovable-uploads/4b216da9-22ab-450e-acb1-bb3dbc10b238.png", alt: "Facebook" },
-              { href: "https://www.instagram.com/gadget360ngbackuppage", src: "/lovable-uploads/cbe3d69a-9a8d-4e4c-84f8-857386f55748.png", alt: "Instagram" },
-              { href: "https://wa.me/2347067894474", src: "/lovable-uploads/c9fd8577-52ae-4feb-bdf2-503f9e458bdc.png", alt: "WhatsApp" },
-              { href: "https://www.threads.net/@gadget360.ng", src: "/lovable-uploads/0cd8ddce-afe1-47f0-91b5-776628bb7751.png", alt: "Threads" },
+              { href: "https://www.facebook.com/share/1AFDYyR6RC/?mibextid=wwXIfr", src: "/lovable-uploads/4b216da9-22ab-450e-acb1-bb3dbc10b238.png", alt: "Follow Gadget360.ng on Facebook" },
+              { href: "https://www.instagram.com/gadget360ngbackuppage", src: "/lovable-uploads/cbe3d69a-9a8d-4e4c-84f8-857386f55748.png", alt: "Follow Gadget360.ng on Instagram" },
+              { href: "https://wa.me/2347067894474", src: "/lovable-uploads/c9fd8577-52ae-4feb-bdf2-503f9e458bdc.png", alt: "Chat with Gadget360.ng on WhatsApp" },
+              { href: "https://www.threads.net/@gadget360.ng", src: "/lovable-uploads/0cd8ddce-afe1-47f0-91b5-776628bb7751.png", alt: "Follow Gadget360.ng on Threads" },
             ].map((s) => (
-              <a key={s.alt} href={s.href} target="_blank" rel="noopener noreferrer"
+              <a key={s.alt} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.alt}
                 className="h-10 w-10 grid place-items-center rounded-full bg-ink-foreground/10 hover:bg-primary transition-colors">
                 <img src={s.src} className="w-4 h-4" alt={s.alt} />
               </a>
