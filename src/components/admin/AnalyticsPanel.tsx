@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Activity, Eye, TrendingUp, Users } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 
-type Row = { created_at: string; path: string; session_id: string | null };
+type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
@@ -16,11 +16,10 @@ const AnalyticsPanel = () => {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    // last 90 days
     const since = new Date(); since.setDate(since.getDate() - 90);
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("page_visits")
-      .select("created_at, path, session_id")
+      .select("created_at, path, session_id, country, country_code, city")
       .gte("created_at", since.toISOString())
       .order("created_at", { ascending: true })
       .limit(5000);
