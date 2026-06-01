@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Minus, Plus, Trash2, ShoppingBag, ArrowLeft } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Seo from "@/components/Seo";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { WHATSAPP_NUMBER, formatNaira } from "@/lib/whatsapp";
 
