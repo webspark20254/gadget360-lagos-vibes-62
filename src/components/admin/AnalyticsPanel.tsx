@@ -182,6 +182,43 @@ const AnalyticsPanel = () => {
           </div>
         )}
       </Card>
+
+      {/* Countries */}
+      {(() => {
+        const countryCounts = new Map<string, number>();
+        rows.filter((r) => new Date(r.created_at) >= last30 && r.country).forEach((r) => {
+          const key = `${r.country_code || ""}|${r.country}`;
+          countryCounts.set(key, (countryCounts.get(key) || 0) + 1);
+        });
+        const topCountries = [...countryCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const max = topCountries[0]?.[1] || 1;
+        const flag = (cc: string) => cc ? String.fromCodePoint(...cc.toUpperCase().split("").map(c => 0x1f1a5 + c.charCodeAt(0))) : "🌍";
+        return (
+          <Card className="p-5 rounded-3xl">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Geography</div>
+            <h3 className="font-display font-bold text-xl mb-3">Visitors by country (30d)</h3>
+            {topCountries.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No geo data yet — appears as visitors arrive.</p>
+            ) : (
+              <div className="space-y-2">
+                {topCountries.map(([key, n]) => {
+                  const [cc, name] = key.split("|");
+                  return (
+                    <div key={key} className="flex items-center gap-3">
+                      <div className="text-lg w-6 text-center">{flag(cc)}</div>
+                      <div className="text-sm w-40 truncate">{name}</div>
+                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                        <div className="h-full bg-foreground rounded-full" style={{ width: `${(n / max) * 100}%` }} />
+                      </div>
+                      <div className="text-sm font-semibold tabular-nums w-12 text-right">{n}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        );
+      })()}
     </div>
   );
 };
