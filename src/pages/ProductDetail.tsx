@@ -138,7 +138,7 @@ const ProductDetail = () => {
             <ArrowLeft size={14} /> Back
           </button>
           <div className="flex items-end justify-between mt-2">
-            <h1 className="font-display font-bold text-[34px] leading-[1.05] tracking-tight">Products</h1>
+            <div className="font-display font-bold text-[34px] leading-[1.05] tracking-tight" aria-hidden="true">Products</div>
             <Link to="/shop" className="text-xs font-medium text-muted-foreground hover:text-primary pb-1.5">
               Change Product
             </Link>
@@ -148,7 +148,7 @@ const ProductDetail = () => {
         {/* Image stage — large, soft pedestal */}
         <div className="relative mx-5 mt-3 rounded-[28px] bg-gradient-to-b from-muted/40 to-muted/20 aspect-[4/4] overflow-hidden">
           <OptimizedImage src={currentImg} alt={product.name} className="absolute inset-0 w-full h-full object-contain p-8" priority />
-          <button className="absolute top-3 right-3 h-9 w-9 grid place-items-center rounded-full bg-background/70 backdrop-blur-md shadow-soft">
+          <button aria-label="Add to wishlist" className="absolute top-3 right-3 h-9 w-9 grid place-items-center rounded-full bg-background/70 backdrop-blur-md shadow-soft">
             <Heart size={14} />
           </button>
           {product.badge_text && (
@@ -203,7 +203,7 @@ const ProductDetail = () => {
             <>
               <div>
                 <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{product.category}</div>
-                <h2 className="font-display font-bold text-2xl leading-tight mt-1">{product.name}</h2>
+                <h1 className="font-display font-bold text-2xl leading-tight mt-1">{product.name}</h1>
                 <div className="flex items-center gap-2 text-xs mt-2">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
@@ -253,9 +253,9 @@ const ProductDetail = () => {
               <div className="text-[11px] opacity-60 mt-1">{qty} × {formatNaira(product.price)}</div>
             </div>
             <div className="inline-flex items-center rounded-full bg-background/10 ring-1 ring-background/20">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background/10"><Minus size={14} /></button>
+              <button aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background/10"><Minus size={14} /></button>
               <span className="px-2 text-sm font-semibold tabular-nums w-7 text-center">{qty}</span>
-              <button onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background/10"><Plus size={14} /></button>
+              <button aria-label="Increase quantity" onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background/10"><Plus size={14} /></button>
             </div>
           </div>
           <div className="flex gap-2">
@@ -300,7 +300,7 @@ const ProductDetail = () => {
                     {product.badge_text}
                   </Badge>
                 )}
-                <button className="absolute top-5 right-5 h-10 w-10 grid place-items-center rounded-full bg-background/80 backdrop-blur-md shadow-soft hover:bg-background">
+                <button aria-label="Add to wishlist" className="absolute top-5 right-5 h-10 w-10 grid place-items-center rounded-full bg-background/80 backdrop-blur-md shadow-soft hover:bg-background">
                   <Heart size={15} />
                 </button>
                 <div className="absolute left-1/2 bottom-6 -translate-x-1/2 h-3 w-40 rounded-full bg-foreground/10 blur-xl" />
@@ -351,9 +351,9 @@ const ProductDetail = () => {
                 {/* Qty + WhatsApp inline */}
                 <div className="flex items-center gap-3 pt-2">
                   <div className="inline-flex items-center rounded-full bg-muted h-12 px-1">
-                    <button onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background"><Minus size={14} /></button>
+                    <button aria-label="Decrease quantity" onClick={() => setQty(Math.max(1, qty - 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background"><Minus size={14} /></button>
                     <span className="px-3 text-sm font-semibold tabular-nums w-8 text-center">{qty}</span>
-                    <button onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background"><Plus size={14} /></button>
+                    <button aria-label="Increase quantity" onClick={() => setQty(Math.min(product.stock_quantity || 99, qty + 1))} className="h-10 w-10 grid place-items-center rounded-full hover:bg-background"><Plus size={14} /></button>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Total <span className="font-display font-bold text-base text-foreground tabular-nums">{formatNaira(totalPrice)}</span>

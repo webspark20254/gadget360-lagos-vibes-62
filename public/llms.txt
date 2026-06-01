@@ -1,0 +1,20 @@
+# Gadget360.ng
+
+> Authentic gadgets in Lagos, Nigeria — smartphones, laptops, gaming consoles and accessories. Buy, sell and swap with warranty. WhatsApp +234 810 841 8727.
+
+Gadget360.ng is a Lagos-based gadget retailer with two physical stores (Ikeja and Computer Village). We sell new and UK-used phones, laptops, PlayStation and Xbox consoles, audio gear and accessories, with warranty and Lagos-wide delivery. Orders and quotes are handled on WhatsApp.
+
+## Pages
+
+- [Home](/): Featured products, categories, brand story and customer testimonials.
+- [Shop](/shop): Full catalogue with search, category filters and live stock.
+- [Contact](/contact): Lagos store addresses, phone numbers, WhatsApp and contact form.
+
+## Categories
+
+- [Smartphones](/shop?category=Smartphones): iPhone, Samsung, Google Pixel and more.
+- [Laptops](/shop?category=Laptops): MacBook, Windows ultrabooks and gaming laptops.
+- [Apple](/shop?category=Apple): iPad, Apple Watch, AirPods and Apple accessories.
+- [Gaming](/shop?category=Gaming): PlayStation 5, Xbox Series and accessories.
+- [Audio](/shop?category=Audio): Headphones, earbuds and speakers.
+- [Accessories](/shop?category=Accessories): Chargers, cases, cables and storage.
