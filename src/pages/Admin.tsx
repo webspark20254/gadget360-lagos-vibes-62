@@ -364,11 +364,11 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
       });
 
       return data.urls;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading images:', error);
       toast({
         title: "Upload Error",
-        description: error.message || "Failed to upload images. Please try again.",
+        description: getErrorMessage(error, "Failed to upload images. Please try again."),
         variant: "destructive",
       });
       return [];
@@ -462,10 +462,10 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
 
       resetForm();
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
@@ -531,10 +531,10 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
 
       resetForm();
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: error.message,
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     }
