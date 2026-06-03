@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Activity, Eye, TrendingUp, Users } from "lucide-react";
+import type { ReactNode } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 
 type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
@@ -17,7 +18,7 @@ const AnalyticsPanel = () => {
 
   const load = async () => {
     const since = new Date(); since.setDate(since.getDate() - 90);
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("page_visits")
       .select("created_at, path, session_id, country, country_code, city")
       .gte("created_at", since.toISOString())
@@ -87,7 +88,7 @@ const AnalyticsPanel = () => {
   });
   const topPaths = [...pathCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
 
-  const Stat = ({ icon, label, value, accent }: any) => (
+  const Stat = ({ icon, label, value, accent }: { icon: ReactNode; label: string; value: number; accent: string }) => (
     <div className={`rounded-2xl p-5 ${accent}`}>
       <div className="flex items-center justify-between">
         <div className="text-[10px] uppercase tracking-[0.2em] opacity-70">{label}</div>
