@@ -289,6 +289,41 @@ const Admin = () => {
     }
   };
 
+  const downloadExportGuide = () => {
+    const guide = `# Gadget360.ng developer export guide
+
+Generated for: ${adminEmail || "Gadget360 admin"}
+Generated at: ${new Date().toISOString()}
+
+## What this admin page can safely provide
+The live website cannot download its own real source code. A deployed React app only contains compiled browser files, not the original TypeScript, migrations, Supabase functions, or Lovable project history.
+
+## Working export paths
+1. GitHub reconnect: Lovable chat + button → GitHub → reconnect the project repository.
+2. Codebase ZIP: Lovable Code Editor → Download codebase, available from eligible paid workspaces.
+3. Public remix fallback: Project Settings → General → enable Public remixing, then remix the project into a workspace/account that can connect GitHub or download code.
+4. Manual backup: copy source files from the Lovable Code Editor file tree and export Supabase data from Cloud → Database → Tables.
+
+## Backend pieces to include in any GitHub repo
+- /supabase/functions for Edge Functions
+- /supabase/migrations for database schema and policies
+- /public for SEO files like robots.txt, sitemap.xml, llms.txt, and Google verification
+- /.env.example with only public keys/placeholders, never service-role keys
+
+## Security rule
+Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHub. Keep them in Supabase Edge Function secrets.
+`;
+    const blob = new Blob([guide], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "gadget360-export-guide.md";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const uploadImagesToStorage = async (files: File[]): Promise<string[]> => {
     if (files.length > 10) {
       toast({
@@ -686,7 +721,7 @@ const Admin = () => {
     }
   };
 
-  if (loading) {
+  if (authChecking || loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
