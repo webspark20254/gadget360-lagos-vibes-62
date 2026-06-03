@@ -713,11 +713,11 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
         
         setAiPrompt("");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('AI generation error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to generate product",
+        description: getErrorMessage(error, "Failed to generate product"),
         variant: "destructive",
       });
     } finally {
