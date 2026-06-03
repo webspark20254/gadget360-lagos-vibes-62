@@ -47,6 +47,9 @@ type User = Database['public']['Tables']['profiles']['Row'];
 type Order = Database['public']['Tables']['orders']['Row'];
 type ChatSession = Database['public']['Tables']['chat_sessions']['Row'];
 
+const getErrorMessage = (error: unknown, fallback = "Something went wrong") =>
+  error instanceof Error ? error.message : fallback;
+
 const Admin = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [users, setUsers] = useState<User[]>([]);
@@ -197,6 +200,7 @@ const Admin = () => {
       mounted = false;
       if (productsChannel) supabase.removeChannel(productsChannel);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate, toast]);
 
   const fetchData = async () => {
@@ -279,10 +283,10 @@ const Admin = () => {
         });
         
         fetchData();
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast({
           title: "Error",
-          description: error.message,
+          description: getErrorMessage(error),
           variant: "destructive",
         });
       }
