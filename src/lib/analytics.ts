@@ -23,7 +23,9 @@ async function getGeo(): Promise<Geo> {
   try {
     const cached = sessionStorage.getItem(GEO_KEY);
     if (cached) return JSON.parse(cached);
-  } catch {}
+  } catch {
+    sessionStorage.removeItem(GEO_KEY);
+  }
   try {
     // Free, no-key, CORS-enabled IP geolocation
     const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
@@ -35,7 +37,11 @@ async function getGeo(): Promise<Geo> {
       city: j.city || undefined,
       region: j.region || undefined,
     };
-    try { sessionStorage.setItem(GEO_KEY, JSON.stringify(geo)); } catch {}
+    try {
+      sessionStorage.setItem(GEO_KEY, JSON.stringify(geo));
+    } catch {
+      sessionStorage.removeItem(GEO_KEY);
+    }
     return geo;
   } catch {
     return {};
