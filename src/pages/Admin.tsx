@@ -32,7 +32,12 @@ import {
   X,
   Copy,
   CheckCircle2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Download,
+  ExternalLink,
+  Github,
+  ShieldCheck,
+  Code2
 } from "lucide-react";
 
 import { Database } from "@/integrations/supabase/types";
@@ -82,6 +87,8 @@ const Admin = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedMainImageUrl, setUploadedMainImageUrl] = useState<string>("");
   const [uploadedAdditionalUrls, setUploadedAdditionalUrls] = useState<string[]>([]);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [adminEmail, setAdminEmail] = useState("");
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -127,43 +134,70 @@ const Admin = () => {
   }, [additionalImages]);
 
   useEffect(() => {
-    fetchData();
-    
-    // Real-time subscription for products with visual notifications
-    const productsChannel = supabase
-      .channel('products-changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'products' }, 
-        (payload) => {
-          console.log('Product change detected:', payload);
-          
-          // Show toast notification for changes
-          if (payload.eventType === 'INSERT') {
-            toast({
-              title: "New Product Added",
-              description: "A new product has been added to the store",
-            });
-          } else if (payload.eventType === 'UPDATE') {
-            toast({
-              title: "Product Updated",
-              description: "A product has been updated",
-            });
-          } else if (payload.eventType === 'DELETE') {
-            toast({
-              title: "Product Deleted",
-              description: "A product has been removed from the store",
-            });
+    let mounted = true;
+    let productsChannel: ReturnType<typeof supabase.channel> | null = null;
+
+    const bootAdmin = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+
+      if (!mounted) return;
+
+      if (error || !user) {
+        setAuthChecking(false);
+        setLoading(false);
+        toast({ title: "Sign in required", description: "Please sign in before opening the admin dashboard.", variant: "destructive" });
+        navigate("/auth");
+        return;
+      }
+
+      const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "admin",
+      });
+
+      if (!mounted) return;
+
+      if (roleError || !isAdmin) {
+        setAuthChecking(false);
+        setLoading(false);
+        toast({ title: "Admin access only", description: "This dashboard is restricted to approved Gadget360 admins.", variant: "destructive" });
+        navigate("/");
+        return;
+      }
+
+      setAdminEmail(user.email || "admin");
+      setAuthChecking(false);
+      await fetchData();
+      
+      // Real-time subscription for products with visual notifications
+      productsChannel = supabase
+        .channel('products-changes')
+        .on('postgres_changes', 
+          { event: '*', schema: 'public', table: 'products' }, 
+          (payload) => {
+            console.log('Product change detected:', payload);
+            
+            if (payload.eventType === 'INSERT') {
+              toast({ title: "New Product Added", description: "A new product has been added to the store" });
+            } else if (payload.eventType === 'UPDATE') {
+              toast({ title: "Product Updated", description: "A product has been updated" });
+            } else if (payload.eventType === 'DELETE') {
+              toast({ title: "Product Deleted", description: "A product has been removed from the store" });
+            }
+            
+            fetchData();
           }
-          
-          fetchData();
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    };
+
+    bootAdmin();
 
     return () => {
-      supabase.removeChannel(productsChannel);
+      mounted = false;
+      if (productsChannel) supabase.removeChannel(productsChannel);
     };
-  }, []);
+  }, [navigate, toast]);
 
   const fetchData = async () => {
     try {
