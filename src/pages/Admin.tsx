@@ -1239,15 +1239,22 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
                     onClick={() => {
                       if (newProduct.name) {
                         setPreviewProduct({
-                          ...newProduct,
                           id: 'preview',
+                          name: newProduct.name,
+                          description: newProduct.description,
                           price: Number(newProduct.price),
+                          category: newProduct.category,
                           stock_quantity: Number(newProduct.stock),
                           created_at: new Date().toISOString(),
                           updated_at: new Date().toISOString(),
                           image_url: imagePreview || newProduct.image,
-                          additional_images: additionalPreviews
-                        } as any);
+                          additional_images: additionalPreviews,
+                          is_featured: newProduct.is_featured,
+                          meta_title: newProduct.meta_title || newProduct.name,
+                          meta_description: newProduct.meta_description || newProduct.description,
+                          badge_text: newProduct.badge_text || null,
+                          badge_color: newProduct.badge_color || null,
+                        });
                         setShowPreview(true);
                       }
                     }}
