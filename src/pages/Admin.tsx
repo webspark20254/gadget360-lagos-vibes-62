@@ -798,6 +798,7 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
               <TabsTrigger value="users" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Users size={14} /> Users</TabsTrigger>
               <TabsTrigger value="orders" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><ShoppingCart size={14} /> Orders</TabsTrigger>
               <TabsTrigger value="chat" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><MessageSquare size={14} /> Chat</TabsTrigger>
+              <TabsTrigger value="developer" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Code2 size={14} /> Developer</TabsTrigger>
             </TabsList>
           </div>
 
@@ -1397,7 +1398,7 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
                 <CardTitle>Registered Users ({users.length})</CardTitle>
                 <CardDescription>Manage user accounts</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto no-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1437,7 +1438,7 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
                 <CardTitle>Recent Orders ({orders.length})</CardTitle>
                 <CardDescription>Manage customer orders</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto no-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1475,7 +1476,7 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
                 <CardTitle>Live Chat Sessions ({chatSessions.length})</CardTitle>
                 <CardDescription>Monitor customer conversations</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-x-auto no-scrollbar">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -1490,7 +1491,7 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
                     {chatSessions.map((session) => (
                       <TableRow key={session.id}>
                         <TableCell className="font-mono text-xs">{session.id.slice(0, 8)}</TableCell>
-                        <TableCell className="font-mono text-xs">{session.user_id.slice(0, 8)}</TableCell>
+                        <TableCell className="font-mono text-xs">{session.user_id ? session.user_id.slice(0, 8) : "Guest"}</TableCell>
                         <TableCell>
                           <Badge variant={session.is_active ? 'default' : 'secondary'}>
                             {session.is_active ? 'Active' : 'Closed'}
@@ -1506,6 +1507,60 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Developer Export Tab */}
+          <TabsContent value="developer" className="space-y-5">
+            <Card className="overflow-hidden border-primary/20">
+              <CardHeader className="bg-gradient-warm border-b border-border/60">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="flex items-center gap-2 text-2xl">
+                      <ShieldCheck className="h-5 w-5 text-primary" /> Developer export
+                    </CardTitle>
+                    <CardDescription>
+                      Admin-only export guidance for moving Gadget360.ng into GitHub or another deployable setup.
+                    </CardDescription>
+                  </div>
+                  <Badge variant="secondary" className="rounded-full whitespace-nowrap">{adminEmail}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="p-5 md:p-6 space-y-5">
+                <Alert className="border-primary/25 bg-primary/5">
+                  <ShieldCheck className="h-4 w-4" />
+                  <AlertDescription>
+                    A deployed website cannot download its original Lovable source, migrations, or Edge Function files from the browser. Use the safe export routes below instead.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="rounded-2xl border border-border bg-card p-4">
+                    <Github className="h-5 w-5 text-primary mb-3" />
+                    <h3 className="font-display font-bold text-lg">Reconnect GitHub</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Use Lovable’s GitHub panel to reconnect or authorize a fresh repository. This creates a real buildable repo.</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-card p-4">
+                    <Download className="h-5 w-5 text-primary mb-3" />
+                    <h3 className="font-display font-bold text-lg">Codebase ZIP</h3>
+                    <p className="text-sm text-muted-foreground mt-1">If your workspace allows it, download the current codebase from the Lovable Code Editor file tree.</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-card p-4">
+                    <Copy className="h-5 w-5 text-primary mb-3" />
+                    <h3 className="font-display font-bold text-lg">Remix fallback</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Enable Public remixing, copy the project into a workspace that can connect GitHub, then export from there.</p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button onClick={downloadExportGuide} className="rounded-full gap-2">
+                    <Download className="h-4 w-4" /> Download export guide
+                  </Button>
+                  <Button variant="outline" className="rounded-full gap-2" onClick={() => window.open("https://docs.lovable.dev/tips-tricks/self-hosting", "_blank", "noopener,noreferrer")}>
+                    <ExternalLink className="h-4 w-4" /> Self-hosting docs
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
