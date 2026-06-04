@@ -811,7 +811,9 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
               <TabsTrigger value="users" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Users size={14} /> Users</TabsTrigger>
               <TabsTrigger value="orders" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><ShoppingCart size={14} /> Orders</TabsTrigger>
               <TabsTrigger value="chat" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><MessageSquare size={14} /> Chat</TabsTrigger>
-              <TabsTrigger value="developer" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Code2 size={14} /> Developer</TabsTrigger>
+              {isSuperAdmin && (
+                <TabsTrigger value="developer" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Code2 size={14} /> Developer</TabsTrigger>
+              )}
             </TabsList>
           </div>
 
