@@ -92,6 +92,7 @@ const Admin = () => {
   const [uploadedAdditionalUrls, setUploadedAdditionalUrls] = useState<string[]>([]);
   const [authChecking, setAuthChecking] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const navigate = useNavigate();
   const { toast } = useToast();
