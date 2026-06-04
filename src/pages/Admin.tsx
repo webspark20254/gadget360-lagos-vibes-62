@@ -170,6 +170,14 @@ const Admin = () => {
       }
 
       setAdminEmail(user.email || "admin");
+
+      // Check elevated super_admin role (gates Developer Export)
+      const { data: superFlag } = await supabase.rpc("has_role", {
+        _user_id: user.id,
+        _role: "super_admin",
+      });
+      if (mounted) setIsSuperAdmin(!!superFlag);
+
       setAuthChecking(false);
       await fetchData();
       
