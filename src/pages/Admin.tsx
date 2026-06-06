@@ -34,10 +34,7 @@ import {
   CheckCircle2,
   Image as ImageIcon,
   Download,
-  ExternalLink,
-  Github,
-  ShieldCheck,
-  Code2
+  Image as ImageIcon2Placeholder,
 } from "lucide-react";
 
 import { Database } from "@/integrations/supabase/types";
