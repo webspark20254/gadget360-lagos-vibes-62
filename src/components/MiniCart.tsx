@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
 import { formatNaira, waCartOrderUrl } from "@/lib/whatsapp";
+import { trackWhatsAppClick } from "@/lib/analytics";
 
 interface CartItem {
   id: string;
@@ -76,6 +77,11 @@ const MiniCart = () => {
       items.map((i) => ({ name: i.product.name, quantity: i.quantity, unitPrice: i.product.price })),
       total,
     );
+    void trackWhatsAppClick({
+      source: "mini-cart",
+      quantity: items.reduce((s, i) => s + i.quantity, 0),
+      total_amount: total,
+    });
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
