@@ -14,6 +14,7 @@ import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import PageViewTracker from "@/components/PageViewTracker";
+import WhatsAppClickTracker from "@/components/WhatsAppClickTracker";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <PageViewTracker />
+          <WhatsAppClickTracker />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/shop" element={<Shop />} />

@@ -27,7 +27,6 @@ async function getGeo(): Promise<Geo> {
     sessionStorage.removeItem(GEO_KEY);
   }
   try {
-    // Free, no-key, CORS-enabled IP geolocation
     const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
     if (!res.ok) return {};
     const j = await res.json();
@@ -62,5 +61,32 @@ export async function trackPageView(path: string) {
     });
   } catch {
     // silent
+  }
+}
+
+export type WhatsAppClickPayload = {
+  source?: string;
+  product_id?: string | null;
+  product_name?: string | null;
+  quantity?: number | null;
+  total_amount?: number | null;
+};
+
+export async function trackWhatsAppClick(payload: WhatsAppClickPayload = {}) {
+  try {
+    const geo = await getGeo();
+    await supabase.from("whatsapp_clicks").insert({
+      path: typeof window !== "undefined" ? window.location.pathname || "/" : "/",
+      source: payload.source ?? null,
+      product_id: payload.product_id ?? null,
+      product_name: payload.product_name ?? null,
+      quantity: payload.quantity ?? null,
+      total_amount: payload.total_amount ?? null,
+      session_id: sid(),
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+      ...geo,
+    });
+  } catch {
+    // silent — never block the WhatsApp redirect
   }
 }
