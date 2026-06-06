@@ -103,7 +103,18 @@ const ProductCard = ({
           </div>
           {/* Mobile: single Order button. Desktop (sm+): Order + Quote */}
           <div className="flex gap-1.5">
-            <a href={waOrderUrl(name, price)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="flex-1">
+            <a
+              href={waOrderUrl(name, price)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1"
+              data-wa-source="product-card"
+              data-wa-product={name}
+              data-wa-product-id={id}
+              data-wa-quantity={1}
+              data-wa-total={price}
+            >
               <Button
                 size="sm"
                 disabled={!inStock}
@@ -112,7 +123,16 @@ const ProductCard = ({
                 <WhatsAppIcon size={12} /> Order
               </Button>
             </a>
-            <a href={waQuoteUrl(name)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="hidden sm:block flex-1">
+            <a
+              href={waQuoteUrl(name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="hidden sm:block flex-1"
+              data-wa-source="product-card-quote"
+              data-wa-product={name}
+              data-wa-product-id={id}
+            >
               <Button
                 size="sm"
                 variant="outline"

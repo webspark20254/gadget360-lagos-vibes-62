@@ -7,7 +7,8 @@ import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link } from "react-router-dom";
-import { WHATSAPP_NUMBER, formatNaira } from "@/lib/whatsapp";
+import { formatNaira, waCartOrderUrl } from "@/lib/whatsapp";
+import { trackWhatsAppClick } from "@/lib/analytics";
 
 interface CartItem {
   id: string;
@@ -72,11 +73,16 @@ const MiniCart = () => {
   };
 
   const sendOnWhatsApp = () => {
-    const lines = items
-      .map((i) => `• ${i.product.name} ×${i.quantity} — ${formatNaira(i.product.price * i.quantity)}`)
-      .join("\n");
-    const text = `Hi Gadget360.ng! I'd like to order the following:\n\n${lines}\n\nTotal: ${formatNaira(total)}\n\nPlease confirm availability & delivery. Thank you!`;
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, "_blank");
+    const url = waCartOrderUrl(
+      items.map((i) => ({ name: i.product.name, quantity: i.quantity, unitPrice: i.product.price })),
+      total,
+    );
+    void trackWhatsAppClick({
+      source: "mini-cart",
+      quantity: items.reduce((s, i) => s + i.quantity, 0),
+      total_amount: total,
+    });
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const trigger = (

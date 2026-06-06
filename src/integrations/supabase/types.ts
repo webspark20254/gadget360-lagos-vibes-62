@@ -356,6 +356,57 @@ export type Database = {
         }
         Relationships: []
       }
+      whatsapp_clicks: {
+        Row: {
+          city: string | null
+          country: string | null
+          country_code: string | null
+          created_at: string
+          id: string
+          path: string
+          product_id: string | null
+          product_name: string | null
+          quantity: number | null
+          region: string | null
+          session_id: string | null
+          source: string | null
+          total_amount: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          path: string
+          product_id?: string | null
+          product_name?: string | null
+          quantity?: number | null
+          region?: string | null
+          session_id?: string | null
+          source?: string | null
+          total_amount?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          path?: string
+          product_id?: string | null
+          product_name?: string | null
+          quantity?: number | null
+          region?: string | null
+          session_id?: string | null
+          source?: string | null
+          total_amount?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

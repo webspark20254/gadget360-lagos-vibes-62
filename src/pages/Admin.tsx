@@ -33,11 +33,6 @@ import {
   Copy,
   CheckCircle2,
   Image as ImageIcon,
-  Download,
-  ExternalLink,
-  Github,
-  ShieldCheck,
-  Code2
 } from "lucide-react";
 
 import { Database } from "@/integrations/supabase/types";
@@ -92,7 +87,7 @@ const Admin = () => {
   const [uploadedAdditionalUrls, setUploadedAdditionalUrls] = useState<string[]>([]);
   const [authChecking, setAuthChecking] = useState(true);
   const [adminEmail, setAdminEmail] = useState("");
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -171,12 +166,6 @@ const Admin = () => {
 
       setAdminEmail(user.email || "admin");
 
-      // Check elevated super_admin role (gates Developer Export)
-      const { data: superFlag } = await supabase.rpc("has_role", {
-        _user_id: user.id,
-        _role: "super_admin",
-      });
-      if (mounted) setIsSuperAdmin(!!superFlag);
 
       setAuthChecking(false);
       await fetchData();
@@ -302,40 +291,6 @@ const Admin = () => {
     }
   };
 
-  const downloadExportGuide = () => {
-    const guide = `# Gadget360.ng developer export guide
-
-Generated for: ${adminEmail || "Gadget360 admin"}
-Generated at: ${new Date().toISOString()}
-
-## What this admin page can safely provide
-The live website cannot download its own real source code. A deployed React app only contains compiled browser files, not the original TypeScript, migrations, Supabase functions, or Lovable project history.
-
-## Working export paths
-1. GitHub reconnect: Lovable chat + button → GitHub → reconnect the project repository.
-2. Codebase ZIP: Lovable Code Editor → Download codebase, available from eligible paid workspaces.
-3. Public remix fallback: Project Settings → General → enable Public remixing, then remix the project into a workspace/account that can connect GitHub or download code.
-4. Manual backup: copy source files from the Lovable Code Editor file tree and export Supabase data from Cloud → Database → Tables.
-
-## Backend pieces to include in any GitHub repo
-- /supabase/functions for Edge Functions
-- /supabase/migrations for database schema and policies
-- /public for SEO files like robots.txt, sitemap.xml, llms.txt, and Google verification
-- /.env.example with only public keys/placeholders, never service-role keys
-
-## Security rule
-Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHub. Keep them in Supabase Edge Function secrets.
-`;
-    const blob = new Blob([guide], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "gadget360-export-guide.md";
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
-  };
 
   const uploadImagesToStorage = async (files: File[]): Promise<string[]> => {
     if (files.length > 10) {
@@ -811,9 +766,6 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
               <TabsTrigger value="users" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Users size={14} /> Users</TabsTrigger>
               <TabsTrigger value="orders" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><ShoppingCart size={14} /> Orders</TabsTrigger>
               <TabsTrigger value="chat" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><MessageSquare size={14} /> Chat</TabsTrigger>
-              {isSuperAdmin && (
-                <TabsTrigger value="developer" className="rounded-full px-3 md:px-4 gap-1.5 text-xs md:text-sm whitespace-nowrap"><Code2 size={14} /> Developer</TabsTrigger>
-              )}
             </TabsList>
           </div>
 
@@ -1533,77 +1485,6 @@ Never place SUPABASE_SERVICE_ROLE_KEY, Gemini keys, or private API keys in GitHu
             </Card>
           </TabsContent>
 
-          {/* Developer Export Tab — super_admin only */}
-          {isSuperAdmin && (
-          <TabsContent value="developer" className="space-y-5">
-            <Card className="overflow-hidden border-primary/20">
-              <CardHeader className="bg-gradient-warm border-b border-border/60">
-                <div className="flex items-start justify-between gap-4 flex-wrap">
-                  <div>
-                    <CardTitle className="flex items-center gap-2 text-2xl">
-                      <ShieldCheck className="h-5 w-5 text-primary" /> Developer export
-                    </CardTitle>
-                    <CardDescription>
-                      Super-admin only. Real, working options to sync or export the Gadget360 codebase — no fake zip downloads.
-                    </CardDescription>
-                  </div>
-                  <Badge variant="secondary" className="rounded-full whitespace-nowrap">{adminEmail}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="p-5 md:p-6 space-y-5">
-                <Alert className="border-primary/25 bg-primary/5">
-                  <ShieldCheck className="h-4 w-4" />
-                  <AlertDescription>
-                    The browser cannot package the live site back into source. Use one of the routes below from inside the Lovable editor — each one produces a real, buildable repo or archive.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <div className="rounded-2xl border border-border bg-card p-4">
-                    <Github className="h-5 w-5 text-primary mb-3" />
-                    <h3 className="font-display font-bold text-lg">1. GitHub sync (recommended)</h3>
-                    <ol className="text-sm text-muted-foreground mt-2 space-y-1 list-decimal pl-4">
-                      <li>Open Lovable editor → Plus (+) menu → GitHub → Connect project.</li>
-                      <li>Authorize the Lovable GitHub App on the correct account/org.</li>
-                      <li>Click <em>Create Repository</em>. Changes will then sync both ways.</li>
-                      <li>If a previous connection is stuck: in GitHub → Settings → Applications, revoke the Lovable app, then redo step 1.</li>
-                    </ol>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-card p-4">
-                    <Download className="h-5 w-5 text-primary mb-3" />
-                    <h3 className="font-display font-bold text-lg">2. Download codebase</h3>
-                    <p className="text-sm text-muted-foreground mt-2">In the Lovable editor open the Code Editor and click <em>Download codebase</em> at the bottom of the file tree sidebar. Requires a paid workspace.</p>
-                  </div>
-                  <div className="rounded-2xl border border-border bg-card p-4">
-                    <Copy className="h-5 w-5 text-primary mb-3" />
-                    <h3 className="font-display font-bold text-lg">3. Remix fallback</h3>
-                    <p className="text-sm text-muted-foreground mt-2">If both above are blocked: enable public Remix on this project, remix into a workspace that can connect GitHub, then sync from there.</p>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-border bg-muted/40 p-4">
-                  <h4 className="font-semibold mb-1">Database & secrets</h4>
-                  <p className="text-sm text-muted-foreground">Code repos don't include data. Export tables from Supabase → Database → Tables (CSV per table). Secrets stay in Supabase → Project Settings → Functions.</p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-                  <Button onClick={downloadExportGuide} className="rounded-full gap-2">
-                    <Download className="h-4 w-4" /> Download export guide (Markdown)
-                  </Button>
-                  <Button variant="outline" className="rounded-full gap-2" onClick={() => window.open("https://docs.lovable.dev/integrations/github", "_blank", "noopener,noreferrer")}>
-                    <ExternalLink className="h-4 w-4" /> GitHub integration docs
-                  </Button>
-                  <Button variant="outline" className="rounded-full gap-2" onClick={() => window.open("https://github.com/settings/applications", "_blank", "noopener,noreferrer")}>
-                    <ExternalLink className="h-4 w-4" /> Revoke old GitHub auth
-                  </Button>
-                  <Button variant="outline" className="rounded-full gap-2" onClick={() => window.open("https://supabase.com/dashboard/project/yasicaakzqqhmtgscbhg/editor", "_blank", "noopener,noreferrer")}>
-                    <ExternalLink className="h-4 w-4" /> Export DB tables
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          )}
         </Tabs>
       </div>
 

@@ -24,10 +24,13 @@ const Seo = ({ title, description, canonical, image = "/favicon.png", type = "we
       <meta property="og:description" content={description} />
       <meta property="og:url" content={url} />
       <meta property="og:type" content={type} />
+      <meta property="og:site_name" content="Gadget360.ng" />
+      <meta property="og:locale" content="en_NG" />
       <meta property="og:image" content={absImage} />
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={absImage} />
       {ldArray.map((ld, i) => (
         <script key={i} type="application/ld+json">{JSON.stringify(ld)}</script>
       ))}

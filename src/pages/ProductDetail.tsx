@@ -262,7 +262,17 @@ const ProductDetail = () => {
             <Button onClick={addToCart} disabled={!inStock} variant="outline" className="flex-1 h-12 rounded-full border-background/30 bg-transparent text-background hover:bg-background hover:text-foreground font-semibold text-xs">
               Add to Cart
             </Button>
-            <a href={waOrderUrl(product.name, totalPrice)} target="_blank" rel="noopener noreferrer" className="flex-[1.2]">
+            <a
+              href={waOrderUrl(product.name, product.price, qty)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-[1.2]"
+              data-wa-source="product"
+              data-wa-product={product.name}
+              data-wa-product-id={product.id}
+              data-wa-quantity={qty}
+              data-wa-total={totalPrice}
+            >
               <Button disabled={!inStock} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2 text-xs">
                 <WhatsAppIcon size={14} /> Buy Now
               </Button>
@@ -361,7 +371,17 @@ const ProductDetail = () => {
                 </div>
 
                 <div className="flex gap-2">
-                  <a href={waOrderUrl(product.name, totalPrice)} target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <a
+                    href={waOrderUrl(product.name, product.price, qty)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1"
+                    data-wa-source="product"
+                    data-wa-product={product.name}
+                    data-wa-product-id={product.id}
+                    data-wa-quantity={qty}
+                    data-wa-total={totalPrice}
+                  >
                     <Button disabled={!inStock} className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
                       <WhatsAppIcon size={16} /> Buy on WhatsApp
                     </Button>
