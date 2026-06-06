@@ -102,6 +102,18 @@ const AnalyticsPanel = () => {
   });
   const topPaths = [...pathCounts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
 
+  // WhatsApp click metrics
+  const waToday = waRows.filter((r) => new Date(r.created_at) >= today).length;
+  const waWeek = waRows.filter((r) => new Date(r.created_at) >= last7).length;
+  const waMonth = waRows.filter((r) => new Date(r.created_at) >= last30).length;
+  const waSources = new Map<string, number>();
+  waRows.filter((r) => new Date(r.created_at) >= last30).forEach((r) => {
+    const k = r.source || "unknown";
+    waSources.set(k, (waSources.get(k) || 0) + 1);
+  });
+  const topWaSources = [...waSources.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const recentWa = waRows.slice(0, 12);
+
   const Stat = ({ icon, label, value, accent }: { icon: ReactNode; label: string; value: number; accent: string }) => (
     <div className={`rounded-2xl p-5 ${accent}`}>
       <div className="flex items-center justify-between">
@@ -234,6 +246,82 @@ const AnalyticsPanel = () => {
           </Card>
         );
       })()}
+      {/* WhatsApp clicks — orders & messages coming from the website */}
+      <Card className="p-5 rounded-3xl">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">WhatsApp from website</div>
+            <h3 className="font-display font-bold text-xl">Order & message clicks</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Every tap on a WhatsApp button on gadget360.ng — so the team knows the lead came from the site.</p>
+          </div>
+          <MessageCircle size={18} className="text-whatsapp" />
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 mb-5">
+          <div className="rounded-2xl p-4 bg-whatsapp/10">
+            <div className="text-[10px] uppercase tracking-[0.2em] opacity-70">Today</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{waToday.toLocaleString()}</div>
+          </div>
+          <div className="rounded-2xl p-4 bg-card border border-border">
+            <div className="text-[10px] uppercase tracking-[0.2em] opacity-70">Last 7 days</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{waWeek.toLocaleString()}</div>
+          </div>
+          <div className="rounded-2xl p-4 bg-card border border-border">
+            <div className="text-[10px] uppercase tracking-[0.2em] opacity-70">Last 30 days</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{waMonth.toLocaleString()}</div>
+          </div>
+        </div>
+
+        {topWaSources.length > 0 && (
+          <div className="mb-5">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2">By source (30d)</div>
+            <div className="space-y-2">
+              {topWaSources.map(([src, n]) => {
+                const max = topWaSources[0][1] || 1;
+                return (
+                  <div key={src} className="flex items-center gap-3">
+                    <div className="text-xs w-32 truncate font-medium">{src}</div>
+                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                      <div className="h-full bg-whatsapp rounded-full" style={{ width: `${(n / max) * 100}%` }} />
+                    </div>
+                    <div className="text-sm font-semibold tabular-nums w-12 text-right">{n}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2">Recent clicks</div>
+        {recentWa.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No WhatsApp clicks yet — they appear in real time as visitors tap the buttons.</p>
+        ) : (
+          <div className="overflow-x-auto -mx-2">
+            <table className="w-full text-xs">
+              <thead className="text-muted-foreground">
+                <tr className="text-left">
+                  <th className="px-2 py-1.5 font-medium">When</th>
+                  <th className="px-2 py-1.5 font-medium">Source</th>
+                  <th className="px-2 py-1.5 font-medium">Product</th>
+                  <th className="px-2 py-1.5 font-medium text-right">Qty</th>
+                  <th className="px-2 py-1.5 font-medium text-right">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentWa.map((r, i) => (
+                  <tr key={i} className="border-t border-border/60">
+                    <td className="px-2 py-1.5 whitespace-nowrap text-muted-foreground">{new Date(r.created_at).toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td>
+                    <td className="px-2 py-1.5"><span className="rounded-full bg-muted px-2 py-0.5">{r.source || "—"}</span></td>
+                    <td className="px-2 py-1.5 max-w-[200px] truncate">{r.product_name || "—"}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{r.quantity ?? "—"}</td>
+                    <td className="px-2 py-1.5 text-right tabular-nums">{r.total_amount != null ? new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 0 }).format(Number(r.total_amount)) : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
