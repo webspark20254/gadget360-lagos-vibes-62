@@ -217,6 +217,62 @@ const AnalyticsPanel = () => {
         <Stat icon={<Users size={16} />} label="Unique sessions / 30d" value={uniqueSessions} accent="bg-primary text-primary-foreground" />
       </div>
 
+      {/* Exports + AI insights toolbar */}
+      <Card className="p-5 rounded-3xl">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Reports</div>
+            <h3 className="font-display font-bold text-lg">Download & AI briefings</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">CSV exports + a plain-English summary written by AI for the owner.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={exportWhatsApp30d} className="gap-2"><Download size={14} /> WhatsApp clicks (30d)</Button>
+            <Button size="sm" variant="outline" onClick={() => exportTraffic("daily")} className="gap-2"><Download size={14} /> Daily traffic</Button>
+            <Button size="sm" variant="outline" onClick={() => exportTraffic("weekly")} className="gap-2"><Download size={14} /> Weekly</Button>
+            <Button size="sm" variant="outline" onClick={() => exportTraffic("monthly")} className="gap-2"><Download size={14} /> Monthly</Button>
+            <Button size="sm" onClick={generateInsights} disabled={insightsLoading} className="gap-2 bg-foreground hover:bg-foreground/90 text-background">
+              <Sparkles size={14} /> {insightsLoading ? "Generating…" : "AI briefing"}
+            </Button>
+          </div>
+        </div>
+        {insights && (
+          <div className="mt-5 rounded-2xl bg-muted/40 p-5 text-sm whitespace-pre-wrap leading-relaxed prose prose-sm max-w-none">
+            {insights}
+          </div>
+        )}
+      </Card>
+
+      {/* Funnel — product page / cart / checkout visits */}
+      <Card className="p-5 rounded-3xl">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Funnel · last 30 days</div>
+        <h3 className="font-display font-bold text-xl mb-4">Shopper journey</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="rounded-2xl p-4 bg-card border border-border">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"><Eye size={12} /> Shop browse</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{shopVisits.toLocaleString()}</div>
+          </div>
+          <div className="rounded-2xl p-4 bg-card border border-border">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"><Package size={12} /> Product views</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{productPageVisits.toLocaleString()}</div>
+          </div>
+          <div className="rounded-2xl p-4 bg-card border border-border">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground"><ShoppingCart size={12} /> Cart visits</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{cartVisits.toLocaleString()}</div>
+          </div>
+          <div className="rounded-2xl p-4 bg-whatsapp/10">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] opacity-70"><MessageCircle size={12} /> WhatsApp clicks</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{waMonth.toLocaleString()}</div>
+          </div>
+          <div className="rounded-2xl p-4 bg-foreground text-background">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] opacity-70"><Sparkles size={12} /> Likely orders*</div>
+            <div className="font-display font-bold text-2xl mt-1 tabular-nums">{estimatedOrders.toLocaleString()}</div>
+            <div className="text-[10px] opacity-60 mt-1">Lead rate ≈ {leadRate}%</div>
+          </div>
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-3">* AI-aided estimate: WhatsApp clicks with a named product convert at ~65%, bare clicks at ~20%. Tap "AI briefing" above for a full owner summary.</p>
+      </Card>
+
+
       <Card className="p-5 rounded-3xl">
         <div className="flex items-center justify-between mb-3">
           <div>
