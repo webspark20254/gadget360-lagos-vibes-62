@@ -1,196 +1,151 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+const WA = "2348108418727";
+
+// Models to try in order — first 200 wins. Lets us survive Gemini model deprecations.
+const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp"];
+
+async function callGemini(apiKey: string, body: unknown): Promise<string | null> {
+  for (const model of MODELS) {
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) },
+      );
+      if (!res.ok) { console.warn(`[gemini-chat] ${model} ${res.status}`); continue; }
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text as string;
+    } catch (err) {
+      console.warn(`[gemini-chat] ${model} threw`, err);
+    }
   }
+  return null;
+}
+
+function fallbackResponse(message: string, products: Array<{ name: string; price: number; category: string | null }>): string {
+  const lower = message.toLowerCase();
+  const match = products.find((p) =>
+    lower.includes(p.name.toLowerCase().split(" ")[0]) ||
+    (p.category && lower.includes(p.category.toLowerCase()))
+  );
+  const waBase = `https://wa.me/${WA}`;
+  if (match) {
+    const text = encodeURIComponent(
+      `Hi Gadget360.ng! 👋 I'm on your website and interested in ${match.name} (₦${match.price.toLocaleString()}). Is it available?`,
+    );
+    return `I'd love to help with **${match.name}** (₦${match.price.toLocaleString()}). Tap "Continue on WhatsApp" to chat with our team instantly: ${waBase}?text=${text}`;
+  }
+  return `I'm having a brief connection issue, but our team is online on WhatsApp right now and can help with prices, stock and delivery. Tap "Continue on WhatsApp" or visit ${waBase}.`;
+}
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    console.log('Processing chat request...');
-    
-    const { message, sessionId, customerName } = await req.json();
-    console.log('Request data:', { message, sessionId, customerName });
-
+    const { message, sessionId, customerName, context } = await req.json();
     if (!message || !sessionId) {
-      throw new Error('Message and sessionId are required');
+      return new Response(JSON.stringify({ error: "Message and sessionId are required" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY is not set');
-    }
-
-    // Initialize Supabase client
-    const supabaseClient = createClient(
+    const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
+      { auth: { persistSession: false } },
     );
 
-    // Save user message to database
-    const { error: userMessageError } = await supabaseClient
-      .from('chat_messages')
-      .insert({
-        session_id: sessionId,
-        sender: 'user',
-        message: message
+    // Live product catalog (max 60) — lets the bot recommend real items with real prices.
+    const { data: productData } = await supabase
+      .from("products")
+      .select("name, price, category, stock_quantity, description")
+      .order("is_featured", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(60);
+    const products = (productData || []) as Array<{ name: string; price: number; category: string | null; stock_quantity: number; description: string | null }>;
+
+    // Log user message (best-effort)
+    supabase.from("chat_messages").insert({ session_id: sessionId, sender: "user", message }).then(() => {});
+
+    const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
+
+    let botResponse: string;
+
+    if (!GEMINI_API_KEY) {
+      botResponse = fallbackResponse(message, products);
+    } else {
+      const catalogText = products
+        .map((p) => `• ${p.name} — ₦${Number(p.price).toLocaleString()} (${p.category || "uncategorised"})${p.stock_quantity > 0 ? "" : " — out of stock"}`)
+        .join("\n");
+
+      const pageContext = context
+        ? `\nCURRENT PAGE CONTEXT:\n• Page: ${context.path || "/"}\n${context.productName ? `• Viewing product: ${context.productName} (₦${context.productPrice?.toLocaleString?.() || ""})\n` : ""}${context.category ? `• Category: ${context.category}\n` : ""}`
+        : "";
+
+      const systemPrompt = `You are the Gadget360.ng AI Concierge — friendly, concise, knowledgeable about phones, laptops, gaming consoles and accessories. You help customers in Nigeria.
+
+CONTACT: WhatsApp +234 810 841 8727 (link: https://wa.me/${WA})
+DELIVERY: Free in Lagos, ₦2,000+ nationwide, 1-3 days Lagos / 3-7 days other states.
+HOURS: Mon-Sat 9am-7pm.
+PAYMENT: Pay on delivery (Lagos) or bank transfer.
+WARRANTY: Manufacturer warranty (new) / 3-month store warranty (UK used).
+
+LIVE CATALOG (use these exact names + prices):
+${catalogText || "(catalog temporarily unavailable — direct user to WhatsApp)"}
+${pageContext}
+
+CUSTOMER: ${customerName || "Guest"}
+
+RULES:
+1. Be warm but brief — 2-4 short sentences max unless asked for details.
+2. Recommend SPECIFIC products from the catalog (with price) when asked.
+3. If they want to order/buy/are ready, say "Tap Continue on WhatsApp" and end with a marker on its own line:
+   [RECOMMEND: <exact product name>]
+4. If the user mentions a budget, suggest 1-2 catalog items that fit.
+5. Never invent prices, never promise specs not in the catalog.
+6. Use ₦ formatting. Be Nigerian-friendly.
+7. If unsure, hand off to WhatsApp.`;
+
+      const result = await callGemini(GEMINI_API_KEY, {
+        contents: [{ parts: [{ text: systemPrompt }, { text: `Customer message: ${message}` }] }],
+        generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 600 },
       });
 
-    if (userMessageError) {
-      console.error('Error saving user message:', userMessageError);
+      botResponse = result || fallbackResponse(message, products);
     }
 
-    // Enhanced system prompt for Gadget360.ng with comprehensive product knowledge
-    const systemPrompt = `You are an AI assistant for Gadget360.ng, Nigeria's premier tech store specializing in authentic electronics. 
+    // Parse a [RECOMMEND: name] marker if present.
+    let recommendedProduct: { name: string; price: number } | null = null;
+    const m = botResponse.match(/\[RECOMMEND:\s*([^\]]+)\]/i);
+    if (m) {
+      const name = m[1].trim();
+      const found = products.find((p) => p.name.toLowerCase() === name.toLowerCase())
+        || products.find((p) => p.name.toLowerCase().includes(name.toLowerCase()));
+      if (found) recommendedProduct = { name: found.name, price: Number(found.price) };
+      botResponse = botResponse.replace(/\[RECOMMEND:[^\]]+\]/gi, "").trim();
+    }
 
-Company Info:
-- Name: Gadget360.ng
-- Services: Buy, sell, and swap phones, computers, accessories & gaming consoles
-- Location: Lagos, Nigeria with nationwide delivery
-- Hours: Monday-Saturday 9AM-7PM, Closed Sundays
-- Contact: WhatsApp +2347067894474
-- Delivery: Free in Lagos, ₦2,000+ for other states, 1-3 days Lagos, 3-7 days nationwide
+    supabase.from("chat_messages").insert({ session_id: sessionId, sender: "bot", message: botResponse }).then(() => {});
 
-Complete Product Catalog:
-
-GAMING CONSOLES:
-- PlayStation 5 Slim: ₦880,000 (was ₦950,000) - Ultra-high speed SSD, Ray tracing, 4K gaming up to 120fps, 3D Audio
-- Nintendo Switch 2: ₦835,000 - Enhanced performance, improved battery life, backward compatible
-
-IPHONES:
-- iPhone XR: ₦285,000 (was ₦320,000) - 6.1" Liquid Retina, A12 Bionic, 12MP camera, Face ID
-- iPhone 11: ₦365,000 (was ₦410,000) - Dual 12MP cameras, A13 Bionic, 6.1" display
-- iPhone 11 Pro: ₦485,000 (was ₦540,000) - Triple camera system, 5.8" Super Retina XDR
-- iPhone 11 Pro Max: ₦525,000 (was ₦580,000) - 6.5" display, triple cameras
-- iPhone 12: ₦415,000 (was ₦465,000) - 5G connectivity, A14 Bionic, dual cameras
-- iPhone 12 Pro: ₦565,000 (was ₦620,000) - LiDAR scanner, quad camera system
-- iPhone 12 Pro Max: ₦625,000 (was ₦680,000) - Largest display, 5G capable
-- iPhone 12 Product Red: ₦450,000 (was ₦520,000) - Special edition red color
-- iPhone 13: ₦525,000 (was ₦575,000) - A15 Bionic, improved cameras, 128GB+
-- iPhone 14: ₦625,000 (was ₦685,000) - Latest model, A15 Bionic with 5-Core GPU
-
-SAMSUNG:
-- Galaxy S22 Ultra: ₦615,000 - Built-in S Pen, 108MP camera, 6.8" Dynamic AMOLED
-
-APPLE ACCESSORIES:
-- AirPods Pro 2: ₦320,000 - Hearing Aid Feature, Active Noise Cancellation, Adaptive Transparency
-
-Product Categories:
-- Consoles & Games
-- Phones
-- Laptops
-- Accessories
-- Apple products
-- Headphones
-- Controllers & Cables
-
-Key Features:
-- Authentic products with warranty
-- Trade-in programs available
-- Competitive pricing updated daily
-- WhatsApp ordering system
-- New items: Manufacturer warranty
-- UK used items: 3-month store warranty
-
-How Orders Work:
-1. Browse products on website or ask me for recommendations
-2. Add items to cart or ask for specific products
-3. Complete order through WhatsApp (+2347067894474)
-4. Provide delivery address and contact details
-5. Payment on delivery or bank transfer
-6. Free delivery in Lagos, ₦2,000+ for other states
-7. 1-3 days delivery in Lagos, 3-7 days nationwide
-
-Instructions:
-1. Be highly knowledgeable about all products with exact prices and specs
-2. Always suggest contacting WhatsApp +2347067894474 for orders, pricing confirmations, and detailed inquiries
-3. Provide accurate information about delivery, warranty, and services
-4. Be friendly, professional, and helpful
-5. Offer product comparisons when users are deciding between models
-6. Mention trade-in options for upgrades
-7. Use Nigerian context and currency (₦)
-8. If asked about specific prices, mention they're current as of today but can be confirmed via WhatsApp
-9. Recommend products based on user needs and budget
-10. Always mention warranty terms (manufacturer warranty for new, 3-month store warranty for UK used)`;
-
-    // Call Gemini API
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: systemPrompt },
-                { text: `Customer message: ${message}` }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 1024,
-          }
-        })
-      }
+    return new Response(JSON.stringify({ response: botResponse, sessionId, recommendedProduct }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("[gemini-chat] fatal", error);
+    const msg = error instanceof Error ? error.message : "Unknown error";
+    return new Response(
+      JSON.stringify({
+        error: msg,
+        response: `I'm having technical trouble. Please WhatsApp us directly at +234 810 841 8727 — we'll reply within minutes. https://wa.me/${WA}`,
+      }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
-
-    if (!geminiResponse.ok) {
-      const errorText = await geminiResponse.text();
-      console.error('Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${geminiResponse.status}`);
-    }
-
-    const geminiData = await geminiResponse.json();
-    console.log('Gemini response:', geminiData);
-
-    const botResponse = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 
-      "I'm here to help you with Gadget360.ng! Please feel free to ask about our products, services, or contact us on WhatsApp at +2347067894474.";
-
-    // Save bot response to database
-    const { error: botMessageError } = await supabaseClient
-      .from('chat_messages')
-      .insert({
-        session_id: sessionId,
-        sender: 'bot',
-        message: botResponse
-      });
-
-    if (botMessageError) {
-      console.error('Error saving bot message:', botMessageError);
-    }
-
-    console.log('Chat processed successfully');
-
-    return new Response(JSON.stringify({ 
-      response: botResponse,
-      sessionId: sessionId 
-    }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-
-  } catch (error: unknown) {
-    console.error('Error in gemini-chat function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return new Response(JSON.stringify({ 
-      error: errorMessage,
-      response: "I'm experiencing technical difficulties. Please contact us directly on WhatsApp at +2347067894474 for immediate assistance!"
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
   }
 });
