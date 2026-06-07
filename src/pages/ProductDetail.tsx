@@ -116,13 +116,23 @@ const ProductDetail = () => {
     toast({ title: "Added to cart", description: `${product.name} ×${qty}` });
   };
 
+  // Build unique, SEO-rich title/description per product. Uses admin-provided
+  // meta_title/meta_description when set, otherwise composes a strong default
+  // including price, category, and warranty signal for search & social previews.
+  const seoTitle = (product.meta_title?.trim()
+    || `${product.name} — ${formatNaira(product.price)}${product.category ? ` | ${product.category}` : ""} | Gadget360.ng Lagos`)
+    .slice(0, 60);
+  const seoDescription = (product.meta_description?.trim()
+    || `Buy ${product.name} in Lagos for ${formatNaira(product.price)}. ${product.description?.replace(/\s+/g, " ").slice(0, 110) || "Authentic with warranty."} Order on WhatsApp — free Lagos delivery.`)
+    .slice(0, 160);
+
   return (
     <div className="min-h-screen bg-background">
 
 
       <Seo
-        title={`${product.name} — ${formatNaira(product.price)} | Gadget360.ng`}
-        description={`${product.name} in Lagos. ${product.description?.slice(0, 140) || "Authentic product with warranty."} Order on WhatsApp.`}
+        title={seoTitle}
+        description={seoDescription}
         canonical={`/product/${product.id}`}
         image={product.image_url}
         type="product"

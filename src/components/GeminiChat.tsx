@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import { X, Send, Sparkles, GripVertical } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
-import { WHATSAPP_NUMBER, waGeneralUrl } from "@/lib/whatsapp";
+import { waGeneralUrl, waOrderUrl } from "@/lib/whatsapp";
 
 interface Message { id: string; text: string; isBot: boolean; timestamp: Date }
 
@@ -58,9 +59,13 @@ const GeminiChat = () => {
   const [sessionId, setSessionId] = useState<string>("");
   const [customerName, setCustomerName] = useState("");
   const [nameSet, setNameSet] = useState(false);
+  const [recommended, setRecommended] = useState<{ name: string; price: number } | null>(null);
+  const [pageProduct, setPageProduct] = useState<{ name: string; price: number; category: string | null } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const location = useLocation();
+  const params = useParams();
 
   // Draggable launcher position (offsets from bottom-right)
   const [pos, setPos] = useState<{ x: number; y: number }>(() => {
@@ -76,6 +81,17 @@ const GeminiChat = () => {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { setSessionId(crypto.randomUUID()); }, []);
+
+  // Track the currently viewed product so the bot — and WhatsApp handoff — has context.
+  useEffect(() => {
+    const id = (params as { id?: string }).id;
+    if (location.pathname.startsWith("/product/") && id) {
+      supabase.from("products").select("name, price, category").eq("id", id).maybeSingle()
+        .then(({ data }) => setPageProduct(data ? { name: data.name, price: Number(data.price), category: data.category } : null));
+    } else {
+      setPageProduct(null);
+    }
+  }, [location.pathname, params]);
 
   const onPointerDown = (e: React.PointerEvent) => {
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
@@ -129,18 +145,39 @@ const GeminiChat = () => {
     const current = inputValue;
     setInputValue("");
     setLoading(true);
+    const context = {
+      path: location.pathname,
+      productName: pageProduct?.name,
+      productPrice: pageProduct?.price,
+      category: pageProduct?.category,
+    };
     try {
       const { data, error } = await supabase.functions.invoke("gemini-chat", {
-        body: { message: current, sessionId, customerName },
+        body: { message: current, sessionId, customerName, context },
       });
       if (error) throw new Error(error.message);
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text: data.response || "Sorry, I'm having trouble. Please WhatsApp +234 810 841 8727.", isBot: true, timestamp: new Date() }]);
+      const text: string = data?.response || "I'm having trouble. Tap Continue on WhatsApp to reach our team instantly.";
+      if (data?.recommendedProduct?.name) setRecommended(data.recommendedProduct);
+      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text, isBot: true, timestamp: new Date() }]);
     } catch {
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text: "I'm having trouble right now. Tap the WhatsApp button to reach a human instantly.", isBot: true, timestamp: new Date() }]);
+      // Resilient fallback: still useful — offer a WhatsApp deep-link with whatever context we have.
+      const product = recommended || (pageProduct ? { name: pageProduct.name, price: pageProduct.price } : null);
+      const fallbackText = product
+        ? `I'm offline for a moment, but our team is live on WhatsApp. They can help with ${product.name} (₦${product.price.toLocaleString()}) right now — tap Continue on WhatsApp.`
+        : "I'm offline for a moment. Tap Continue on WhatsApp — our team replies in minutes.";
+      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text: fallbackText, isBot: true, timestamp: new Date() }]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Smart WhatsApp handoff — prefills the message with the product the bot last recommended
+  // (or the product page the user is currently on).
+  const handoffUrl = (() => {
+    const target = recommended || (pageProduct ? { name: pageProduct.name, price: pageProduct.price } : null);
+    if (target) return waOrderUrl(target.name, target.price, 1);
+    return waGeneralUrl(customerName ? `My name is ${customerName} and I have a question.` : undefined);
+  })();
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") nameSet ? handleSendMessage() : handleNameSubmit();
@@ -259,7 +296,19 @@ const GeminiChat = () => {
                 </div>
 
                 <div className="border-t border-border bg-background p-3 space-y-2">
-                  <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+                  {(recommended || pageProduct) && (
+                    <p className="text-[10px] text-muted-foreground text-center -mb-1">
+                      WhatsApp will be prefilled with: <span className="font-semibold text-foreground">{(recommended || pageProduct)!.name}</span>
+                    </p>
+                  )}
+                  <a
+                    href={handoffUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-wa-source="chat"
+                    data-wa-product={(recommended || pageProduct)?.name || ""}
+                    data-wa-total={(recommended || pageProduct)?.price || ""}
+                  >
                     <Button className="w-full h-10 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-xs font-semibold gap-2">
                       <WhatsAppIcon size={13} /> Continue on WhatsApp
                     </Button>
