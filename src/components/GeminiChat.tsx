@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import { X, Send, Sparkles, GripVertical } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
-import { WHATSAPP_NUMBER, waGeneralUrl } from "@/lib/whatsapp";
+import { WHATSAPP_NUMBER, waGeneralUrl, waOrderUrl } from "@/lib/whatsapp";
 
 interface Message { id: string; text: string; isBot: boolean; timestamp: Date }
 
@@ -58,9 +59,13 @@ const GeminiChat = () => {
   const [sessionId, setSessionId] = useState<string>("");
   const [customerName, setCustomerName] = useState("");
   const [nameSet, setNameSet] = useState(false);
+  const [recommended, setRecommended] = useState<{ name: string; price: number } | null>(null);
+  const [pageProduct, setPageProduct] = useState<{ name: string; price: number; category: string | null } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+  const location = useLocation();
+  const params = useParams();
 
   // Draggable launcher position (offsets from bottom-right)
   const [pos, setPos] = useState<{ x: number; y: number }>(() => {
@@ -76,6 +81,17 @@ const GeminiChat = () => {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { setSessionId(crypto.randomUUID()); }, []);
+
+  // Track the currently viewed product so the bot — and WhatsApp handoff — has context.
+  useEffect(() => {
+    const id = (params as { id?: string }).id;
+    if (location.pathname.startsWith("/product/") && id) {
+      supabase.from("products").select("name, price, category").eq("id", id).maybeSingle()
+        .then(({ data }) => setPageProduct(data ? { name: data.name, price: Number(data.price), category: data.category } : null));
+    } else {
+      setPageProduct(null);
+    }
+  }, [location.pathname, params]);
 
   const onPointerDown = (e: React.PointerEvent) => {
     (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
