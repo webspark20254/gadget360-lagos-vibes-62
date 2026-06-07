@@ -145,18 +145,39 @@ const GeminiChat = () => {
     const current = inputValue;
     setInputValue("");
     setLoading(true);
+    const context = {
+      path: location.pathname,
+      productName: pageProduct?.name,
+      productPrice: pageProduct?.price,
+      category: pageProduct?.category,
+    };
     try {
       const { data, error } = await supabase.functions.invoke("gemini-chat", {
-        body: { message: current, sessionId, customerName },
+        body: { message: current, sessionId, customerName, context },
       });
       if (error) throw new Error(error.message);
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text: data.response || "Sorry, I'm having trouble. Please WhatsApp +234 810 841 8727.", isBot: true, timestamp: new Date() }]);
+      const text: string = data?.response || "I'm having trouble. Tap Continue on WhatsApp to reach our team instantly.";
+      if (data?.recommendedProduct?.name) setRecommended(data.recommendedProduct);
+      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text, isBot: true, timestamp: new Date() }]);
     } catch {
-      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text: "I'm having trouble right now. Tap the WhatsApp button to reach a human instantly.", isBot: true, timestamp: new Date() }]);
+      // Resilient fallback: still useful — offer a WhatsApp deep-link with whatever context we have.
+      const product = recommended || (pageProduct ? { name: pageProduct.name, price: pageProduct.price } : null);
+      const fallbackText = product
+        ? `I'm offline for a moment, but our team is live on WhatsApp. They can help with ${product.name} (₦${product.price.toLocaleString()}) right now — tap Continue on WhatsApp.`
+        : "I'm offline for a moment. Tap Continue on WhatsApp — our team replies in minutes.";
+      setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text: fallbackText, isBot: true, timestamp: new Date() }]);
     } finally {
       setLoading(false);
     }
   };
+
+  // Smart WhatsApp handoff — prefills the message with the product the bot last recommended
+  // (or the product page the user is currently on).
+  const handoffUrl = (() => {
+    const target = recommended || (pageProduct ? { name: pageProduct.name, price: pageProduct.price } : null);
+    if (target) return waOrderUrl(target.name, target.price, 1);
+    return waGeneralUrl(customerName ? `My name is ${customerName} and I have a question.` : undefined);
+  })();
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") nameSet ? handleSendMessage() : handleNameSubmit();
