@@ -296,7 +296,19 @@ const GeminiChat = () => {
                 </div>
 
                 <div className="border-t border-border bg-background p-3 space-y-2">
-                  <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
+                  {(recommended || pageProduct) && (
+                    <p className="text-[10px] text-muted-foreground text-center -mb-1">
+                      WhatsApp will be prefilled with: <span className="font-semibold text-foreground">{(recommended || pageProduct)!.name}</span>
+                    </p>
+                  )}
+                  <a
+                    href={handoffUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-wa-source="chat"
+                    data-wa-product={(recommended || pageProduct)?.name || ""}
+                    data-wa-total={(recommended || pageProduct)?.price || ""}
+                  >
                     <Button className="w-full h-10 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white text-xs font-semibold gap-2">
                       <WhatsAppIcon size={13} /> Continue on WhatsApp
                     </Button>
