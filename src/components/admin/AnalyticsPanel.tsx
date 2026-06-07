@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
-import { Activity, Eye, MessageCircle, TrendingUp, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Activity, Eye, MessageCircle, TrendingUp, Users, Download, Sparkles, ShoppingCart, Package } from "lucide-react";
 import type { ReactNode } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
+import { useToast } from "@/hooks/use-toast";
 
 type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
 type WaRow = { created_at: string; source: string | null; product_name: string | null; quantity: number | null; total_amount: number | null; country?: string | null; country_code?: string | null };
@@ -17,6 +19,9 @@ const AnalyticsPanel = () => {
   const [rows, setRows] = useState<Row[]>([]);
   const [waRows, setWaRows] = useState<WaRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [insights, setInsights] = useState<string>("");
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const { toast } = useToast();
 
   const load = async () => {
     const since = new Date(); since.setDate(since.getDate() - 90);
