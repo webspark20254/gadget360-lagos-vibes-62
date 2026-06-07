@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
-import { WHATSAPP_NUMBER, waGeneralUrl, waOrderUrl } from "@/lib/whatsapp";
+import { waGeneralUrl, waOrderUrl } from "@/lib/whatsapp";
 
 interface Message { id: string; text: string; isBot: boolean; timestamp: Date }
 
