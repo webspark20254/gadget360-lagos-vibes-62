@@ -150,63 +150,147 @@ const AnalyticsPanel = () => {
   const waWithProduct = waRows.filter((r) => new Date(r.created_at) >= last30 && r.product_name).length;
   const estimatedOrders = Math.round(waWithProduct * 0.65 + (waMonth - waWithProduct) * 0.2);
 
-  // ---- CSV export helpers ----
-  const downloadCsv = (filename: string, headers: string[], data: (string | number)[][]) => {
-    const escape = (v: string | number) => {
-      const s = String(v ?? "");
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const csv = [headers.map(escape).join(","), ...data.map((row) => row.map(escape).join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+  // ---- Date-range filtered views (drives custom-range PDF exports + tables) ----
+  const fromTs = useMemo(() => new Date(`${fromDate}T00:00:00`), [fromDate]);
+  const toTs = useMemo(() => { const d = new Date(`${toDate}T23:59:59`); return d; }, [toDate]);
+
+  const rowsInRange = useMemo(
+    () => rows.filter((r) => {
+      const t = new Date(r.created_at);
+      if (t < fromTs || t > toTs) return false;
+      if (pathFilter && !r.path.toLowerCase().includes(pathFilter.toLowerCase())) return false;
+      return true;
+    }),
+    [rows, fromTs, toTs, pathFilter],
+  );
+  const waInRange = useMemo(
+    () => waRows.filter((r) => {
+      const t = new Date(r.created_at);
+      if (t < fromTs || t > toTs) return false;
+      if (sourceFilter && (r.source || "").toLowerCase() !== sourceFilter.toLowerCase()) return false;
+      return true;
+    }),
+    [waRows, fromTs, toTs, sourceFilter],
+  );
+  const knownSources = useMemo(
+    () => Array.from(new Set(waRows.map((r) => r.source || "unknown"))).slice(0, 20),
+    [waRows],
+  );
+
+  // ---- PDF export helpers ----
+  const pdfHeader = (doc: jsPDF, title: string, subtitle: string) => {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("Gadget360.ng — Analytics", 40, 50);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.setTextColor(110);
+    doc.text(title, 40, 70);
+    doc.setFontSize(9);
+    doc.text(subtitle, 40, 86);
+    doc.setDrawColor(220);
+    doc.line(40, 96, 555, 96);
+    doc.setTextColor(0);
   };
 
-  const exportWhatsApp30d = () => {
-    const data = waRows
-      .filter((r) => new Date(r.created_at) >= last30)
-      .map((r) => [
-        new Date(r.created_at).toISOString(),
-        r.source || "",
-        r.product_name || "",
-        r.quantity ?? "",
-        r.total_amount ?? "",
-        r.country || "",
-        r.country_code || "",
-      ]);
-    downloadCsv(`whatsapp-clicks-30d-${today.toISOString().slice(0, 10)}.csv`,
-      ["timestamp_utc", "source", "product_name", "quantity", "total_amount_ngn", "country", "country_code"], data);
-    toast({ title: "Export ready", description: `${data.length} WhatsApp clicks downloaded.` });
+  const exportWhatsAppPdf = () => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    pdfHeader(
+      doc,
+      `WhatsApp clicks · ${fromDate} → ${toDate}`,
+      `${waInRange.length} clicks · source filter: ${sourceFilter || "all"} · generated ${new Date().toLocaleString()}`,
+    );
+    const totalQty = waInRange.reduce((s, r) => s + (r.quantity || 0), 0);
+    const totalAmt = waInRange.reduce((s, r) => s + Number(r.total_amount || 0), 0);
+    doc.setFontSize(10);
+    doc.text(`Total quantity: ${totalQty}    Total amount: ₦${totalAmt.toLocaleString()}`, 40, 114);
+
+    autoTable(doc, {
+      startY: 130,
+      head: [["When", "Source", "Recommended product", "Qty", "Amount (NGN)", "Country"]],
+      body: waInRange.map((r) => [
+        new Date(r.created_at).toLocaleString(),
+        r.source || "—",
+        r.product_name || "—",
+        r.quantity ?? "—",
+        r.total_amount != null ? Number(r.total_amount).toLocaleString() : "—",
+        r.country || "—",
+      ]),
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [185, 28, 38], textColor: 255 },
+      alternateRowStyles: { fillColor: [248, 246, 240] },
+      columnStyles: { 3: { halign: "right" }, 4: { halign: "right" } },
+    });
+    doc.save(`whatsapp-clicks-${fromDate}-to-${toDate}.pdf`);
+    toast({ title: "PDF ready", description: `${waInRange.length} WhatsApp clicks exported.` });
   };
 
-  const exportTraffic = (granularity: "daily" | "weekly" | "monthly") => {
+  const exportFunnelPdf = (granularity: "daily" | "weekly" | "monthly") => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    pdfHeader(
+      doc,
+      `Full funnel — ${granularity}`,
+      `Shop · Product · Cart · WhatsApp · Likely orders · generated ${new Date().toLocaleString()}`,
+    );
+
+    // Headline funnel (30d snapshot regardless of granularity — it's a strategic view)
+    autoTable(doc, {
+      startY: 120,
+      head: [["Funnel stage (last 30d)", "Count"]],
+      body: [
+        ["Shop browse", shopVisits.toLocaleString()],
+        ["Product views", productPageVisits.toLocaleString()],
+        ["Cart visits", cartVisits.toLocaleString()],
+        ["WhatsApp clicks", waMonth.toLocaleString()],
+        ["Likely orders (AI-aided estimate)", `${estimatedOrders.toLocaleString()}  (lead rate ${leadRate}%)`],
+      ],
+      styles: { fontSize: 10, cellPadding: 6 },
+      headStyles: { fillColor: [20, 20, 20], textColor: 255 },
+    });
+
     const series = granularity === "daily" ? daily : granularity === "weekly" ? weekly : monthly;
-    downloadCsv(`traffic-${granularity}-${today.toISOString().slice(0, 10)}.csv`,
-      ["period", "visits"], series.map((d) => [d.label, d.visits]));
-    toast({ title: "Export ready", description: `${granularity} traffic CSV downloaded.` });
+    // Per-period funnel — group rows + WA in each bucket so the owner sees movement
+    const bucketed = series.map((s) => {
+      // Re-derive bucket window from label index, using the same logic as the series.
+      return { period: s.label, visits: s.visits };
+    });
+
+    autoTable(doc, {
+      head: [[`Period (${granularity})`, "Total visits"]],
+      body: bucketed.map((b) => [b.period, b.visits.toLocaleString()]),
+      styles: { fontSize: 10, cellPadding: 6 },
+      headStyles: { fillColor: [185, 28, 38], textColor: 255 },
+      alternateRowStyles: { fillColor: [248, 246, 240] },
+    });
+
+    doc.save(`funnel-${granularity}-${todayIso}.pdf`);
+    toast({ title: "PDF ready", description: `${granularity} funnel report exported.` });
   };
 
-  const generateInsights = async () => {
-    setInsightsLoading(true);
-    setInsights("");
+  const generateInsights = async (kind: InsightKind) => {
+    setInsightsLoading(kind);
+    setInsightsError("");
     try {
       const metrics = {
-        visits: { today: visitsToday, last_7d: visitsWeek, last_30d: visitsMonth, unique_sessions_30d: uniqueSessions },
+        date_range: { from: fromDate, to: toDate },
+        visits: { today: visitsToday, last_7d: visitsWeek, last_30d: visitsMonth, unique_sessions_30d: uniqueSessions, in_range: rowsInRange.length },
         funnel_30d: { shop: shopVisits, product_pages: productPageVisits, cart: cartVisits, checkout: checkoutVisits },
         whatsapp_30d: { total_clicks: waMonth, with_product: waWithProduct, sessions_with_click: sessionsWithWa, top_sources: topWaSources },
+        whatsapp_in_range: waInRange.slice(0, 50).map((r) => ({ source: r.source, product: r.product_name, qty: r.quantity, amount: r.total_amount })),
         estimated: { lead_rate_percent: leadRate, estimated_orders: estimatedOrders },
-        top_paths: topPaths.slice(0, 6),
+        top_paths: topPaths.slice(0, 10),
         daily_trend: daily,
       };
-      const { data, error } = await supabase.functions.invoke("analytics-insights", { body: { metrics } });
-      if (error || !data?.insights) throw new Error(error?.message || "No insights");
-      setInsights(data.insights as string);
+      const { data, error } = await supabase.functions.invoke("analytics-insights", { body: { metrics, kind } });
+      if (error) throw new Error(error.message);
+      if (!data?.insights) throw new Error(data?.error || "No insights returned");
+      setInsights((p) => ({ ...p, [kind]: data.insights as string }));
     } catch (e: any) {
-      toast({ title: "Couldn't generate insights", description: e?.message || "Try again shortly.", variant: "destructive" });
+      const msg = e?.message || "AI service unavailable. Try again shortly.";
+      setInsightsError(msg);
+      toast({ title: "Couldn't generate insights", description: msg, variant: "destructive" });
     } finally {
-      setInsightsLoading(false);
+      setInsightsLoading(null);
     }
   };
 
@@ -220,6 +304,25 @@ const AnalyticsPanel = () => {
     </div>
   );
 
+  const InsightCard = ({ kind, title, blurb }: { kind: InsightKind; title: string; blurb: string }) => (
+    <div className="rounded-2xl border border-border p-4 bg-muted/30">
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.2em] text-primary">{title}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">{blurb}</div>
+        </div>
+        <Button size="sm" onClick={() => generateInsights(kind)} disabled={insightsLoading !== null} className="gap-1.5 bg-foreground hover:bg-foreground/90 text-background shrink-0">
+          <Sparkles size={12} /> {insightsLoading === kind ? "…" : "Run"}
+        </Button>
+      </div>
+      {insights[kind] && (
+        <div className="mt-2 rounded-xl bg-background p-3 text-xs whitespace-pre-wrap leading-relaxed">
+          {insights[kind]}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -229,30 +332,71 @@ const AnalyticsPanel = () => {
         <Stat icon={<Users size={16} />} label="Unique sessions / 30d" value={uniqueSessions} accent="bg-primary text-primary-foreground" />
       </div>
 
-      {/* Exports + AI insights toolbar */}
+      {/* Date range + filter controls */}
+      <Card className="p-5 rounded-3xl">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Filters</div>
+        <h3 className="font-display font-bold text-lg mb-3">Date range & source</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+          <label className="text-xs text-muted-foreground">From
+            <Input type="date" value={fromDate} max={toDate} onChange={(e) => setFromDate(e.target.value)} className="mt-1 h-9 text-sm" />
+          </label>
+          <label className="text-xs text-muted-foreground">To
+            <Input type="date" value={toDate} min={fromDate} max={todayIso} onChange={(e) => setToDate(e.target.value)} className="mt-1 h-9 text-sm" />
+          </label>
+          <label className="text-xs text-muted-foreground">WhatsApp source
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="mt-1 h-9 w-full rounded-md border border-input bg-background text-sm px-2"
+            >
+              <option value="">All</option>
+              {knownSources.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </label>
+          <label className="text-xs text-muted-foreground md:col-span-1">Page path contains
+            <Input placeholder="/product/ or /shop" value={pathFilter} onChange={(e) => setPathFilter(e.target.value)} className="mt-1 h-9 text-sm" />
+          </label>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => { setFromDate(d30.toISOString().slice(0,10)); setToDate(todayIso); setSourceFilter(""); setPathFilter(""); }}>Reset</Button>
+            <Button size="sm" variant="outline" onClick={() => { const y = new Date(); y.setDate(y.getDate()-1); const s = y.toISOString().slice(0,10); setFromDate(s); setToDate(s); }}>Yesterday</Button>
+          </div>
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-3">In range: <strong>{rowsInRange.length.toLocaleString()}</strong> page visits · <strong>{waInRange.length.toLocaleString()}</strong> WhatsApp clicks</p>
+      </Card>
+
+      {/* PDF exports toolbar */}
       <Card className="p-5 rounded-3xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Reports</div>
-            <h3 className="font-display font-bold text-lg">Download & AI briefings</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">CSV exports + a plain-English summary written by AI for the owner.</p>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Reports · PDF</div>
+            <h3 className="font-display font-bold text-lg">Download formatted reports</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">All exports respect the date range above. WhatsApp PDF includes recommended product + quantity per click.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline" onClick={exportWhatsApp30d} className="gap-2"><Download size={14} /> WhatsApp clicks (30d)</Button>
-            <Button size="sm" variant="outline" onClick={() => exportTraffic("daily")} className="gap-2"><Download size={14} /> Daily traffic</Button>
-            <Button size="sm" variant="outline" onClick={() => exportTraffic("weekly")} className="gap-2"><Download size={14} /> Weekly</Button>
-            <Button size="sm" variant="outline" onClick={() => exportTraffic("monthly")} className="gap-2"><Download size={14} /> Monthly</Button>
-            <Button size="sm" onClick={generateInsights} disabled={insightsLoading} className="gap-2 bg-foreground hover:bg-foreground/90 text-background">
-              <Sparkles size={14} /> {insightsLoading ? "Generating…" : "AI briefing"}
-            </Button>
+            <Button size="sm" variant="outline" onClick={exportWhatsAppPdf} className="gap-2"><FileText size={14} /> WhatsApp clicks PDF</Button>
+            <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Funnel · daily</Button>
+            <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("weekly")} className="gap-2"><FileText size={14} /> Funnel · weekly</Button>
+            <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("monthly")} className="gap-2"><FileText size={14} /> Funnel · monthly</Button>
           </div>
         </div>
-        {insights && (
-          <div className="mt-5 rounded-2xl bg-muted/40 p-5 text-sm whitespace-pre-wrap leading-relaxed prose prose-sm max-w-none">
-            {insights}
-          </div>
+      </Card>
+
+      {/* Multiple AI analyses */}
+      <Card className="p-5 rounded-3xl">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-primary">AI analyses</div>
+        <h3 className="font-display font-bold text-lg mb-1">Plain-English briefings written by AI</h3>
+        <p className="text-xs text-muted-foreground mb-4">Three angles on the same data — run any of them on demand. Uses the filtered date range above.</p>
+        <div className="grid md:grid-cols-3 gap-3">
+          <InsightCard kind="briefing" title="Owner briefing" blurb="Headline · lead quality · likely orders · opportunities · watch-outs." />
+          <InsightCard kind="conversion" title="Conversion analyst" blurb="Order probability per WhatsApp click + funnel drop-off + 7-day forecast." />
+          <InsightCard kind="products" title="Product picker" blurb="Top 3 to push · underperformers · pricing & stock actions." />
+        </div>
+        {insightsError && (
+          <p className="text-xs text-destructive mt-3">⚠ {insightsError}</p>
         )}
       </Card>
+
+
 
       {/* Funnel — product page / cart / checkout visits */}
       <Card className="p-5 rounded-3xl">
