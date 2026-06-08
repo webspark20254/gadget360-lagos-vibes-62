@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Activity, Eye, MessageCircle, TrendingUp, Users, Download, Sparkles, ShoppingCart, Package } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Activity, Eye, MessageCircle, TrendingUp, Users, Download, Sparkles, ShoppingCart, Package, FileText } from "lucide-react";
 import type { ReactNode } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
 type WaRow = { created_at: string; source: string | null; product_name: string | null; quantity: number | null; total_amount: number | null; country?: string | null; country_code?: string | null };
+type InsightKind = "briefing" | "conversion" | "products";
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
