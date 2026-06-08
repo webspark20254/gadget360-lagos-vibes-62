@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Activity, Eye, MessageCircle, TrendingUp, Users, Download, Sparkles, ShoppingCart, Package, FileText } from "lucide-react";
+import { Activity, Eye, MessageCircle, TrendingUp, Users, Sparkles, ShoppingCart, Package, FileText } from "lucide-react";
 import type { ReactNode } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 import { useToast } from "@/hooks/use-toast";
