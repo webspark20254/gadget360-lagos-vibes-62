@@ -318,6 +318,19 @@ const GeminiChat = () => {
                       WhatsApp will be prefilled with: <span className="font-semibold text-foreground">{(recommended || pageProduct)!.name}</span>
                     </p>
                   )}
+                  {aiFailed && (
+                    <div className="rounded-xl bg-muted/60 border border-border p-2.5">
+                      <p className="text-[10px] text-muted-foreground mb-1.5">AI is offline — drop your phone so our team can reach you on WhatsApp:</p>
+                      <Input
+                        type="tel"
+                        inputMode="tel"
+                        placeholder="e.g. 0810 841 8727"
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        className="h-9 rounded-full text-sm"
+                      />
+                    </div>
+                  )}
                   <a
                     href={handoffUrl}
                     target="_blank"
