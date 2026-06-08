@@ -58,6 +58,8 @@ const GeminiChat = () => {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string>("");
   const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [aiFailed, setAiFailed] = useState(false); // graceful fallback flag — show phone capture
   const [nameSet, setNameSet] = useState(false);
   const [recommended, setRecommended] = useState<{ name: string; price: number } | null>(null);
   const [pageProduct, setPageProduct] = useState<{ name: string; price: number; category: string | null } | null>(null);
