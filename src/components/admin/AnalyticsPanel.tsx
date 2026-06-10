@@ -58,7 +58,7 @@ const AnalyticsPanel = () => {
         .limit(5000),
       supabase
         .from("whatsapp_clicks")
-        .select("created_at, source, product_name, quantity, total_amount, country, country_code")
+        .select("created_at, path, session_id, source, product_name, quantity, total_amount, country, country_code")
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: false })
         .limit(2000),
