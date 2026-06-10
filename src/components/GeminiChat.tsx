@@ -190,10 +190,8 @@ const GeminiChat = () => {
     const nameLine = customerName ? `My name is ${customerName}.` : "";
     if (target) {
       // Build a context-rich order message with phone callback when present.
-      const base = waOrderUrl(target.name, target.price, 1);
-      if (!phoneLine && !nameLine) return base;
-      const extra = encodeURIComponent(`\n\n${nameLine}${phoneLine}`.trim());
-      return `${base}${extra}`;
+      const note = `${nameLine}${phoneLine}`.trim();
+      return waOrderUrl(target.name, target.price, 1, note || undefined);
     }
     const msg = nameLine
       ? `${nameLine} I have a question.${phoneLine}`
