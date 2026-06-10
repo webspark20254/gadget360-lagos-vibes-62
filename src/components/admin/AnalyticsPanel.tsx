@@ -606,6 +606,43 @@ const AnalyticsPanel = () => {
       <Card className="p-5 rounded-3xl">
         <div className="flex items-center justify-between mb-3">
           <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Daily shopper data</div>
+            <h3 className="font-display font-bold text-xl">Browse → product → cart → WhatsApp</h3>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Daily PDF</Button>
+        </div>
+        <div className="overflow-x-auto -mx-2">
+          <table className="w-full text-xs">
+            <thead className="text-muted-foreground">
+              <tr className="text-left">
+                <th className="px-2 py-1.5 font-medium">Day</th>
+                <th className="px-2 py-1.5 font-medium text-right">Shop</th>
+                <th className="px-2 py-1.5 font-medium text-right">Product</th>
+                <th className="px-2 py-1.5 font-medium text-right">Cart</th>
+                <th className="px-2 py-1.5 font-medium text-right">WhatsApp</th>
+                <th className="px-2 py-1.5 font-medium text-right">Likely orders</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dailyShopperData.map((d) => (
+                <tr key={d.label} className="border-t border-border/60">
+                  <td className="px-2 py-1.5 whitespace-nowrap font-medium">{d.label}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{d.shop}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{d.product}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{d.cart}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums">{d.handoff}</td>
+                  <td className="px-2 py-1.5 text-right tabular-nums font-semibold">{d.likely}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+
+      <Card className="p-5 rounded-3xl">
+        <div className="flex items-center justify-between mb-3">
+          <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Daily traffic</div>
             <h3 className="font-display font-bold text-xl">Last 14 days</h3>
           </div>
