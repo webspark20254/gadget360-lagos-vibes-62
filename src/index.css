@@ -172,6 +172,21 @@
     box-shadow: 0 18px 50px -18px hsl(0 0% 0% / 0.18);
   }
 
+  @media (max-width: 768px) {
+    /* High-DPR Android Chrome can render backdrop-filter layers as horizontal
+       red/black “TV static” bands while scrolling. Keep the visual style, but
+       remove live blur/compositor effects on mobile surfaces. */
+    .glass,
+    .glass-strong,
+    [class*="backdrop-blur"] {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+    header[class*="backdrop-blur"] {
+      background-color: hsl(var(--background) / 0.96) !important;
+    }
+  }
+
   .text-balance { text-wrap: balance; }
   .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
   .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -200,5 +215,6 @@
     /* Mobile: disable entirely — every extra composited layer at dpr 2.75+
        costs frames and can re-introduce flicker. */
     .grain::before { display: none; }
+    .bg-gradient-warm { background: hsl(var(--background)); }
   }
 }
