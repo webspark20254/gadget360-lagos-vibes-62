@@ -45,6 +45,8 @@ const AnalyticsPanel = () => {
   const [toDate, setToDate] = useState<string>(todayIso);
   const [sourceFilter, setSourceFilter] = useState<string>("");
   const [pathFilter, setPathFilter] = useState<string>("");
+  const [seoChecks, setSeoChecks] = useState<SeoCheck[]>([]);
+  const [seoChecking, setSeoChecking] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
