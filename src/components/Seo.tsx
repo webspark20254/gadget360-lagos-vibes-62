@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import type { Json } from "@/integrations/supabase/types";
 
 interface SeoProps {
   title: string;
@@ -6,12 +7,13 @@ interface SeoProps {
   canonical?: string;
   image?: string;
   type?: "website" | "article" | "product";
-  jsonLd?: Record<string, any> | Record<string, any>[];
+  robots?: string;
+  jsonLd?: Record<string, Json> | Record<string, Json>[];
 }
 
 const SITE = "https://gadget360.ng";
 
-const Seo = ({ title, description, canonical, image = "/favicon.png", type = "website", jsonLd }: SeoProps) => {
+const Seo = ({ title, description, canonical, image = "/favicon.png", type = "website", robots = "index, follow, max-image-preview:large", jsonLd }: SeoProps) => {
   const url = canonical?.startsWith("http") ? canonical : `${SITE}${canonical || ""}`;
   const absImage = image.startsWith("http") ? image : `${SITE}${image.startsWith("/") ? image : `/${image}`}`;
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
@@ -19,6 +21,7 @@ const Seo = ({ title, description, canonical, image = "/favicon.png", type = "we
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="robots" content={robots} />
       <link rel="canonical" href={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
