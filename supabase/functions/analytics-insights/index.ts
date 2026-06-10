@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp"];
+const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
 
 async function callGemini(key: string, body: unknown): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
   let lastErr = "no models tried";
@@ -56,14 +56,41 @@ METRICS:
 ${JSON.stringify(m, null, 2)}`,
 };
 
+function safeNum(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function localInsight(metrics: any, kind: string): string {
+  const visits = metrics?.visits || {};
+  const funnel = metrics?.funnel_30d || {};
+  const wa = metrics?.whatsapp_30d || {};
+  const estimated = metrics?.estimated || {};
+  const inRange = safeNum(visits.in_range);
+  const waClicks = safeNum(wa.total_clicks);
+  const withProduct = safeNum(wa.with_product);
+  const leadRate = safeNum(estimated.lead_rate_percent);
+  const likely = safeNum(estimated.estimated_orders);
+  const productRate = waClicks ? Math.round((withProduct / waClicks) * 100) : 0;
+  const drop = safeNum(funnel.product_pages) > safeNum(funnel.cart) ? "product page → cart" : "shop → product page";
+
+  if (kind === "conversion") {
+    return `**Conversion snapshot**\n\n- WhatsApp handoffs in the last 30 days: **${waClicks}**.\n- Product-attached clicks: **${productRate}%** of WhatsApp leads; these are the strongest buying signals.\n- Main drop-off appears around **${drop}**.\n- Likely orders estimate: **${likely}** with a lead rate around **${leadRate}%**.\n\nAI model is temporarily unavailable, so this is a rules-based briefing from live dashboard data.`;
+  }
+  if (kind === "products") {
+    const products = (metrics?.whatsapp_in_range || []).filter((r: any) => r.product).slice(0, 3).map((r: any) => r.product);
+    return `**Product actions**\n\n- Push: ${products.length ? products.map((p: string) => `**${p}**`).join(", ") : "the products already getting WhatsApp clicks"}.\n- Improve pages with views but no WhatsApp clicks by adding clearer warranty, delivery and availability copy.\n- Prioritise products with named WhatsApp leads because they show stronger purchase intent.\n\nAI model is temporarily unavailable, so this is a rules-based briefing from live dashboard data.`;
+  }
+  return `**Owner briefing**\n\n- Traffic in selected range: **${inRange}** visits.\n- Last 30 days: **${safeNum(visits.last_30d)}** visits, **${waClicks}** WhatsApp handoffs.\n- Likely orders: **${likely}** based on product-attached vs general WhatsApp clicks.\n- Opportunity: increase product-page handoffs with clearer “Buy on WhatsApp” prompts and product-specific messages.\n\nAI model is temporarily unavailable, so this is a reliable rules-based briefing from live dashboard data.`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
     const { metrics, kind = "briefing" } = await req.json();
     const key = Deno.env.get("GEMINI_API_KEY");
     if (!key) {
-      return new Response(JSON.stringify({ error: "GEMINI_API_KEY not configured on the server." }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ insights: localInsight(metrics, kind), kind, fallback: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     const buildPrompt = PROMPTS[kind] || PROMPTS.briefing;
@@ -73,8 +100,8 @@ serve(async (req) => {
     });
 
     if (!result.ok) {
-      return new Response(JSON.stringify({ error: `AI unavailable: ${result.error}` }), {
-        status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ insights: localInsight(metrics, kind), kind, fallback: true, warning: result.error }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     return new Response(JSON.stringify({ insights: result.text, kind }), {
