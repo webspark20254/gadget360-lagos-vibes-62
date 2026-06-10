@@ -163,6 +163,27 @@ const AnalyticsPanel = () => {
   // gadget sales via WhatsApp — used as a conservative estimator only.
   const waWithProduct = waRows.filter((r) => new Date(r.created_at) >= last30 && r.product_name).length;
   const estimatedOrders = Math.round(waWithProduct * 0.65 + (waMonth - waWithProduct) * 0.2);
+  const yesterdayStart = new Date(today); yesterdayStart.setDate(today.getDate() - 1);
+  const yesterdayEnd = endOfDay(yesterdayStart);
+
+  const buildFunnelRow = (label: string, start: Date, end: Date) => {
+    const periodRows = rows.filter((r) => inWindow(r.created_at, start, end));
+    const periodWa = waRows.filter((r) => inWindow(r.created_at, start, end));
+    return {
+      label,
+      shop: periodRows.filter((r) => r.path.startsWith("/shop")).length,
+      product: periodRows.filter((r) => r.path.startsWith("/product/")).length,
+      cart: periodRows.filter((r) => r.path.startsWith("/cart")).length,
+      handoff: periodWa.length,
+      likely: likelyOrdersFrom(periodWa),
+      visits: periodRows.length,
+    };
+  };
+
+  const dailyShopperData = Array.from({ length: 14 }, (_, idx) => {
+    const d = new Date(today); d.setDate(today.getDate() - (13 - idx));
+    return buildFunnelRow(fmtDay(d), d, endOfDay(d));
+  });
 
   // ---- Date-range filtered views (drives custom-range PDF exports + tables) ----
   const fromTs = useMemo(() => new Date(`${fromDate}T00:00:00`), [fromDate]);
