@@ -582,6 +582,19 @@ const AnalyticsPanel = () => {
         )}
       </Card>
 
+      <Card className="p-5 rounded-3xl">
+        <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Lead growth suggestions</div>
+        <h3 className="font-display font-bold text-lg mb-3">Next moves from today’s funnel</h3>
+        <div className="grid md:grid-cols-3 gap-3">
+          {growthSuggestions.map((item, i) => (
+            <div key={item} className="rounded-2xl bg-muted/30 border border-border p-3">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">Action {i + 1}</div>
+              <p className="text-sm leading-relaxed">{item}</p>
+            </div>
+          ))}
+        </div>
+      </Card>
+
 
 
       {/* Funnel — product page / cart / checkout visits */}
