@@ -311,10 +311,6 @@ const AnalyticsPanel = () => {
 
   const exportYesterdayFunnelPdf = () => {
     const y = yesterdayStart.toISOString().slice(0, 10);
-    const previousFrom = fromDate;
-    const previousTo = toDate;
-    setFromDate(y);
-    setToDate(y);
     const doc = new jsPDF({ unit: "pt", format: "a4" });
     const row = buildFunnelRow("Yesterday", yesterdayStart, yesterdayEnd);
     const clicks = waRows.filter((r) => inWindow(r.created_at, yesterdayStart, yesterdayEnd));
@@ -347,8 +343,6 @@ const AnalyticsPanel = () => {
       alternateRowStyles: { fillColor: [248, 246, 240] },
     });
     doc.save(`yesterday-funnel-${y}.pdf`);
-    setFromDate(previousFrom);
-    setToDate(previousTo);
     toast({ title: "Yesterday PDF ready", description: "Downloaded the one-click funnel report." });
   };
 
