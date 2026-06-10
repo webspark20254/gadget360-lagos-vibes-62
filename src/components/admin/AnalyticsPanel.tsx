@@ -518,12 +518,41 @@ const AnalyticsPanel = () => {
             <p className="text-xs text-muted-foreground mt-0.5">All exports respect the date range above. WhatsApp PDF includes recommended product + quantity per click.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button size="sm" onClick={exportYesterdayFunnelPdf} className="gap-2 bg-foreground hover:bg-foreground/90 text-background"><FileText size={14} /> Yesterday PDF</Button>
             <Button size="sm" variant="outline" onClick={exportWhatsAppPdf} className="gap-2"><FileText size={14} /> WhatsApp clicks PDF</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Funnel · daily</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("weekly")} className="gap-2"><FileText size={14} /> Funnel · weekly</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("monthly")} className="gap-2"><FileText size={14} /> Funnel · monthly</Button>
           </div>
         </div>
+      </Card>
+
+      <Card className="p-5 rounded-3xl">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">SEO health</div>
+            <h3 className="font-display font-bold text-lg">Sitemap & indexability check</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">Live XML sitemap: <a href={SITEMAP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline inline-flex items-center gap-1">open sitemap <ExternalLink size={11} /></a></p>
+          </div>
+          <Button size="sm" onClick={runSeoCheck} disabled={seoChecking} variant="outline" className="gap-2">
+            <SearchCheck size={14} /> {seoChecking ? "Checking…" : "Run SEO check"}
+          </Button>
+        </div>
+        {seoChecks.length > 0 && (
+          <div className="grid md:grid-cols-2 gap-2 mt-4">
+            {seoChecks.map((c) => (
+              <div key={c.label} className="rounded-2xl border border-border bg-muted/30 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-xs font-semibold">{c.label}</div>
+                  <span className={`text-[10px] uppercase tracking-[0.18em] ${c.status === "pass" ? "text-success" : c.status === "warn" ? "text-primary" : "text-destructive"}`}>{c.status}</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{c.detail}</p>
+                {c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-[11px] text-primary hover:underline mt-1 inline-flex items-center gap-1">View <ExternalLink size={10} /></a>}
+              </div>
+            ))}
+          </div>
+        )}
+        <p className="text-[11px] text-muted-foreground mt-3 inline-flex gap-1.5"><AlertTriangle size={12} className="mt-0.5 shrink-0" /> Social apps may still read the static fallback head because this is a client-rendered app; Google indexing sees the per-product Helmet tags.</p>
       </Card>
 
       {/* Multiple AI analyses */}
