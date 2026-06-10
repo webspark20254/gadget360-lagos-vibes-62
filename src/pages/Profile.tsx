@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { ReactNode } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +25,8 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type Review = Database["public"]["Tables"]["product_reviews"]["Row"] & { product?: { id: string; name: string; image_url: string | null } | null };
 type Testimonial = Database["public"]["Tables"]["testimonials"]["Row"];
+type ReviewProduct = { id: string; name: string; image_url: string | null };
+const getMessage = (error: unknown, fallback = "Something went wrong") => error instanceof Error ? error.message : fallback;
 
 const statusTone: Record<string, string> = {
   completed: "bg-success text-success-foreground",
@@ -64,7 +67,7 @@ const Profile = () => {
 
       // attach product info
       const ids = [...new Set((r || []).map((x) => x.product_id))];
-      let prodMap: Record<string, any> = {};
+      let prodMap: Record<string, ReviewProduct> = {};
       if (ids.length) {
         const { data: prods } = await supabase.from("products").select("id, name, image_url").in("id", ids);
         prodMap = Object.fromEntries((prods || []).map((p) => [p.id, p]));
@@ -84,8 +87,8 @@ const Profile = () => {
         .eq("user_id", user.id);
       if (error) throw error;
       toast({ title: "Saved", description: "Profile updated." });
-    } catch (e: any) {
-      toast({ title: "Error", description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      toast({ title: "Error", description: getMessage(e), variant: "destructive" });
     } finally { setUpdating(false); }
   };
 
@@ -111,8 +114,8 @@ const Profile = () => {
       if (updateError) throw updateError;
       setProfile((p) => p ? { ...p, avatar_url } : p);
       toast({ title: "Avatar updated", description: "Your profile photo is now live." });
-    } catch (e: any) {
-      toast({ title: "Upload failed", description: e.message || "Please try a different image.", variant: "destructive" });
+    } catch (e: unknown) {
+      toast({ title: "Upload failed", description: getMessage(e, "Please try a different image."), variant: "destructive" });
     } finally { setUploading(false); }
   };
 
@@ -376,7 +379,7 @@ const Profile = () => {
   );
 };
 
-const EmptyState = ({ icon, title, body, onPrimary, primary }: any) => (
+const EmptyState = ({ icon, title, body, onPrimary, primary }: { icon: ReactNode; title: string; body: string; onPrimary: () => void; primary: string }) => (
   <div className="rounded-[28px] border border-dashed border-border bg-card p-10 md:p-16 text-center">
     <div className="mx-auto h-16 w-16 rounded-2xl bg-muted grid place-items-center mb-4 text-muted-foreground">{icon}</div>
     <h3 className="font-display font-bold text-2xl">{title}</h3>
