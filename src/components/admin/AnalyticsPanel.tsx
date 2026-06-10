@@ -283,16 +283,23 @@ const AnalyticsPanel = () => {
       headStyles: { fillColor: [20, 20, 20], textColor: 255 },
     });
 
-    const series = granularity === "daily" ? daily : granularity === "weekly" ? weekly : monthly;
-    // Per-period funnel — group rows + WA in each bucket so the owner sees movement
-    const bucketed = series.map((s) => {
-      // Re-derive bucket window from label index, using the same logic as the series.
-      return { period: s.label, visits: s.visits };
-    });
+    const bucketed = granularity === "daily"
+      ? dailyShopperData
+      : granularity === "weekly"
+        ? Array.from({ length: 8 }, (_, idx) => {
+            const end = new Date(today); end.setDate(today.getDate() - (7 - idx) * 7);
+            const start = new Date(end); start.setDate(end.getDate() - 6);
+            return buildFunnelRow(fmtWeek(end), start, endOfDay(end));
+          })
+        : Array.from({ length: 6 }, (_, idx) => {
+            const start = new Date(today.getFullYear(), today.getMonth() - (5 - idx), 1);
+            const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+            return buildFunnelRow(fmtMonth(start), start, endOfDay(end));
+          });
 
     autoTable(doc, {
-      head: [[`Period (${granularity})`, "Total visits"]],
-      body: bucketed.map((b) => [b.period, b.visits.toLocaleString()]),
+      head: [[`Period (${granularity})`, "Shop", "Product", "Cart", "WhatsApp", "Likely orders"]],
+      body: bucketed.map((b) => [b.label, b.shop.toLocaleString(), b.product.toLocaleString(), b.cart.toLocaleString(), b.handoff.toLocaleString(), b.likely.toLocaleString()]),
       styles: { fontSize: 10, cellPadding: 6 },
       headStyles: { fillColor: [185, 28, 38], textColor: 255 },
       alternateRowStyles: { fillColor: [248, 246, 240] },
@@ -300,6 +307,49 @@ const AnalyticsPanel = () => {
 
     doc.save(`funnel-${granularity}-${todayIso}.pdf`);
     toast({ title: "PDF ready", description: `${granularity} funnel report exported.` });
+  };
+
+  const exportYesterdayFunnelPdf = () => {
+    const y = yesterdayStart.toISOString().slice(0, 10);
+    const previousFrom = fromDate;
+    const previousTo = toDate;
+    setFromDate(y);
+    setToDate(y);
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const row = buildFunnelRow("Yesterday", yesterdayStart, yesterdayEnd);
+    const clicks = waRows.filter((r) => inWindow(r.created_at, yesterdayStart, yesterdayEnd));
+    pdfHeader(doc, "Yesterday funnel report", `${y} · current store tracking · generated ${new Date().toLocaleString()}`);
+    autoTable(doc, {
+      startY: 120,
+      head: [["Stage", "Count", "Meaning"]],
+      body: [
+        ["Shop views", row.shop.toLocaleString(), "Visitors who browsed the catalogue"],
+        ["Product views", row.product.toLocaleString(), "Visitors who opened product detail pages"],
+        ["Cart visits", row.cart.toLocaleString(), "Visitors who viewed cart"],
+        ["WhatsApp handoffs", row.handoff.toLocaleString(), "Order/message button taps from the site"],
+        ["Likely orders", row.likely.toLocaleString(), "Estimated from product-attached vs general WhatsApp clicks"],
+      ],
+      styles: { fontSize: 10, cellPadding: 6 },
+      headStyles: { fillColor: [20, 20, 20], textColor: 255 },
+    });
+    autoTable(doc, {
+      head: [["When", "Source", "Page", "Recommended product", "Qty", "Amount"]],
+      body: clicks.slice(0, 80).map((r) => [
+        new Date(r.created_at).toLocaleString(),
+        r.source || "—",
+        r.path || "—",
+        r.product_name || "—",
+        r.quantity ?? "—",
+        r.total_amount != null ? Number(r.total_amount).toLocaleString() : "—",
+      ]),
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [185, 28, 38], textColor: 255 },
+      alternateRowStyles: { fillColor: [248, 246, 240] },
+    });
+    doc.save(`yesterday-funnel-${y}.pdf`);
+    setFromDate(previousFrom);
+    setToDate(previousTo);
+    toast({ title: "Yesterday PDF ready", description: "Downloaded the one-click funnel report." });
   };
 
   const generateInsights = async (kind: InsightKind) => {
