@@ -19,6 +19,7 @@ const Seo = ({ title, description, canonical, image = "/favicon.png", type = "we
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="robots" content="index, follow, max-image-preview:large" />
       <link rel="canonical" href={url} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
