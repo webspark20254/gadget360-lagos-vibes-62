@@ -160,6 +160,7 @@ const GeminiChat = () => {
       if (error) throw new Error(error.message);
       const text: string = data?.response || "I'm having trouble. Tap Continue on WhatsApp to reach our team instantly.";
       if (data?.recommendedProduct?.name) setRecommended(data.recommendedProduct);
+      setAiFailed(Boolean(data?.fallback));
       setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text, isBot: true, timestamp: new Date() }]);
     } catch {
       // Graceful AI fallback: surface a phone-capture prompt so the owner can still
