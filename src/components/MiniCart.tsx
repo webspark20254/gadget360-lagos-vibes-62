@@ -98,9 +98,9 @@ const MiniCart = () => {
 
   if (!user) {
     return (
-      <button onClick={() => navigate("/auth")} className="contents">
-        {trigger}
-      </button>
+      <Button variant="ghost" size="icon" onClick={() => navigate("/auth")} className="relative rounded-full h-9 w-9" aria-label="Sign in to view cart">
+        <ShoppingCart className="h-4 w-4" />
+      </Button>
     );
   }
 

@@ -185,6 +185,17 @@ const AnalyticsPanel = () => {
     const d = new Date(today); d.setDate(today.getDate() - (13 - idx));
     return buildFunnelRow(fmtDay(d), d, endOfDay(d));
   });
+  const growthSuggestions = [
+    productPageVisits > cartVisits * 3
+      ? "Add a stronger product-page WhatsApp prompt near warranty/delivery details."
+      : "Keep product-page CTAs stable; current product-to-cart movement is healthy.",
+    waWithProduct < Math.max(1, waMonth * 0.6)
+      ? "Make every WhatsApp handoff product-specific so the team sees item name, quantity and page source."
+      : "Product-specific WhatsApp handoffs are working; push the top clicked products harder this week.",
+    shopVisits > 0 && productPageVisits < shopVisits * 0.5
+      ? "Feature 3 high-margin products higher on the shop page to move more browsers into product detail pages."
+      : "Shop visitors are opening products; improve lead capture with limited-stock badges and delivery reassurance.",
+  ];
 
   // ---- Date-range filtered views (drives custom-range PDF exports + tables) ----
   const fromTs = useMemo(() => new Date(`${fromDate}T00:00:00`), [fromDate]);
