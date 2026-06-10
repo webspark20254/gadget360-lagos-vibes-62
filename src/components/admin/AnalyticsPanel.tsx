@@ -346,6 +346,72 @@ const AnalyticsPanel = () => {
     toast({ title: "Yesterday PDF ready", description: "Downloaded the one-click funnel report." });
   };
 
+  const runSeoCheck = async () => {
+    setSeoChecking(true);
+    try {
+      const checks: SeoCheck[] = [];
+      const [robotsRes, sitemapRes, productsRes] = await Promise.all([
+        fetch("/robots.txt", { cache: "no-store" }),
+        fetch(SITEMAP_URL, { cache: "no-store" }),
+        supabase.from("products").select("id, name, meta_title, meta_description, image_url").limit(30),
+      ]);
+
+      const robots = robotsRes.ok ? await robotsRes.text() : "";
+      checks.push({
+        label: "Robots access",
+        status: robotsRes.ok && !/Disallow:\s*\//i.test(robots) ? "pass" : "fail",
+        detail: robotsRes.ok ? "robots.txt allows public crawling." : "robots.txt could not be loaded.",
+        url: `${SITE_URL}/robots.txt`,
+      });
+      checks.push({
+        label: "Sitemap exposed",
+        status: robots.includes(SITEMAP_URL) ? "pass" : "warn",
+        detail: robots.includes(SITEMAP_URL) ? "robots.txt points to the live XML sitemap." : "robots.txt loaded, but the live sitemap URL was not listed.",
+        url: SITEMAP_URL,
+      });
+
+      const sitemap = sitemapRes.ok ? await sitemapRes.text() : "";
+      const productRows = (productsRes.data || []) as Array<{ id: string; name: string; meta_title: string | null; meta_description: string | null; image_url: string | null }>;
+      const productUrlsInSitemap = (sitemap.match(/\/product\//g) || []).length;
+      checks.push({
+        label: "Product sitemap URLs",
+        status: sitemapRes.ok && productUrlsInSitemap > 0 ? "pass" : "fail",
+        detail: sitemapRes.ok ? `${productUrlsInSitemap} product detail URLs found in the XML sitemap.` : "The XML sitemap could not be loaded.",
+        url: SITEMAP_URL,
+      });
+      const sample = productRows[0];
+      if (sample) {
+        const routeRes = await fetch(`/product/${sample.id}`, { cache: "no-store" });
+        const missingMeta = productRows.filter((p) => !p.meta_title?.trim() || !p.meta_description?.trim()).length;
+        const missingImages = productRows.filter((p) => !p.image_url).length;
+        checks.push({
+          label: "Product page route",
+          status: routeRes.ok ? "pass" : "fail",
+          detail: routeRes.ok ? `A product detail page is reachable: ${sample.name}.` : "Product detail route did not return a valid page.",
+          url: `${SITE_URL}/product/${sample.id}`,
+        });
+        checks.push({
+          label: "Product meta fields",
+          status: missingMeta === 0 ? "pass" : "warn",
+          detail: missingMeta === 0 ? "Checked products have unique admin meta titles/descriptions." : `${missingMeta} of ${productRows.length} checked products are using fallback SEO metadata.`,
+        });
+        checks.push({
+          label: "Product images",
+          status: missingImages === 0 ? "pass" : "warn",
+          detail: missingImages === 0 ? "Checked products have images for Open Graph previews." : `${missingImages} checked products are missing image URLs.`,
+        });
+      } else {
+        checks.push({ label: "Product pages", status: "warn", detail: "No products were returned for checking." });
+      }
+      setSeoChecks(checks);
+      toast({ title: "SEO check complete", description: `${checks.filter((c) => c.status === "pass").length}/${checks.length} checks passed.` });
+    } catch (e: any) {
+      toast({ title: "SEO check failed", description: e.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setSeoChecking(false);
+    }
+  };
+
   const generateInsights = async (kind: InsightKind) => {
     setInsightsLoading(kind);
     setInsightsError("");
