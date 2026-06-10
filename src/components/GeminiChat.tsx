@@ -74,7 +74,9 @@ const GeminiChat = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved);
-    } catch {}
+    } catch {
+      localStorage.removeItem(STORAGE_KEY);
+    }
     return { x: 20, y: 20 };
   });
   const dragRef = useRef<{ active: boolean; sx: number; sy: number; ox: number; oy: number; moved: boolean }>({
@@ -113,7 +115,9 @@ const GeminiChat = () => {
   };
   const onPointerUp = () => {
     if (dragRef.current.active) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pos)); } catch {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pos)); } catch {
+        localStorage.removeItem(STORAGE_KEY);
+      }
       const wasMoved = dragRef.current.moved;
       dragRef.current.active = false;
       if (!wasMoved) setIsOpen(true);
@@ -198,7 +202,10 @@ const GeminiChat = () => {
   })();
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") nameSet ? handleSendMessage() : handleNameSubmit();
+    if (e.key === "Enter") {
+      if (nameSet) handleSendMessage();
+      else handleNameSubmit();
+    }
   };
 
   return (

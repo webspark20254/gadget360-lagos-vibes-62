@@ -60,7 +60,16 @@ function safeNum(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-function localInsight(metrics: any, kind: string): string {
+type MetricLeaf = Record<string, unknown>;
+type LocalMetrics = {
+  visits?: MetricLeaf;
+  funnel_30d?: MetricLeaf;
+  whatsapp_30d?: MetricLeaf;
+  estimated?: MetricLeaf;
+  whatsapp_in_range?: Array<{ product?: string | null }>;
+};
+
+function localInsight(metrics: LocalMetrics, kind: string): string {
   const visits = metrics?.visits || {};
   const funnel = metrics?.funnel_30d || {};
   const wa = metrics?.whatsapp_30d || {};
@@ -77,7 +86,7 @@ function localInsight(metrics: any, kind: string): string {
     return `**Conversion snapshot**\n\n- WhatsApp handoffs in the last 30 days: **${waClicks}**.\n- Product-attached clicks: **${productRate}%** of WhatsApp leads; these are the strongest buying signals.\n- Main drop-off appears around **${drop}**.\n- Likely orders estimate: **${likely}** with a lead rate around **${leadRate}%**.\n\nAI model is temporarily unavailable, so this is a rules-based briefing from live dashboard data.`;
   }
   if (kind === "products") {
-    const products = (metrics?.whatsapp_in_range || []).filter((r: any) => r.product).slice(0, 3).map((r: any) => r.product);
+    const products = (metrics?.whatsapp_in_range || []).filter((r) => r.product).slice(0, 3).map((r) => r.product as string);
     return `**Product actions**\n\n- Push: ${products.length ? products.map((p: string) => `**${p}**`).join(", ") : "the products already getting WhatsApp clicks"}.\n- Improve pages with views but no WhatsApp clicks by adding clearer warranty, delivery and availability copy.\n- Prioritise products with named WhatsApp leads because they show stronger purchase intent.\n\nAI model is temporarily unavailable, so this is a rules-based briefing from live dashboard data.`;
   }
   return `**Owner briefing**\n\n- Traffic in selected range: **${inRange}** visits.\n- Last 30 days: **${safeNum(visits.last_30d)}** visits, **${waClicks}** WhatsApp handoffs.\n- Likely orders: **${likely}** based on product-attached vs general WhatsApp clicks.\n- Opportunity: increase product-page handoffs with clearer “Buy on WhatsApp” prompts and product-specific messages.\n\nAI model is temporarily unavailable, so this is a reliable rules-based briefing from live dashboard data.`;

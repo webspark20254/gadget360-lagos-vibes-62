@@ -30,6 +30,7 @@ const inWindow = (createdAt: string, start: Date, end: Date) => {
 const likelyOrdersFrom = (clicks: WaRow[]) => Math.round(
   clicks.filter((r) => r.product_name).length * 0.65 + clicks.filter((r) => !r.product_name).length * 0.2,
 );
+const messageFrom = (error: unknown, fallback = "Please try again.") => error instanceof Error ? error.message : fallback;
 
 const AnalyticsPanel = () => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -155,7 +156,7 @@ const AnalyticsPanel = () => {
 
   // Lead-quality score: % of unique sessions that produced a WhatsApp click in last 30d
   const sessionsWithWa = new Set(
-    waRows.filter((r) => new Date(r.created_at) >= last30 && (r as any).session_id).map((r: any) => r.session_id),
+    waRows.filter((r) => new Date(r.created_at) >= last30 && r.session_id).map((r) => r.session_id),
   ).size;
   const leadRate = uniqueSessions > 0 ? Math.round((waMonth / Math.max(1, uniqueSessions)) * 100) : 0;
   // AI-aided probability: a WhatsApp click that names a product is a much stronger
@@ -405,8 +406,8 @@ const AnalyticsPanel = () => {
       }
       setSeoChecks(checks);
       toast({ title: "SEO check complete", description: `${checks.filter((c) => c.status === "pass").length}/${checks.length} checks passed.` });
-    } catch (e: any) {
-      toast({ title: "SEO check failed", description: e.message || "Please try again.", variant: "destructive" });
+    } catch (e: unknown) {
+      toast({ title: "SEO check failed", description: messageFrom(e), variant: "destructive" });
     } finally {
       setSeoChecking(false);
     }
@@ -430,8 +431,8 @@ const AnalyticsPanel = () => {
       if (error) throw new Error(error.message);
       if (!data?.insights) throw new Error(data?.error || "No insights returned");
       setInsights((p) => ({ ...p, [kind]: data.insights as string }));
-    } catch (e: any) {
-      const msg = e?.message || "AI service unavailable. Try again shortly.";
+    } catch (e: unknown) {
+      const msg = messageFrom(e, "AI service unavailable. Try again shortly.");
       setInsightsError(msg);
       toast({ title: "Couldn't generate insights", description: msg, variant: "destructive" });
     } finally {

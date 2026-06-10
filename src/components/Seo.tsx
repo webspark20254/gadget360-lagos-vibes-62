@@ -1,4 +1,5 @@
 import { Helmet } from "react-helmet-async";
+import type { Json } from "@/integrations/supabase/types";
 
 interface SeoProps {
   title: string;
@@ -7,7 +8,7 @@ interface SeoProps {
   image?: string;
   type?: "website" | "article" | "product";
   robots?: string;
-  jsonLd?: Record<string, any> | Record<string, any>[];
+  jsonLd?: Record<string, Json> | Record<string, Json>[];
 }
 
 const SITE = "https://gadget360.ng";
