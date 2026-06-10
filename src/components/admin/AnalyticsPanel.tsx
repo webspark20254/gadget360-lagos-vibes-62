@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Activity, Eye, MessageCircle, TrendingUp, Users, Sparkles, ShoppingCart, Package, FileText } from "lucide-react";
+import { Activity, Eye, MessageCircle, TrendingUp, Users, Sparkles, ShoppingCart, Package, FileText, ExternalLink, SearchCheck, AlertTriangle } from "lucide-react";
 import type { ReactNode } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -11,13 +11,25 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
-type WaRow = { created_at: string; source: string | null; product_name: string | null; quantity: number | null; total_amount: number | null; country?: string | null; country_code?: string | null };
+type WaRow = { created_at: string; path: string; session_id: string | null; source: string | null; product_name: string | null; quantity: number | null; total_amount: number | null; country?: string | null; country_code?: string | null };
 type InsightKind = "briefing" | "conversion" | "products";
+type SeoCheck = { label: string; status: "pass" | "warn" | "fail"; detail: string; url?: string };
+
+const SITEMAP_URL = "https://yasicaakzqqhmtgscbhg.supabase.co/functions/v1/sitemap";
+const SITE_URL = "https://gadget360.ng";
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 const fmtWeek = (d: Date) => `W${Math.ceil(((+d - +new Date(d.getFullYear(),0,1)) / 86400000 + 1) / 7)}`;
 const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+const endOfDay = (d: Date) => { const x = new Date(d); x.setHours(23,59,59,999); return x; };
+const inWindow = (createdAt: string, start: Date, end: Date) => {
+  const t = new Date(createdAt);
+  return t >= start && t <= end;
+};
+const likelyOrdersFrom = (clicks: WaRow[]) => Math.round(
+  clicks.filter((r) => r.product_name).length * 0.65 + clicks.filter((r) => !r.product_name).length * 0.2,
+);
 
 const AnalyticsPanel = () => {
   const [rows, setRows] = useState<Row[]>([]);
