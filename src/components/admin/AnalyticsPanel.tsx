@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Activity, Eye, MessageCircle, TrendingUp, Users, Sparkles, ShoppingCart, Package, FileText, ExternalLink, SearchCheck, AlertTriangle } from "lucide-react";
+import { Activity, Eye, MessageCircle, TrendingUp, Users, Sparkles, ShoppingCart, Package, FileText } from "lucide-react";
 import type { ReactNode } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, LineChart } from "recharts";
 import { useToast } from "@/hooks/use-toast";
@@ -11,26 +11,13 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 type Row = { created_at: string; path: string; session_id: string | null; country?: string | null; country_code?: string | null; city?: string | null };
-type WaRow = { created_at: string; path: string; session_id: string | null; source: string | null; product_name: string | null; quantity: number | null; total_amount: number | null; country?: string | null; country_code?: string | null };
+type WaRow = { created_at: string; source: string | null; product_name: string | null; quantity: number | null; total_amount: number | null; country?: string | null; country_code?: string | null };
 type InsightKind = "briefing" | "conversion" | "products";
-type SeoCheck = { label: string; status: "pass" | "warn" | "fail"; detail: string; url?: string };
-
-const SITEMAP_URL = "https://yasicaakzqqhmtgscbhg.supabase.co/functions/v1/sitemap";
-const SITE_URL = "https://gadget360.ng";
 
 const startOfDay = (d: Date) => { const x = new Date(d); x.setHours(0,0,0,0); return x; };
 const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 const fmtWeek = (d: Date) => `W${Math.ceil(((+d - +new Date(d.getFullYear(),0,1)) / 86400000 + 1) / 7)}`;
 const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
-const endOfDay = (d: Date) => { const x = new Date(d); x.setHours(23,59,59,999); return x; };
-const inWindow = (createdAt: string, start: Date, end: Date) => {
-  const t = new Date(createdAt);
-  return t >= start && t <= end;
-};
-const likelyOrdersFrom = (clicks: WaRow[]) => Math.round(
-  clicks.filter((r) => r.product_name).length * 0.65 + clicks.filter((r) => !r.product_name).length * 0.2,
-);
-const messageFrom = (error: unknown, fallback = "Please try again.") => error instanceof Error ? error.message : fallback;
 
 const AnalyticsPanel = () => {
   const [rows, setRows] = useState<Row[]>([]);
@@ -46,8 +33,6 @@ const AnalyticsPanel = () => {
   const [toDate, setToDate] = useState<string>(todayIso);
   const [sourceFilter, setSourceFilter] = useState<string>("");
   const [pathFilter, setPathFilter] = useState<string>("");
-  const [seoChecks, setSeoChecks] = useState<SeoCheck[]>([]);
-  const [seoChecking, setSeoChecking] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -61,7 +46,7 @@ const AnalyticsPanel = () => {
         .limit(5000),
       supabase
         .from("whatsapp_clicks")
-        .select("created_at, path, session_id, source, product_name, quantity, total_amount, country, country_code")
+        .select("created_at, source, product_name, quantity, total_amount, country, country_code")
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: false })
         .limit(2000),
@@ -156,7 +141,7 @@ const AnalyticsPanel = () => {
 
   // Lead-quality score: % of unique sessions that produced a WhatsApp click in last 30d
   const sessionsWithWa = new Set(
-    waRows.filter((r) => new Date(r.created_at) >= last30 && r.session_id).map((r) => r.session_id),
+    waRows.filter((r) => new Date(r.created_at) >= last30 && (r as any).session_id).map((r: any) => r.session_id),
   ).size;
   const leadRate = uniqueSessions > 0 ? Math.round((waMonth / Math.max(1, uniqueSessions)) * 100) : 0;
   // AI-aided probability: a WhatsApp click that names a product is a much stronger
@@ -164,38 +149,6 @@ const AnalyticsPanel = () => {
   // gadget sales via WhatsApp — used as a conservative estimator only.
   const waWithProduct = waRows.filter((r) => new Date(r.created_at) >= last30 && r.product_name).length;
   const estimatedOrders = Math.round(waWithProduct * 0.65 + (waMonth - waWithProduct) * 0.2);
-  const yesterdayStart = new Date(today); yesterdayStart.setDate(today.getDate() - 1);
-  const yesterdayEnd = endOfDay(yesterdayStart);
-
-  const buildFunnelRow = (label: string, start: Date, end: Date) => {
-    const periodRows = rows.filter((r) => inWindow(r.created_at, start, end));
-    const periodWa = waRows.filter((r) => inWindow(r.created_at, start, end));
-    return {
-      label,
-      shop: periodRows.filter((r) => r.path.startsWith("/shop")).length,
-      product: periodRows.filter((r) => r.path.startsWith("/product/")).length,
-      cart: periodRows.filter((r) => r.path.startsWith("/cart")).length,
-      handoff: periodWa.length,
-      likely: likelyOrdersFrom(periodWa),
-      visits: periodRows.length,
-    };
-  };
-
-  const dailyShopperData = Array.from({ length: 14 }, (_, idx) => {
-    const d = new Date(today); d.setDate(today.getDate() - (13 - idx));
-    return buildFunnelRow(fmtDay(d), d, endOfDay(d));
-  });
-  const growthSuggestions = [
-    productPageVisits > cartVisits * 3
-      ? "Add a stronger product-page WhatsApp prompt near warranty/delivery details."
-      : "Keep product-page CTAs stable; current product-to-cart movement is healthy.",
-    waWithProduct < Math.max(1, waMonth * 0.6)
-      ? "Make every WhatsApp handoff product-specific so the team sees item name, quantity and page source."
-      : "Product-specific WhatsApp handoffs are working; push the top clicked products harder this week.",
-    shopVisits > 0 && productPageVisits < shopVisits * 0.5
-      ? "Feature 3 high-margin products higher on the shop page to move more browsers into product detail pages."
-      : "Shop visitors are opening products; improve lead capture with limited-stock badges and delivery reassurance.",
-  ];
 
   // ---- Date-range filtered views (drives custom-range PDF exports + tables) ----
   const fromTs = useMemo(() => new Date(`${fromDate}T00:00:00`), [fromDate]);
@@ -295,23 +248,16 @@ const AnalyticsPanel = () => {
       headStyles: { fillColor: [20, 20, 20], textColor: 255 },
     });
 
-    const bucketed = granularity === "daily"
-      ? dailyShopperData
-      : granularity === "weekly"
-        ? Array.from({ length: 8 }, (_, idx) => {
-            const end = new Date(today); end.setDate(today.getDate() - (7 - idx) * 7);
-            const start = new Date(end); start.setDate(end.getDate() - 6);
-            return buildFunnelRow(fmtWeek(end), start, endOfDay(end));
-          })
-        : Array.from({ length: 6 }, (_, idx) => {
-            const start = new Date(today.getFullYear(), today.getMonth() - (5 - idx), 1);
-            const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
-            return buildFunnelRow(fmtMonth(start), start, endOfDay(end));
-          });
+    const series = granularity === "daily" ? daily : granularity === "weekly" ? weekly : monthly;
+    // Per-period funnel — group rows + WA in each bucket so the owner sees movement
+    const bucketed = series.map((s) => {
+      // Re-derive bucket window from label index, using the same logic as the series.
+      return { period: s.label, visits: s.visits };
+    });
 
     autoTable(doc, {
-      head: [[`Period (${granularity})`, "Shop", "Product", "Cart", "WhatsApp", "Likely orders"]],
-      body: bucketed.map((b) => [b.label, b.shop.toLocaleString(), b.product.toLocaleString(), b.cart.toLocaleString(), b.handoff.toLocaleString(), b.likely.toLocaleString()]),
+      head: [[`Period (${granularity})`, "Total visits"]],
+      body: bucketed.map((b) => [b.period, b.visits.toLocaleString()]),
       styles: { fontSize: 10, cellPadding: 6 },
       headStyles: { fillColor: [185, 28, 38], textColor: 255 },
       alternateRowStyles: { fillColor: [248, 246, 240] },
@@ -319,109 +265,6 @@ const AnalyticsPanel = () => {
 
     doc.save(`funnel-${granularity}-${todayIso}.pdf`);
     toast({ title: "PDF ready", description: `${granularity} funnel report exported.` });
-  };
-
-  const exportYesterdayFunnelPdf = () => {
-    const y = yesterdayStart.toISOString().slice(0, 10);
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const row = buildFunnelRow("Yesterday", yesterdayStart, yesterdayEnd);
-    const clicks = waRows.filter((r) => inWindow(r.created_at, yesterdayStart, yesterdayEnd));
-    pdfHeader(doc, "Yesterday funnel report", `${y} · current store tracking · generated ${new Date().toLocaleString()}`);
-    autoTable(doc, {
-      startY: 120,
-      head: [["Stage", "Count", "Meaning"]],
-      body: [
-        ["Shop views", row.shop.toLocaleString(), "Visitors who browsed the catalogue"],
-        ["Product views", row.product.toLocaleString(), "Visitors who opened product detail pages"],
-        ["Cart visits", row.cart.toLocaleString(), "Visitors who viewed cart"],
-        ["WhatsApp handoffs", row.handoff.toLocaleString(), "Order/message button taps from the site"],
-        ["Likely orders", row.likely.toLocaleString(), "Estimated from product-attached vs general WhatsApp clicks"],
-      ],
-      styles: { fontSize: 10, cellPadding: 6 },
-      headStyles: { fillColor: [20, 20, 20], textColor: 255 },
-    });
-    autoTable(doc, {
-      head: [["When", "Source", "Page", "Recommended product", "Qty", "Amount"]],
-      body: clicks.slice(0, 80).map((r) => [
-        new Date(r.created_at).toLocaleString(),
-        r.source || "—",
-        r.path || "—",
-        r.product_name || "—",
-        r.quantity ?? "—",
-        r.total_amount != null ? Number(r.total_amount).toLocaleString() : "—",
-      ]),
-      styles: { fontSize: 8, cellPadding: 4 },
-      headStyles: { fillColor: [185, 28, 38], textColor: 255 },
-      alternateRowStyles: { fillColor: [248, 246, 240] },
-    });
-    doc.save(`yesterday-funnel-${y}.pdf`);
-    toast({ title: "Yesterday PDF ready", description: "Downloaded the one-click funnel report." });
-  };
-
-  const runSeoCheck = async () => {
-    setSeoChecking(true);
-    try {
-      const checks: SeoCheck[] = [];
-      const [robotsRes, sitemapRes, productsRes] = await Promise.all([
-        fetch("/robots.txt", { cache: "no-store" }),
-        fetch(SITEMAP_URL, { cache: "no-store" }),
-        supabase.from("products").select("id, name, meta_title, meta_description, image_url").limit(30),
-      ]);
-
-      const robots = robotsRes.ok ? await robotsRes.text() : "";
-      checks.push({
-        label: "Robots access",
-        status: robotsRes.ok && !/Disallow:\s*\//i.test(robots) ? "pass" : "fail",
-        detail: robotsRes.ok ? "robots.txt allows public crawling." : "robots.txt could not be loaded.",
-        url: `${SITE_URL}/robots.txt`,
-      });
-      checks.push({
-        label: "Sitemap exposed",
-        status: robots.includes(SITEMAP_URL) ? "pass" : "warn",
-        detail: robots.includes(SITEMAP_URL) ? "robots.txt points to the live XML sitemap." : "robots.txt loaded, but the live sitemap URL was not listed.",
-        url: SITEMAP_URL,
-      });
-
-      const sitemap = sitemapRes.ok ? await sitemapRes.text() : "";
-      const productRows = (productsRes.data || []) as Array<{ id: string; name: string; meta_title: string | null; meta_description: string | null; image_url: string | null }>;
-      const productUrlsInSitemap = (sitemap.match(/\/product\//g) || []).length;
-      checks.push({
-        label: "Product sitemap URLs",
-        status: sitemapRes.ok && productUrlsInSitemap > 0 ? "pass" : "fail",
-        detail: sitemapRes.ok ? `${productUrlsInSitemap} product detail URLs found in the XML sitemap.` : "The XML sitemap could not be loaded.",
-        url: SITEMAP_URL,
-      });
-      const sample = productRows[0];
-      if (sample) {
-        const routeRes = await fetch(`/product/${sample.id}`, { cache: "no-store" });
-        const missingMeta = productRows.filter((p) => !p.meta_title?.trim() || !p.meta_description?.trim()).length;
-        const missingImages = productRows.filter((p) => !p.image_url).length;
-        checks.push({
-          label: "Product page route",
-          status: routeRes.ok ? "pass" : "fail",
-          detail: routeRes.ok ? `A product detail page is reachable: ${sample.name}.` : "Product detail route did not return a valid page.",
-          url: `${SITE_URL}/product/${sample.id}`,
-        });
-        checks.push({
-          label: "Product meta fields",
-          status: missingMeta === 0 ? "pass" : "warn",
-          detail: missingMeta === 0 ? "Checked products have unique admin meta titles/descriptions." : `${missingMeta} of ${productRows.length} checked products are using fallback SEO metadata.`,
-        });
-        checks.push({
-          label: "Product images",
-          status: missingImages === 0 ? "pass" : "warn",
-          detail: missingImages === 0 ? "Checked products have images for Open Graph previews." : `${missingImages} checked products are missing image URLs.`,
-        });
-      } else {
-        checks.push({ label: "Product pages", status: "warn", detail: "No products were returned for checking." });
-      }
-      setSeoChecks(checks);
-      toast({ title: "SEO check complete", description: `${checks.filter((c) => c.status === "pass").length}/${checks.length} checks passed.` });
-    } catch (e: unknown) {
-      toast({ title: "SEO check failed", description: messageFrom(e), variant: "destructive" });
-    } finally {
-      setSeoChecking(false);
-    }
   };
 
   const generateInsights = async (kind: InsightKind) => {
@@ -442,8 +285,8 @@ const AnalyticsPanel = () => {
       if (error) throw new Error(error.message);
       if (!data?.insights) throw new Error(data?.error || "No insights returned");
       setInsights((p) => ({ ...p, [kind]: data.insights as string }));
-    } catch (e: unknown) {
-      const msg = messageFrom(e, "AI service unavailable. Try again shortly.");
+    } catch (e: any) {
+      const msg = e?.message || "AI service unavailable. Try again shortly.";
       setInsightsError(msg);
       toast({ title: "Couldn't generate insights", description: msg, variant: "destructive" });
     } finally {
@@ -530,41 +373,12 @@ const AnalyticsPanel = () => {
             <p className="text-xs text-muted-foreground mt-0.5">All exports respect the date range above. WhatsApp PDF includes recommended product + quantity per click.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={exportYesterdayFunnelPdf} className="gap-2 bg-foreground hover:bg-foreground/90 text-background"><FileText size={14} /> Yesterday PDF</Button>
             <Button size="sm" variant="outline" onClick={exportWhatsAppPdf} className="gap-2"><FileText size={14} /> WhatsApp clicks PDF</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Funnel · daily</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("weekly")} className="gap-2"><FileText size={14} /> Funnel · weekly</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("monthly")} className="gap-2"><FileText size={14} /> Funnel · monthly</Button>
           </div>
         </div>
-      </Card>
-
-      <Card className="p-5 rounded-3xl">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">SEO health</div>
-            <h3 className="font-display font-bold text-lg">Sitemap & indexability check</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Live XML sitemap: <a href={SITEMAP_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline inline-flex items-center gap-1">open sitemap <ExternalLink size={11} /></a></p>
-          </div>
-          <Button size="sm" onClick={runSeoCheck} disabled={seoChecking} variant="outline" className="gap-2">
-            <SearchCheck size={14} /> {seoChecking ? "Checking…" : "Run SEO check"}
-          </Button>
-        </div>
-        {seoChecks.length > 0 && (
-          <div className="grid md:grid-cols-2 gap-2 mt-4">
-            {seoChecks.map((c) => (
-              <div key={c.label} className="rounded-2xl border border-border bg-muted/30 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="text-xs font-semibold">{c.label}</div>
-                  <span className={`text-[10px] uppercase tracking-[0.18em] ${c.status === "pass" ? "text-success" : c.status === "warn" ? "text-primary" : "text-destructive"}`}>{c.status}</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">{c.detail}</p>
-                {c.url && <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-[11px] text-primary hover:underline mt-1 inline-flex items-center gap-1">View <ExternalLink size={10} /></a>}
-              </div>
-            ))}
-          </div>
-        )}
-        <p className="text-[11px] text-muted-foreground mt-3 inline-flex gap-1.5"><AlertTriangle size={12} className="mt-0.5 shrink-0" /> Social apps may still read the static fallback head because this is a client-rendered app; Google indexing sees the per-product Helmet tags.</p>
       </Card>
 
       {/* Multiple AI analyses */}
@@ -580,19 +394,6 @@ const AnalyticsPanel = () => {
         {insightsError && (
           <p className="text-xs text-destructive mt-3">⚠ {insightsError}</p>
         )}
-      </Card>
-
-      <Card className="p-5 rounded-3xl">
-        <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Lead growth suggestions</div>
-        <h3 className="font-display font-bold text-lg mb-3">Next moves from today’s funnel</h3>
-        <div className="grid md:grid-cols-3 gap-3">
-          {growthSuggestions.map((item, i) => (
-            <div key={item} className="rounded-2xl bg-muted/30 border border-border p-3">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1">Action {i + 1}</div>
-              <p className="text-sm leading-relaxed">{item}</p>
-            </div>
-          ))}
-        </div>
       </Card>
 
 
@@ -625,43 +426,6 @@ const AnalyticsPanel = () => {
           </div>
         </div>
         <p className="text-[11px] text-muted-foreground mt-3">* AI-aided estimate: WhatsApp clicks with a named product convert at ~65%, bare clicks at ~20%. Tap "AI briefing" above for a full owner summary.</p>
-      </Card>
-
-
-      <Card className="p-5 rounded-3xl">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Daily shopper data</div>
-            <h3 className="font-display font-bold text-xl">Browse → product → cart → WhatsApp</h3>
-          </div>
-          <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Daily PDF</Button>
-        </div>
-        <div className="overflow-x-auto -mx-2">
-          <table className="w-full text-xs">
-            <thead className="text-muted-foreground">
-              <tr className="text-left">
-                <th className="px-2 py-1.5 font-medium">Day</th>
-                <th className="px-2 py-1.5 font-medium text-right">Shop</th>
-                <th className="px-2 py-1.5 font-medium text-right">Product</th>
-                <th className="px-2 py-1.5 font-medium text-right">Cart</th>
-                <th className="px-2 py-1.5 font-medium text-right">WhatsApp</th>
-                <th className="px-2 py-1.5 font-medium text-right">Likely orders</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dailyShopperData.map((d) => (
-                <tr key={d.label} className="border-t border-border/60">
-                  <td className="px-2 py-1.5 whitespace-nowrap font-medium">{d.label}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{d.shop}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{d.product}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{d.cart}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums">{d.handoff}</td>
-                  <td className="px-2 py-1.5 text-right tabular-nums font-semibold">{d.likely}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </Card>
 
 

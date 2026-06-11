@@ -15,7 +15,6 @@ interface CartItem {
   quantity: number;
   product: { id: string; name: string; price: number; image_url: string; stock_quantity: number };
 }
-type RawCartItem = Omit<CartItem, "product"> & { product: CartItem["product"] | CartItem["product"][] | null };
 
 const MiniCart = () => {
   const { user } = useAuth();
@@ -34,7 +33,7 @@ const MiniCart = () => {
       .from("cart_items")
       .select("id, quantity, product:products(id, name, price, image_url, stock_quantity)")
       .eq("user_id", user.id);
-    const norm = ((data || []) as RawCartItem[]).map((it) => ({
+    const norm = (data || []).map((it: any) => ({
       ...it,
       product: Array.isArray(it.product) ? it.product[0] : it.product,
     })) as CartItem[];
@@ -99,9 +98,9 @@ const MiniCart = () => {
 
   if (!user) {
     return (
-      <Button variant="ghost" size="icon" onClick={() => navigate("/auth")} className="relative rounded-full h-9 w-9" aria-label="Sign in to view cart">
-        <ShoppingCart className="h-4 w-4" />
-      </Button>
+      <button onClick={() => navigate("/auth")} className="contents">
+        {trigger}
+      </button>
     );
   }
 

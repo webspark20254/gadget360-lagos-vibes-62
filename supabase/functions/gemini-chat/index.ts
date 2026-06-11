@@ -9,7 +9,7 @@ const corsHeaders = {
 const WA = "2348108418727";
 
 // Models to try in order — first 200 wins. Lets us survive Gemini model deprecations.
-const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+const MODELS = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.0-flash-exp"];
 
 async function callGemini(apiKey: string, body: unknown): Promise<string | null> {
   for (const model of MODELS) {
@@ -40,7 +40,7 @@ function fallbackResponse(message: string, products: Array<{ name: string; price
     const text = encodeURIComponent(
       `Hi Gadget360.ng! 👋 I'm on your website and interested in ${match.name} (₦${match.price.toLocaleString()}). Is it available?`,
     );
-    return `I'd love to help with **${match.name}** (₦${match.price.toLocaleString()}). Tap "Continue on WhatsApp" to chat with our team instantly: ${waBase}?text=${text}\n\n[RECOMMEND: ${match.name}]`;
+    return `I'd love to help with **${match.name}** (₦${match.price.toLocaleString()}). Tap "Continue on WhatsApp" to chat with our team instantly: ${waBase}?text=${text}`;
   }
   return `I'm having a brief connection issue, but our team is online on WhatsApp right now and can help with prices, stock and delivery. Tap "Continue on WhatsApp" or visit ${waBase}.`;
 }
@@ -77,10 +77,8 @@ serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 
     let botResponse: string;
-    let usedFallback = false;
 
     if (!GEMINI_API_KEY) {
-      usedFallback = true;
       botResponse = fallbackResponse(message, products);
     } else {
       const catalogText = products
@@ -120,7 +118,6 @@ RULES:
         generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 600 },
       });
 
-      usedFallback = !result;
       botResponse = result || fallbackResponse(message, products);
     }
 
@@ -137,7 +134,7 @@ RULES:
 
     supabase.from("chat_messages").insert({ session_id: sessionId, sender: "bot", message: botResponse }).then(() => {});
 
-    return new Response(JSON.stringify({ response: botResponse, sessionId, recommendedProduct, fallback: usedFallback }), {
+    return new Response(JSON.stringify({ response: botResponse, sessionId, recommendedProduct }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {

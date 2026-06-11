@@ -74,9 +74,7 @@ const GeminiChat = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) return JSON.parse(saved);
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-    }
+    } catch {}
     return { x: 20, y: 20 };
   });
   const dragRef = useRef<{ active: boolean; sx: number; sy: number; ox: number; oy: number; moved: boolean }>({
@@ -115,9 +113,7 @@ const GeminiChat = () => {
   };
   const onPointerUp = () => {
     if (dragRef.current.active) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pos)); } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(pos)); } catch {}
       const wasMoved = dragRef.current.moved;
       dragRef.current.active = false;
       if (!wasMoved) setIsOpen(true);
@@ -164,7 +160,6 @@ const GeminiChat = () => {
       if (error) throw new Error(error.message);
       const text: string = data?.response || "I'm having trouble. Tap Continue on WhatsApp to reach our team instantly.";
       if (data?.recommendedProduct?.name) setRecommended(data.recommendedProduct);
-      setAiFailed(Boolean(data?.fallback));
       setMessages((p) => [...p, { id: (Date.now() + 1).toString(), text, isBot: true, timestamp: new Date() }]);
     } catch {
       // Graceful AI fallback: surface a phone-capture prompt so the owner can still
@@ -190,8 +185,10 @@ const GeminiChat = () => {
     const nameLine = customerName ? `My name is ${customerName}.` : "";
     if (target) {
       // Build a context-rich order message with phone callback when present.
-      const note = `${nameLine}${phoneLine}`.trim();
-      return waOrderUrl(target.name, target.price, 1, note || undefined);
+      const base = waOrderUrl(target.name, target.price, 1);
+      if (!phoneLine && !nameLine) return base;
+      const extra = encodeURIComponent(`\n\n${nameLine}${phoneLine}`.trim());
+      return `${base}${extra}`;
     }
     const msg = nameLine
       ? `${nameLine} I have a question.${phoneLine}`
@@ -200,10 +197,7 @@ const GeminiChat = () => {
   })();
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      if (nameSet) handleSendMessage();
-      else handleNameSubmit();
-    }
+    if (e.key === "Enter") nameSet ? handleSendMessage() : handleNameSubmit();
   };
 
   return (

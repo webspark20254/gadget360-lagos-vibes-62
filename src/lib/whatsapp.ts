@@ -8,7 +8,7 @@ export const formatNaira = (a: number) =>
 // instantly knows the lead came from gadget360.ng (not a saved contact).
 const FROM_WEBSITE = "Hi Gadget360.ng team! 👋 I'm messaging from your website (gadget360.ng).";
 
-export const waOrderUrl = (productName: string, price: number, quantity = 1, note?: string) => {
+export const waOrderUrl = (productName: string, price: number, quantity = 1) => {
   const qty = Math.max(1, Math.floor(quantity));
   const lineTotal = price * qty;
   const body =
@@ -18,7 +18,6 @@ export const waOrderUrl = (productName: string, price: number, quantity = 1, not
     `• Quantity: ${qty}\n` +
     `• Unit price: ${formatNaira(price)}\n` +
     `• Total: ${formatNaira(lineTotal)}\n\n` +
-    `${note?.trim() ? `${note.trim()}\n\n` : ""}` +
     `Please confirm availability and delivery. Thank you!`;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(body)}`;
 };

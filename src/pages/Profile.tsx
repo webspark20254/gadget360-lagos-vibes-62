@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import type { ReactNode } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,8 +24,6 @@ type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type Review = Database["public"]["Tables"]["product_reviews"]["Row"] & { product?: { id: string; name: string; image_url: string | null } | null };
 type Testimonial = Database["public"]["Tables"]["testimonials"]["Row"];
-type ReviewProduct = { id: string; name: string; image_url: string | null };
-const getMessage = (error: unknown, fallback = "Something went wrong") => error instanceof Error ? error.message : fallback;
 
 const statusTone: Record<string, string> = {
   completed: "bg-success text-success-foreground",
@@ -67,7 +64,7 @@ const Profile = () => {
 
       // attach product info
       const ids = [...new Set((r || []).map((x) => x.product_id))];
-      let prodMap: Record<string, ReviewProduct> = {};
+      let prodMap: Record<string, any> = {};
       if (ids.length) {
         const { data: prods } = await supabase.from("products").select("id, name, image_url").in("id", ids);
         prodMap = Object.fromEntries((prods || []).map((p) => [p.id, p]));
@@ -87,35 +84,26 @@ const Profile = () => {
         .eq("user_id", user.id);
       if (error) throw error;
       toast({ title: "Saved", description: "Profile updated." });
-    } catch (e: unknown) {
-      toast({ title: "Error", description: getMessage(e), variant: "destructive" });
+    } catch (e: any) {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
     } finally { setUpdating(false); }
   };
 
   const uploadAvatar = async (file: File) => {
     if (!user) return;
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Image required", description: "Please choose a JPG, PNG or WebP image.", variant: "destructive" });
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Image too large", description: "Please upload an image under 5MB.", variant: "destructive" });
-      return;
-    }
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("images", file);
-      const { data, error } = await supabase.functions.invoke("upload-image", { body: formData });
-      if (error) throw new Error(error.message || "Image upload failed");
-      const avatar_url = data?.urls?.[0];
-      if (!avatar_url) throw new Error("No image URL was returned. Please try again.");
-      const { error: updateError } = await supabase.from("profiles").update({ avatar_url }).eq("user_id", user.id);
-      if (updateError) throw updateError;
+      const ext = file.name.split(".").pop() || "png";
+      const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+      const avatar_url = pub.publicUrl;
+      await supabase.from("profiles").update({ avatar_url }).eq("user_id", user.id);
       setProfile((p) => p ? { ...p, avatar_url } : p);
-      toast({ title: "Avatar updated", description: "Your profile photo is now live." });
-    } catch (e: unknown) {
-      toast({ title: "Upload failed", description: getMessage(e, "Please try a different image."), variant: "destructive" });
+      toast({ title: "Avatar updated" });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
     } finally { setUploading(false); }
   };
 
@@ -196,7 +184,7 @@ const Profile = () => {
               <label className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full bg-primary text-primary-foreground ring-2 ring-background grid place-items-center cursor-pointer hover:scale-105 transition">
                 <Camera size={14} />
                 <input type="file" accept="image/*" className="hidden" disabled={uploading}
-                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); e.currentTarget.value = ""; }} />
+                  onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }} />
               </label>
             </div>
             <div className="flex-1 min-w-0">
@@ -379,7 +367,7 @@ const Profile = () => {
   );
 };
 
-const EmptyState = ({ icon, title, body, onPrimary, primary }: { icon: ReactNode; title: string; body: string; onPrimary: () => void; primary: string }) => (
+const EmptyState = ({ icon, title, body, onPrimary, primary }: any) => (
   <div className="rounded-[28px] border border-dashed border-border bg-card p-10 md:p-16 text-center">
     <div className="mx-auto h-16 w-16 rounded-2xl bg-muted grid place-items-center mb-4 text-muted-foreground">{icon}</div>
     <h3 className="font-display font-bold text-2xl">{title}</h3>
