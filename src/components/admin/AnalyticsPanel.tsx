@@ -26,6 +26,7 @@ const AnalyticsPanel = () => {
   const [insights, setInsights] = useState<Record<InsightKind, string>>({ briefing: "", conversion: "", products: "" });
   const [insightsLoading, setInsightsLoading] = useState<InsightKind | null>(null);
   const [insightsError, setInsightsError] = useState<string>("");
+  const [productIndex, setProductIndex] = useState<{ id: string; name: string; category: string | null }[]>([]);
   // Date-range filter (defaults: last 30 days). Lets the owner drill into "yesterday" etc.
   const todayIso = new Date().toISOString().slice(0, 10);
   const d30 = new Date(); d30.setDate(d30.getDate() - 29);
@@ -33,6 +34,7 @@ const AnalyticsPanel = () => {
   const [toDate, setToDate] = useState<string>(todayIso);
   const [sourceFilter, setSourceFilter] = useState<string>("");
   const [pathFilter, setPathFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
   const { toast } = useToast();
 
   const load = async () => {
