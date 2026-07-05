@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import {
   User, Package, LogOut, ShoppingBag, Mail, Calendar, ArrowUpRight,
-  Pencil, Star, Trash2, Quote, Camera, MessageSquareQuote,
+  Pencil, Star, Trash2, Quote, Camera, MessageSquareQuote, BarChart3, FileText,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
