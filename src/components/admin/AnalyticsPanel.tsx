@@ -74,6 +74,18 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
     return () => { supabase.removeChannel(ch); };
   }, []);
 
+  // One-click deep-link from Profile: /admin?tab=analytics&download=yesterday
+  useEffect(() => {
+    if (autoDownload !== "yesterday" || loading) return;
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const s = y.toISOString().slice(0, 10);
+    setFromDate(s); setToDate(s);
+    const t = setTimeout(() => exportFunnelPdf("daily"), 200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoDownload, loading]);
+
+
   const today = startOfDay(new Date());
   const last7 = new Date(today); last7.setDate(today.getDate() - 6);
   const last30 = new Date(today); last30.setDate(today.getDate() - 29);
