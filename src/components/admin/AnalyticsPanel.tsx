@@ -19,7 +19,7 @@ const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", da
 const fmtWeek = (d: Date) => `W${Math.ceil(((+d - +new Date(d.getFullYear(),0,1)) / 86400000 + 1) / 7)}`;
 const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
 
-const AnalyticsPanel = () => {
+const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string | null }) => {
   const [rows, setRows] = useState<Row[]>([]);
   const [waRows, setWaRows] = useState<WaRow[]>([]);
   const [loading, setLoading] = useState(true);
