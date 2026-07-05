@@ -158,23 +158,48 @@ const AnalyticsPanel = () => {
   const fromTs = useMemo(() => new Date(`${fromDate}T00:00:00`), [fromDate]);
   const toTs = useMemo(() => { const d = new Date(`${toDate}T23:59:59`); return d; }, [toDate]);
 
+  // Product-name → category map, plus set of product IDs matching the active category
+  const categoryByName = useMemo(() => {
+    const m = new Map<string, string>();
+    productIndex.forEach((p) => { if (p.category) m.set(p.name.toLowerCase(), p.category); });
+    return m;
+  }, [productIndex]);
+  const productIdsInCategory = useMemo(() => {
+    if (!categoryFilter) return null;
+    return new Set(productIndex.filter((p) => p.category === categoryFilter).map((p) => p.id));
+  }, [productIndex, categoryFilter]);
+  const knownCategories = useMemo(
+    () => Array.from(new Set(productIndex.map((p) => p.category).filter(Boolean) as string[])).sort(),
+    [productIndex],
+  );
+
   const rowsInRange = useMemo(
     () => rows.filter((r) => {
       const t = new Date(r.created_at);
       if (t < fromTs || t > toTs) return false;
       if (pathFilter && !r.path.toLowerCase().includes(pathFilter.toLowerCase())) return false;
+      if (productIdsInCategory) {
+        // Only count product-page visits whose product id belongs to the selected category
+        if (!r.path.startsWith("/product/")) return false;
+        const pid = r.path.split("/product/")[1]?.split("/")[0];
+        if (!pid || !productIdsInCategory.has(pid)) return false;
+      }
       return true;
     }),
-    [rows, fromTs, toTs, pathFilter],
+    [rows, fromTs, toTs, pathFilter, productIdsInCategory],
   );
   const waInRange = useMemo(
     () => waRows.filter((r) => {
       const t = new Date(r.created_at);
       if (t < fromTs || t > toTs) return false;
       if (sourceFilter && (r.source || "").toLowerCase() !== sourceFilter.toLowerCase()) return false;
+      if (categoryFilter) {
+        const cat = r.product_name ? categoryByName.get(r.product_name.toLowerCase()) : null;
+        if (cat !== categoryFilter) return false;
+      }
       return true;
     }),
-    [waRows, fromTs, toTs, sourceFilter],
+    [waRows, fromTs, toTs, sourceFilter, categoryFilter, categoryByName],
   );
   const knownSources = useMemo(
     () => Array.from(new Set(waRows.map((r) => r.source || "unknown"))).slice(0, 20),
