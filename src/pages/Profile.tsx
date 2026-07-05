@@ -59,6 +59,14 @@ const Profile = () => {
         supabase.from("product_reviews").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("testimonials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
+      // Check admin role so we can surface a quick-link to the analytics dashboard
+      const { data: adminRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["admin", "super_admin"])
+        .maybeSingle();
+      setIsAdmin(!!adminRow);
       if (p) setProfile(p);
       setOrders(o || []);
       setTestimonials(t || []);
