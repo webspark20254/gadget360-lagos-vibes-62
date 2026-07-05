@@ -364,8 +364,8 @@ const AnalyticsPanel = () => {
       {/* Date range + filter controls */}
       <Card className="p-5 rounded-3xl">
         <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Filters</div>
-        <h3 className="font-display font-bold text-lg mb-3">Date range & source</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <h3 className="font-display font-bold text-lg mb-3">Date range, source & category</h3>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
           <label className="text-xs text-muted-foreground">From
             <Input type="date" value={fromDate} max={toDate} onChange={(e) => setFromDate(e.target.value)} className="mt-1 h-9 text-sm" />
           </label>
@@ -382,15 +382,26 @@ const AnalyticsPanel = () => {
               {knownSources.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
-          <label className="text-xs text-muted-foreground md:col-span-1">Page path contains
+          <label className="text-xs text-muted-foreground">Category
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="mt-1 h-9 w-full rounded-md border border-input bg-background text-sm px-2"
+            >
+              <option value="">All</option>
+              {knownCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+          <label className="text-xs text-muted-foreground">Page path contains
             <Input placeholder="/product/ or /shop" value={pathFilter} onChange={(e) => setPathFilter(e.target.value)} className="mt-1 h-9 text-sm" />
           </label>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => { setFromDate(d30.toISOString().slice(0,10)); setToDate(todayIso); setSourceFilter(""); setPathFilter(""); }}>Reset</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => { setFromDate(d30.toISOString().slice(0,10)); setToDate(todayIso); setSourceFilter(""); setPathFilter(""); setCategoryFilter(""); }}>Reset</Button>
             <Button size="sm" variant="outline" onClick={() => { const y = new Date(); y.setDate(y.getDate()-1); const s = y.toISOString().slice(0,10); setFromDate(s); setToDate(s); }}>Yesterday</Button>
+            <Button size="sm" variant="outline" onClick={() => { const s = new Date().toISOString().slice(0,10); setFromDate(s); setToDate(s); }}>Today</Button>
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground mt-3">In range: <strong>{rowsInRange.length.toLocaleString()}</strong> page visits · <strong>{waInRange.length.toLocaleString()}</strong> WhatsApp clicks</p>
+        <p className="text-[11px] text-muted-foreground mt-3">In range: <strong>{rowsInRange.length.toLocaleString()}</strong> page visits · <strong>{waInRange.length.toLocaleString()}</strong> WhatsApp clicks{categoryFilter && <> · category <strong>{categoryFilter}</strong></>}</p>
       </Card>
 
       {/* PDF exports toolbar */}
@@ -399,9 +410,22 @@ const AnalyticsPanel = () => {
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Reports · PDF</div>
             <h3 className="font-display font-bold text-lg">Download formatted reports</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">All exports respect the date range above. WhatsApp PDF includes recommended product + quantity per click.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">All exports respect the filters above. WhatsApp PDF includes recommended product + quantity per click.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              onClick={() => {
+                const y = new Date(); y.setDate(y.getDate() - 1);
+                const s = y.toISOString().slice(0, 10);
+                setFromDate(s); setToDate(s);
+                // Give React a tick so the range applies before we render the PDF
+                setTimeout(() => exportFunnelPdf("daily"), 60);
+              }}
+              className="gap-2 bg-foreground text-background hover:bg-foreground/90"
+            >
+              <FileText size={14} /> Yesterday · funnel PDF
+            </Button>
             <Button size="sm" variant="outline" onClick={exportWhatsAppPdf} className="gap-2"><FileText size={14} /> WhatsApp clicks PDF</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Funnel · daily</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("weekly")} className="gap-2"><FileText size={14} /> Funnel · weekly</Button>
