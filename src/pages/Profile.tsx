@@ -39,6 +39,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [newTesti, setNewTesti] = useState({ quote: "", rating: 5, location: "" });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
