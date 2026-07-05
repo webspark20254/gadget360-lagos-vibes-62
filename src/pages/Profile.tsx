@@ -234,6 +234,23 @@ const Profile = () => {
             </a>
           </div>
         </div>
+        {isAdmin && (
+          <div className="mb-6 rounded-3xl border border-border bg-gradient-to-r from-foreground to-foreground/90 text-background p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.25em] opacity-70">Admin access</div>
+              <h2 className="font-display font-bold text-xl md:text-2xl mt-1">You're an admin</h2>
+              <p className="text-sm opacity-80 mt-1">Jump into the analytics dashboard to download the yesterday funnel PDF, WhatsApp click logs, and daily shopper data.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <Button onClick={() => navigate("/admin?tab=analytics")} className="h-11 rounded-full bg-background text-foreground hover:bg-background/90 font-semibold gap-2">
+                <BarChart3 size={16} /> Open analytics
+              </Button>
+              <Button onClick={() => navigate("/admin?tab=analytics&download=yesterday")} variant="outline" className="h-11 rounded-full border-background/40 text-background hover:bg-background/10 gap-2">
+                <FileText size={16} /> Yesterday PDF
+              </Button>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="orders" className="space-y-6">
           <TabsList className="rounded-full bg-muted h-12 p-1 flex flex-wrap">
