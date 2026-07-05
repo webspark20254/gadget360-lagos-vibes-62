@@ -778,7 +778,7 @@ const Admin = () => {
           </div>
 
           <TabsContent value="analytics" className="space-y-6">
-            <AnalyticsPanel />
+            <AnalyticsPanel autoDownload={new URLSearchParams(window.location.search).get("download") as any} />
           </TabsContent>
 
           {/* Products Tab */}
