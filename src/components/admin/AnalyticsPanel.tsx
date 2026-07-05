@@ -39,7 +39,7 @@ const AnalyticsPanel = () => {
 
   const load = async () => {
     const since = new Date(); since.setDate(since.getDate() - 90);
-    const [{ data: visitsData }, { data: waData }] = await Promise.all([
+    const [{ data: visitsData }, { data: waData }, { data: prodData }] = await Promise.all([
       supabase
         .from("page_visits")
         .select("created_at, path, session_id, country, country_code, city")
@@ -52,9 +52,11 @@ const AnalyticsPanel = () => {
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: false })
         .limit(2000),
+      supabase.from("products").select("id, name, category").limit(500),
     ]);
     setRows((visitsData as Row[]) || []);
     setWaRows((waData as WaRow[]) || []);
+    setProductIndex((prodData as any) || []);
     setLoading(false);
   };
 
