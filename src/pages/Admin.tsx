@@ -309,13 +309,21 @@ const Admin = () => {
         formData.append('images', file);
       });
 
-      const { data, error } = await supabase.functions.invoke('upload-image', {
+      // Use direct fetch — supabase.functions.invoke sometimes mishandles multipart FormData
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/upload-image`;
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
         body: formData,
       });
-
-      if (error) {
-        console.error('Upload error:', error);
-        throw new Error(error.message || 'Failed to upload images');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        console.error('Upload error:', data);
+        throw new Error(data?.error || `Upload failed (HTTP ${res.status})`);
       }
 
       if (!data?.urls || data.urls.length === 0) {
@@ -770,7 +778,7 @@ const Admin = () => {
           </div>
 
           <TabsContent value="analytics" className="space-y-6">
-            <AnalyticsPanel />
+            <AnalyticsPanel autoDownload={new URLSearchParams(window.location.search).get("download") as any} />
           </TabsContent>
 
           {/* Products Tab */}

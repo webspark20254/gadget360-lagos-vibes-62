@@ -10,7 +10,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Badge } from "@/components/ui/badge";
 import {
   User, Package, LogOut, ShoppingBag, Mail, Calendar, ArrowUpRight,
-  Pencil, Star, Trash2, Quote, Camera, MessageSquareQuote,
+  Pencil, Star, Trash2, Quote, Camera, MessageSquareQuote, BarChart3, FileText,
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -39,6 +39,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [newTesti, setNewTesti] = useState({ quote: "", rating: 5, location: "" });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -58,6 +59,14 @@ const Profile = () => {
         supabase.from("product_reviews").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
         supabase.from("testimonials").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       ]);
+      // Check admin role so we can surface a quick-link to the analytics dashboard
+      const { data: adminRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .in("role", ["admin", "super_admin"])
+        .maybeSingle();
+      setIsAdmin(!!adminRow);
       if (p) setProfile(p);
       setOrders(o || []);
       setTestimonials(t || []);
@@ -225,6 +234,23 @@ const Profile = () => {
             </a>
           </div>
         </div>
+        {isAdmin && (
+          <div className="mb-6 rounded-3xl border border-border bg-gradient-to-r from-foreground to-foreground/90 text-background p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.25em] opacity-70">Admin access</div>
+              <h2 className="font-display font-bold text-xl md:text-2xl mt-1">You're an admin</h2>
+              <p className="text-sm opacity-80 mt-1">Jump into the analytics dashboard to download the yesterday funnel PDF, WhatsApp click logs, and daily shopper data.</p>
+            </div>
+            <div className="flex flex-wrap gap-2 shrink-0">
+              <Button onClick={() => navigate("/admin?tab=analytics")} className="h-11 rounded-full bg-background text-foreground hover:bg-background/90 font-semibold gap-2">
+                <BarChart3 size={16} /> Open analytics
+              </Button>
+              <Button onClick={() => navigate("/admin?tab=analytics&download=yesterday")} variant="outline" className="h-11 rounded-full border-background/40 text-background hover:bg-background/10 gap-2">
+                <FileText size={16} /> Yesterday PDF
+              </Button>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="orders" className="space-y-6">
           <TabsList className="rounded-full bg-muted h-12 p-1 flex flex-wrap">

@@ -19,13 +19,14 @@ const fmtDay = (d: Date) => d.toLocaleDateString(undefined, { month: "short", da
 const fmtWeek = (d: Date) => `W${Math.ceil(((+d - +new Date(d.getFullYear(),0,1)) / 86400000 + 1) / 7)}`;
 const fmtMonth = (d: Date) => d.toLocaleDateString(undefined, { month: "short", year: "2-digit" });
 
-const AnalyticsPanel = () => {
+const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string | null }) => {
   const [rows, setRows] = useState<Row[]>([]);
   const [waRows, setWaRows] = useState<WaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [insights, setInsights] = useState<Record<InsightKind, string>>({ briefing: "", conversion: "", products: "" });
   const [insightsLoading, setInsightsLoading] = useState<InsightKind | null>(null);
   const [insightsError, setInsightsError] = useState<string>("");
+  const [productIndex, setProductIndex] = useState<{ id: string; name: string; category: string | null }[]>([]);
   // Date-range filter (defaults: last 30 days). Lets the owner drill into "yesterday" etc.
   const todayIso = new Date().toISOString().slice(0, 10);
   const d30 = new Date(); d30.setDate(d30.getDate() - 29);
@@ -33,11 +34,12 @@ const AnalyticsPanel = () => {
   const [toDate, setToDate] = useState<string>(todayIso);
   const [sourceFilter, setSourceFilter] = useState<string>("");
   const [pathFilter, setPathFilter] = useState<string>("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
   const { toast } = useToast();
 
   const load = async () => {
     const since = new Date(); since.setDate(since.getDate() - 90);
-    const [{ data: visitsData }, { data: waData }] = await Promise.all([
+    const [{ data: visitsData }, { data: waData }, { data: prodData }] = await Promise.all([
       supabase
         .from("page_visits")
         .select("created_at, path, session_id, country, country_code, city")
@@ -50,9 +52,11 @@ const AnalyticsPanel = () => {
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: false })
         .limit(2000),
+      supabase.from("products").select("id, name, category").limit(500),
     ]);
     setRows((visitsData as Row[]) || []);
     setWaRows((waData as WaRow[]) || []);
+    setProductIndex((prodData as any) || []);
     setLoading(false);
   };
 
@@ -69,6 +73,18 @@ const AnalyticsPanel = () => {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, []);
+
+  // One-click deep-link from Profile: /admin?tab=analytics&download=yesterday
+  useEffect(() => {
+    if (autoDownload !== "yesterday" || loading) return;
+    const y = new Date(); y.setDate(y.getDate() - 1);
+    const s = y.toISOString().slice(0, 10);
+    setFromDate(s); setToDate(s);
+    const t = setTimeout(() => exportFunnelPdf("daily"), 200);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoDownload, loading]);
+
 
   const today = startOfDay(new Date());
   const last7 = new Date(today); last7.setDate(today.getDate() - 6);
@@ -154,23 +170,48 @@ const AnalyticsPanel = () => {
   const fromTs = useMemo(() => new Date(`${fromDate}T00:00:00`), [fromDate]);
   const toTs = useMemo(() => { const d = new Date(`${toDate}T23:59:59`); return d; }, [toDate]);
 
+  // Product-name → category map, plus set of product IDs matching the active category
+  const categoryByName = useMemo(() => {
+    const m = new Map<string, string>();
+    productIndex.forEach((p) => { if (p.category) m.set(p.name.toLowerCase(), p.category); });
+    return m;
+  }, [productIndex]);
+  const productIdsInCategory = useMemo(() => {
+    if (!categoryFilter) return null;
+    return new Set(productIndex.filter((p) => p.category === categoryFilter).map((p) => p.id));
+  }, [productIndex, categoryFilter]);
+  const knownCategories = useMemo(
+    () => Array.from(new Set(productIndex.map((p) => p.category).filter(Boolean) as string[])).sort(),
+    [productIndex],
+  );
+
   const rowsInRange = useMemo(
     () => rows.filter((r) => {
       const t = new Date(r.created_at);
       if (t < fromTs || t > toTs) return false;
       if (pathFilter && !r.path.toLowerCase().includes(pathFilter.toLowerCase())) return false;
+      if (productIdsInCategory) {
+        // Only count product-page visits whose product id belongs to the selected category
+        if (!r.path.startsWith("/product/")) return false;
+        const pid = r.path.split("/product/")[1]?.split("/")[0];
+        if (!pid || !productIdsInCategory.has(pid)) return false;
+      }
       return true;
     }),
-    [rows, fromTs, toTs, pathFilter],
+    [rows, fromTs, toTs, pathFilter, productIdsInCategory],
   );
   const waInRange = useMemo(
     () => waRows.filter((r) => {
       const t = new Date(r.created_at);
       if (t < fromTs || t > toTs) return false;
       if (sourceFilter && (r.source || "").toLowerCase() !== sourceFilter.toLowerCase()) return false;
+      if (categoryFilter) {
+        const cat = r.product_name ? categoryByName.get(r.product_name.toLowerCase()) : null;
+        if (cat !== categoryFilter) return false;
+      }
       return true;
     }),
-    [waRows, fromTs, toTs, sourceFilter],
+    [waRows, fromTs, toTs, sourceFilter, categoryFilter, categoryByName],
   );
   const knownSources = useMemo(
     () => Array.from(new Set(waRows.map((r) => r.source || "unknown"))).slice(0, 20),
@@ -335,8 +376,8 @@ const AnalyticsPanel = () => {
       {/* Date range + filter controls */}
       <Card className="p-5 rounded-3xl">
         <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Filters</div>
-        <h3 className="font-display font-bold text-lg mb-3">Date range & source</h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 items-end">
+        <h3 className="font-display font-bold text-lg mb-3">Date range, source & category</h3>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 items-end">
           <label className="text-xs text-muted-foreground">From
             <Input type="date" value={fromDate} max={toDate} onChange={(e) => setFromDate(e.target.value)} className="mt-1 h-9 text-sm" />
           </label>
@@ -353,15 +394,26 @@ const AnalyticsPanel = () => {
               {knownSources.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </label>
-          <label className="text-xs text-muted-foreground md:col-span-1">Page path contains
+          <label className="text-xs text-muted-foreground">Category
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="mt-1 h-9 w-full rounded-md border border-input bg-background text-sm px-2"
+            >
+              <option value="">All</option>
+              {knownCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </label>
+          <label className="text-xs text-muted-foreground">Page path contains
             <Input placeholder="/product/ or /shop" value={pathFilter} onChange={(e) => setPathFilter(e.target.value)} className="mt-1 h-9 text-sm" />
           </label>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={() => { setFromDate(d30.toISOString().slice(0,10)); setToDate(todayIso); setSourceFilter(""); setPathFilter(""); }}>Reset</Button>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={() => { setFromDate(d30.toISOString().slice(0,10)); setToDate(todayIso); setSourceFilter(""); setPathFilter(""); setCategoryFilter(""); }}>Reset</Button>
             <Button size="sm" variant="outline" onClick={() => { const y = new Date(); y.setDate(y.getDate()-1); const s = y.toISOString().slice(0,10); setFromDate(s); setToDate(s); }}>Yesterday</Button>
+            <Button size="sm" variant="outline" onClick={() => { const s = new Date().toISOString().slice(0,10); setFromDate(s); setToDate(s); }}>Today</Button>
           </div>
         </div>
-        <p className="text-[11px] text-muted-foreground mt-3">In range: <strong>{rowsInRange.length.toLocaleString()}</strong> page visits · <strong>{waInRange.length.toLocaleString()}</strong> WhatsApp clicks</p>
+        <p className="text-[11px] text-muted-foreground mt-3">In range: <strong>{rowsInRange.length.toLocaleString()}</strong> page visits · <strong>{waInRange.length.toLocaleString()}</strong> WhatsApp clicks{categoryFilter && <> · category <strong>{categoryFilter}</strong></>}</p>
       </Card>
 
       {/* PDF exports toolbar */}
@@ -370,9 +422,22 @@ const AnalyticsPanel = () => {
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-primary">Reports · PDF</div>
             <h3 className="font-display font-bold text-lg">Download formatted reports</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">All exports respect the date range above. WhatsApp PDF includes recommended product + quantity per click.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">All exports respect the filters above. WhatsApp PDF includes recommended product + quantity per click.</p>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              onClick={() => {
+                const y = new Date(); y.setDate(y.getDate() - 1);
+                const s = y.toISOString().slice(0, 10);
+                setFromDate(s); setToDate(s);
+                // Give React a tick so the range applies before we render the PDF
+                setTimeout(() => exportFunnelPdf("daily"), 60);
+              }}
+              className="gap-2 bg-foreground text-background hover:bg-foreground/90"
+            >
+              <FileText size={14} /> Yesterday · funnel PDF
+            </Button>
             <Button size="sm" variant="outline" onClick={exportWhatsAppPdf} className="gap-2"><FileText size={14} /> WhatsApp clicks PDF</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("daily")} className="gap-2"><FileText size={14} /> Funnel · daily</Button>
             <Button size="sm" variant="outline" onClick={() => exportFunnelPdf("weekly")} className="gap-2"><FileText size={14} /> Funnel · weekly</Button>
