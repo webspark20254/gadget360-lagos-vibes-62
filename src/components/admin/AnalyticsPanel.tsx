@@ -74,11 +74,12 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  // One-click deep-link from Profile: /admin?tab=analytics&download=yesterday
+  // One-click deep-link from Profile: /admin?tab=analytics&download=yesterday|today
   useEffect(() => {
-    if (autoDownload !== "yesterday" || loading) return;
-    const y = new Date(); y.setDate(y.getDate() - 1);
-    const s = y.toISOString().slice(0, 10);
+    if ((autoDownload !== "yesterday" && autoDownload !== "today") || loading) return;
+    const d = new Date();
+    if (autoDownload === "yesterday") d.setDate(d.getDate() - 1);
+    const s = d.toISOString().slice(0, 10);
     setFromDate(s); setToDate(s);
     const t = setTimeout(() => exportFunnelPdf("daily"), 200);
     return () => clearTimeout(t);
