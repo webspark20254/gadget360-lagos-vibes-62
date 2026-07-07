@@ -428,10 +428,20 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
             <Button
               size="sm"
               onClick={() => {
+                const s = new Date().toISOString().slice(0, 10);
+                setFromDate(s); setToDate(s);
+                setTimeout(() => exportFunnelPdf("daily"), 60);
+              }}
+              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <FileText size={14} /> Today · funnel PDF
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
                 const y = new Date(); y.setDate(y.getDate() - 1);
                 const s = y.toISOString().slice(0, 10);
                 setFromDate(s); setToDate(s);
-                // Give React a tick so the range applies before we render the PDF
                 setTimeout(() => exportFunnelPdf("daily"), 60);
               }}
               className="gap-2 bg-foreground text-background hover:bg-foreground/90"
