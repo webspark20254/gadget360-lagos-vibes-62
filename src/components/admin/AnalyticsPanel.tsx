@@ -74,11 +74,12 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
     return () => { supabase.removeChannel(ch); };
   }, []);
 
-  // One-click deep-link from Profile: /admin?tab=analytics&download=yesterday
+  // One-click deep-link from Profile: /admin?tab=analytics&download=yesterday|today
   useEffect(() => {
-    if (autoDownload !== "yesterday" || loading) return;
-    const y = new Date(); y.setDate(y.getDate() - 1);
-    const s = y.toISOString().slice(0, 10);
+    if ((autoDownload !== "yesterday" && autoDownload !== "today") || loading) return;
+    const d = new Date();
+    if (autoDownload === "yesterday") d.setDate(d.getDate() - 1);
+    const s = d.toISOString().slice(0, 10);
     setFromDate(s); setToDate(s);
     const t = setTimeout(() => exportFunnelPdf("daily"), 200);
     return () => clearTimeout(t);
@@ -428,10 +429,20 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
             <Button
               size="sm"
               onClick={() => {
+                const s = new Date().toISOString().slice(0, 10);
+                setFromDate(s); setToDate(s);
+                setTimeout(() => exportFunnelPdf("daily"), 60);
+              }}
+              className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <FileText size={14} /> Today · funnel PDF
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
                 const y = new Date(); y.setDate(y.getDate() - 1);
                 const s = y.toISOString().slice(0, 10);
                 setFromDate(s); setToDate(s);
-                // Give React a tick so the range applies before we render the PDF
                 setTimeout(() => exportFunnelPdf("daily"), 60);
               }}
               className="gap-2 bg-foreground text-background hover:bg-foreground/90"
