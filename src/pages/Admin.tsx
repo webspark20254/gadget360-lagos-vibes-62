@@ -135,27 +135,15 @@ const Admin = () => {
   useEffect(() => {
     let mounted = true;
     let productsChannel: ReturnType<typeof supabase.channel> | null = null;
+    let authorized = false;
 
-    const bootAdmin = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-
-      if (!mounted) return;
-
-      if (error || !user) {
-        setAuthChecking(false);
-        setLoading(false);
-        toast({ title: "Sign in required", description: "Please sign in before opening the admin dashboard.", variant: "destructive" });
-        navigate("/auth");
-        return;
-      }
-
+    const verifyAndBoot = async (userId: string, email: string | null) => {
+      if (authorized) return;
       const { data: isAdmin, error: roleError } = await supabase.rpc("has_role", {
-        _user_id: user.id,
+        _user_id: userId,
         _role: "admin",
       });
-
       if (!mounted) return;
-
       if (roleError || !isAdmin) {
         setAuthChecking(false);
         setLoading(false);
@@ -163,21 +151,16 @@ const Admin = () => {
         navigate("/");
         return;
       }
-
-      setAdminEmail(user.email || "admin");
-
-
+      authorized = true;
+      setAdminEmail(email || "admin");
       setAuthChecking(false);
       await fetchData();
-      
-      // Real-time subscription for products with visual notifications
+
       productsChannel = supabase
         .channel('products-changes')
-        .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'products' }, 
+        .on('postgres_changes',
+          { event: '*', schema: 'public', table: 'products' },
           (payload) => {
-            console.log('Product change detected:', payload);
-            
             if (payload.eventType === 'INSERT') {
               toast({ title: "New Product Added", description: "A new product has been added to the store" });
             } else if (payload.eventType === 'UPDATE') {
@@ -185,17 +168,51 @@ const Admin = () => {
             } else if (payload.eventType === 'DELETE') {
               toast({ title: "Product Deleted", description: "A product has been removed from the store" });
             }
-            
             fetchData();
           }
         )
         .subscribe();
     };
 
-    bootAdmin();
+    // Subscribe FIRST so we catch INITIAL_SESSION during hydration
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      if (session?.user) {
+        void verifyAndBoot(session.user.id, session.user.email ?? null);
+      } else if (event === "SIGNED_OUT") {
+        authorized = false;
+        setAuthChecking(false);
+        setLoading(false);
+        navigate("/auth");
+      }
+    });
+
+    // Also check existing session immediately (covers hard refresh / direct URL)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      if (session?.user) {
+        void verifyAndBoot(session.user.id, session.user.email ?? null);
+      } else {
+        // Give the auth client a brief window to hydrate before redirecting
+        setTimeout(async () => {
+          if (!mounted || authorized) return;
+          const { data: { session: s2 } } = await supabase.auth.getSession();
+          if (!mounted || authorized) return;
+          if (s2?.user) {
+            void verifyAndBoot(s2.user.id, s2.user.email ?? null);
+          } else {
+            setAuthChecking(false);
+            setLoading(false);
+            toast({ title: "Sign in required", description: "Please sign in before opening the admin dashboard.", variant: "destructive" });
+            navigate("/auth");
+          }
+        }, 400);
+      }
+    });
 
     return () => {
       mounted = false;
+      subscription.unsubscribe();
       if (productsChannel) supabase.removeChannel(productsChannel);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
