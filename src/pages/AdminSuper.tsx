@@ -18,14 +18,36 @@ const AdminSuper = () => {
     setLoading(true);
     setError("");
     try {
-      const { data, error: fnErr } = await supabase.functions.invoke("adminsuper-login", {
-        body: { password },
+      // Clear any stale session first — a stale/expired user JWT on the
+      // Authorization header can cause the gateway to reject the invoke
+      // before it ever reaches the edge function (non-2xx on first try,
+      // works after refresh / in incognito).
+      try { await supabase.auth.signOut({ scope: "local" } as any); } catch {}
+
+      // Call the edge function via raw fetch so we control the headers
+      // exactly (anon key only, no stale bearer token).
+      const SUPABASE_URL = "https://yasicaakzqqhmtgscbhg.supabase.co";
+      const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlhc2ljYWFrenFxaG10Z3NjYmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyOTY4OTUsImV4cCI6MjA3MTg3Mjg5NX0.Fv_WBq_pw46OwE6tT3kTCzIqtgMSSO_pqaXBh8CTxrU";
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/adminsuper-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: ANON,
+          Authorization: `Bearer ${ANON}`,
+        },
+        body: JSON.stringify({ password }),
       });
-      if (fnErr || !data?.token_hash) {
-        setError(data?.error || fnErr?.message || "Invalid password");
+
+      let data: any = null;
+      try { data = await res.json(); } catch {}
+
+      if (!res.ok || !data?.token_hash) {
+        setError(data?.error || (res.status === 401 ? "Invalid password" : `Login failed (${res.status})`));
         setLoading(false);
         return;
       }
+
       const { error: otpErr } = await supabase.auth.verifyOtp({
         type: "magiclink",
         token_hash: data.token_hash,
