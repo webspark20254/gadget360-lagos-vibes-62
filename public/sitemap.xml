@@ -178,12 +178,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gadget360.ng/product/c538ff7a-d102-4465-9bf0-6afea1f797ad</loc>
-    <lastmod>2025-10-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://gadget360.ng/product/f23bb3b5-5803-4fa2-a7c7-3042fd6571d6</loc>
     <lastmod>2025-10-24</lastmod>
     <changefreq>weekly</changefreq>
@@ -216,6 +210,24 @@
   <url>
     <loc>https://gadget360.ng/product/2b044aad-8811-44a4-81c9-66f1cece2cda</loc>
     <lastmod>2026-07-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gadget360.ng/product/4b3feae0-6f2e-40a2-9441-efe185cf3019</loc>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gadget360.ng/product/c538ff7a-d102-4465-9bf0-6afea1f797ad</loc>
+    <lastmod>2026-07-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gadget360.ng/product/8063174b-ed3b-4ded-ae59-cb489b0e2979</loc>
+    <lastmod>2026-07-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
