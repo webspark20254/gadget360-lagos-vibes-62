@@ -16,11 +16,19 @@ interface ProductAddToCartProps {
 const ProductAddToCart = ({ productId, stockQuantity, className = "" }: ProductAddToCartProps) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleAddToCart = async () => {
+    if (authLoading) {
+      toast({
+        title: "Checking your account",
+        description: "Please wait a moment and try again.",
+      });
+      return;
+    }
+
     if (!user) {
       toast({
         title: "Sign in required",
@@ -134,10 +142,12 @@ const ProductAddToCart = ({ productId, stockQuantity, className = "" }: ProductA
       
       <Button 
         onClick={handleAddToCart}
-        disabled={loading || stockQuantity === 0}
+        disabled={loading || authLoading || stockQuantity === 0}
         className="flex-1"
       >
-        {loading ? (
+        {authLoading ? (
+          "Checking..."
+        ) : loading ? (
           "Adding..."
         ) : (
           <>

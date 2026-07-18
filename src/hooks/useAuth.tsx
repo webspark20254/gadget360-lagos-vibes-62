@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { SUPABASE_AUTH_STORAGE_KEY, supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 
 interface AuthContextType {
@@ -26,6 +26,21 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+const LEGACY_AUTH_STORAGE_KEYS = [
+  'sb-yasicaakzqqhmtgscbhg-auth-token',
+  'supabase.auth.token',
+];
+
+const clearLegacyAuthStorage = () => {
+  try {
+    LEGACY_AUTH_STORAGE_KEYS.forEach((key) => {
+      if (key !== SUPABASE_AUTH_STORAGE_KEY) localStorage.removeItem(key);
+    });
+  } catch (error) {
+    console.warn('Unable to clear legacy auth storage:', error);
+  }
+};
+
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -33,13 +48,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { toast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
+    clearLegacyAuthStorage();
+
+    const applySession = (nextSession: Session | null) => {
+      if (!mounted) return;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
+      setLoading(false);
+    };
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        if (event === 'SIGNED_OUT') clearLegacyAuthStorage();
+        applySession(session);
 
         // Handle profile creation for new signups
         if (event === 'SIGNED_IN' && session?.user && session.user.email_confirmed_at) {
@@ -74,17 +97,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     );
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session }, error }) => {
+        if (error) throw error;
+        applySession(session);
+      })
+      .catch((error) => {
+        console.warn('Auth session could not be restored. Clearing stale browser session.', error);
+        try {
+          localStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);
+          clearLegacyAuthStorage();
+        } catch {}
+        applySession(null);
+      });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     try {
+      await supabase.auth.signOut({ scope: 'local' } as any).catch(() => undefined);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -116,7 +152,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
+      const redirectUrl = `${window.location.origin}/welcome`;
       
       const { error } = await supabase.auth.signUp({
         email,

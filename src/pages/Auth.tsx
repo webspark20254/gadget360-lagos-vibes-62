@@ -86,6 +86,7 @@ const Auth = () => {
     setError("");
 
     try {
+      await supabase.auth.signOut({ scope: "local" } as any).catch(() => undefined);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
