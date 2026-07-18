@@ -21,7 +21,7 @@ import { waOrderUrl, waQuoteUrl, formatNaira } from "@/lib/whatsapp";
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<any>(null);
   const [related, setRelated] = useState<any[]>([]);
@@ -105,6 +105,10 @@ const ProductDetail = () => {
   };
 
   const addToCart = async () => {
+    if (authLoading) {
+      toast({ title: "Checking your account", description: "Please wait a moment and try again." });
+      return;
+    }
     if (!user) { navigate("/auth"); return; }
     const { data: existing } = await supabase
       .from("cart_items").select("id, quantity").eq("user_id", user.id).eq("product_id", product.id).maybeSingle();

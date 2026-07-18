@@ -17,7 +17,7 @@ interface CartItem {
 }
 
 const MiniCart = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState<CartItem[]>([]);
@@ -85,8 +85,8 @@ const MiniCart = () => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const trigger = (
-    <Button variant="ghost" size="icon" className="relative rounded-full h-9 w-9" aria-label="Open cart">
+  const renderTrigger = (props: any = {}) => (
+    <Button variant="ghost" size="icon" className="relative rounded-full h-9 w-9" aria-label="Open cart" {...props}>
       <ShoppingCart className="h-4 w-4" />
       {count > 0 && (
         <Badge className="absolute -top-1 -right-1 h-4 min-w-4 px-1 flex items-center justify-center text-[10px] bg-primary text-primary-foreground border-0">
@@ -96,12 +96,14 @@ const MiniCart = () => {
     </Button>
   );
 
+  const trigger = renderTrigger();
+
+  if (authLoading) {
+    return renderTrigger({ disabled: true, "aria-label": "Loading cart" });
+  }
+
   if (!user) {
-    return (
-      <button onClick={() => navigate("/auth")} className="contents">
-        {trigger}
-      </button>
-    );
+    return renderTrigger({ onClick: () => navigate("/auth"), "aria-label": "Sign in to open cart" });
   }
 
   return (

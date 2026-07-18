@@ -23,14 +23,15 @@ interface CartItem {
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    if (authLoading) return;
     if (!user) { navigate("/auth"); return; }
     loadCartItems();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const loadCartItems = async () => {
     if (!user) return;
