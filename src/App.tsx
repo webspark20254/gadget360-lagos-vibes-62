@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import AdminSuper from "./pages/AdminSuper";
+import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
 import PageViewTracker from "@/components/PageViewTracker";
 import WhatsAppClickTracker from "@/components/WhatsAppClickTracker";
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/cart" element={<Cart />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/adminsuper" element={<AdminSuper />} />
+            <Route path="/welcome" element={<Welcome />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
