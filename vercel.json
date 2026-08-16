@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
+    { "source": "/sitemap.xml", "destination": "https://yasicaakzqqhmtgscbhg.supabase.co/functions/v1/sitemap" },
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/admin/(.*)", "destination": "/index.html" },
     { "source": "/adminsuper", "destination": "/index.html" },
