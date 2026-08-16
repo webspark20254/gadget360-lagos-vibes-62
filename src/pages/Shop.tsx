@@ -152,7 +152,7 @@ const Shop = () => {
       price: p.price,
       priceCurrency: "NGN",
       availability: p.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `https://gadget360.ng/product/${p.id}`,
+      url: `https://gadgets360.ng/product/${p.id}`,
     },
   }));
 

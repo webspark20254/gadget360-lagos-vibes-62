@@ -9,7 +9,7 @@ interface SeoProps {
   jsonLd?: Record<string, any> | Record<string, any>[];
 }
 
-const SITE = "https://gadget360.ng";
+const SITE = "https://gadgets360.ng";
 
 const Seo = ({ title, description, canonical, image = "/favicon.png", type = "website", jsonLd }: SeoProps) => {
   const url = canonical?.startsWith("http") ? canonical : `${SITE}${canonical || ""}`;
