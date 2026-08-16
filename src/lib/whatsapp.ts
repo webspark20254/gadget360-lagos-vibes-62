@@ -6,7 +6,7 @@ export const formatNaira = (a: number) =>
 
 // Every outbound message identifies the website as the source so the team
 // instantly knows the lead came from gadget360.ng (not a saved contact).
-const FROM_WEBSITE = "Hi Gadget360.ng team! 👋 I'm messaging from your website (gadget360.ng).";
+const FROM_WEBSITE = "Hi Gadget360.ng team! 👋 I'm messaging from your website (gadgets360.ng).";
 
 export const waOrderUrl = (productName: string, price: number, quantity = 1) => {
   const qty = Math.max(1, Math.floor(quantity));
