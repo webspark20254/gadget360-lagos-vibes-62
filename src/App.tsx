@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,15 +9,25 @@ import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Contact from "./pages/Contact";
 import ProductDetail from "./pages/ProductDetail";
-import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
-import Cart from "./pages/Cart";
-import Admin from "./pages/Admin";
-import AdminSuper from "./pages/AdminSuper";
-import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
 import PageViewTracker from "@/components/PageViewTracker";
 import WhatsAppClickTracker from "@/components/WhatsAppClickTracker";
+
+/* Heavy / rarely-visited routes are code-split so the storefront's first load
+   stays small. Admin pulls in charts + PDF tooling and must never ship to shoppers. */
+const Auth = lazy(() => import("./pages/Auth"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Admin = lazy(() => import("./pages/Admin"));
+const AdminSuper = lazy(() => import("./pages/AdminSuper"));
+const Welcome = lazy(() => import("./pages/Welcome"));
+
+const RouteFallback = () => (
+  <div className="min-h-screen grid place-items-center bg-background">
+    <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" aria-label="Loading" />
+  </div>
+);
+
 
 const queryClient = new QueryClient();
 
