@@ -3,7 +3,7 @@
 import { writeFileSync, mkdirSync } from "fs";
 import { resolve, dirname } from "path";
 
-const BASE_URL = "https://gadget360.ng";
+const BASE_URL = "https://gadgets360.ng";
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || "https://yasicaakzqqhmtgscbhg.supabase.co";
 const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlhc2ljYWFrenFxaG10Z3NjYmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyOTY4OTUsImV4cCI6MjA3MTg3Mjg5NX0.Fv_WBq_pw46OwE6tT3kTCzIqtgMSSO_pqaXBh8CTxrU";

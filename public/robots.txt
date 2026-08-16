@@ -1,5 +1,12 @@
 User-agent: *
 Allow: /
 
-# Live sitemap (regenerates on every request from the Supabase products table)
-Sitemap: https://yasicaakzqqhmtgscbhg.supabase.co/functions/v1/sitemap
+# Keep private/admin surfaces out of the index
+Disallow: /admin
+Disallow: /adminsuper
+Disallow: /profile
+Disallow: /cart
+Disallow: /auth
+Disallow: /welcome
+
+Sitemap: https://gadgets360.ng/sitemap.xml

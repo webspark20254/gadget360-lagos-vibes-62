@@ -9,9 +9,9 @@ interface SeoProps {
   jsonLd?: Record<string, any> | Record<string, any>[];
 }
 
-const SITE = "https://gadget360.ng";
+const SITE = "https://gadgets360.ng";
 
-const Seo = ({ title, description, canonical, image = "/favicon.png", type = "website", jsonLd }: SeoProps) => {
+const Seo = ({ title, description, canonical, image = "/og-image.jpg", type = "website", jsonLd }: SeoProps) => {
   const url = canonical?.startsWith("http") ? canonical : `${SITE}${canonical || ""}`;
   const absImage = image.startsWith("http") ? image : `${SITE}${image.startsWith("/") ? image : `/${image}`}`;
   const ldArray = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];

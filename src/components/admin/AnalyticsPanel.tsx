@@ -624,7 +624,7 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
           <div>
             <div className="text-[10px] uppercase tracking-[0.25em] text-primary">WhatsApp from website</div>
             <h3 className="font-display font-bold text-xl">Order & message clicks</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Every tap on a WhatsApp button on gadget360.ng — so the team knows the lead came from the site.</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Every tap on a WhatsApp button on gadgets360.ng — so the team knows the lead came from the site.</p>
           </div>
           <MessageCircle size={18} className="text-whatsapp" />
         </div>

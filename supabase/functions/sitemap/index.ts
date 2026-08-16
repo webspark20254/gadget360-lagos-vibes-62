@@ -3,7 +3,7 @@
 //
 // Public URL: https://yasicaakzqqhmtgscbhg.supabase.co/functions/v1/sitemap
 
-const BASE_URL = "https://gadget360.ng";
+const BASE_URL = "https://gadgets360.ng";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 

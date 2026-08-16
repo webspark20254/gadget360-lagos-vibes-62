@@ -21,10 +21,10 @@ const Index = () => (
         {
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
-          "@id": "https://gadget360.ng/#business",
+          "@id": "https://gadgets360.ng/#business",
           name: "Gadget360.ng",
-          image: "https://gadget360.ng/favicon.png",
-          url: "https://gadget360.ng",
+          image: "https://gadgets360.ng/og-image.jpg",
+          url: "https://gadgets360.ng",
           telephone: "+2348108418727",
           priceRange: "₦₦",
           address: {
@@ -50,10 +50,10 @@ const Index = () => (
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Gadget360.ng",
-          url: "https://gadget360.ng",
+          url: "https://gadgets360.ng",
           potentialAction: {
             "@type": "SearchAction",
-            target: "https://gadget360.ng/shop?search={search_term_string}",
+            target: "https://gadgets360.ng/shop?search={search_term_string}",
             "query-input": "required name=search_term_string",
           },
         },

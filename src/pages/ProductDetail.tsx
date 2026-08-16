@@ -99,7 +99,7 @@ const ProductDetail = () => {
       price: product.price,
       priceCurrency: "NGN",
       availability: inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `https://gadget360.ng/product/${product.id}`,
+      url: `https://gadgets360.ng/product/${product.id}`,
       seller: { "@type": "Organization", name: "Gadget360.ng" },
     },
   };

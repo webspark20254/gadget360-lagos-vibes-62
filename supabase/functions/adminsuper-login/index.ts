@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     // Constant-time-ish compare
     const a = new TextEncoder().encode(String(password || ""));
     const b = new TextEncoder().encode(expected);
-    let ok = a.length === b.length;
+    const ok = a.length === b.length;
     const len = Math.max(a.length, b.length);
     let diff = a.length ^ b.length;
     for (let i = 0; i < len; i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0);

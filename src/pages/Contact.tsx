@@ -41,10 +41,10 @@ const Contact = () => {
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: "Gadget360.ng",
-          image: "https://gadget360.ng/favicon.png",
+          image: "https://gadgets360.ng/og-image.jpg",
           telephone: "+2348108418727",
           email: "gadget360ng@gmail.com",
-          url: "https://gadget360.ng/contact",
+          url: "https://gadgets360.ng/contact",
           priceRange: "₦₦",
           address: [
             { "@type": "PostalAddress", streetAddress: "24 Adegbola Street, Opposite Railway Line", addressLocality: "Ikeja", addressRegion: "Lagos", addressCountry: "NG" },
