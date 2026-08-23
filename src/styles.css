@@ -1,0 +1,277 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Gadget360.ng — Warm ivory + brand crimson, editorial-magazine system
+   (ported from the Classic src/index.css + tailwind.config.ts) */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-glow: var(--primary-glow);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-cream: var(--cream);
+  --color-cream-foreground: var(--cream-foreground);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-foreground: var(--whatsapp-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-serif-display: "Instrument Serif", Georgia, serif;
+
+  --animate-fade-up: fade-up 0.5s ease-out;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes fade-up {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+}
+
+:root {
+  --background: hsl(42 48% 96%);
+  --foreground: hsl(0 0% 9%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 9%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 9%);
+
+  --primary: hsl(357 72% 45%);
+  --primary-foreground: hsl(0 0% 100%);
+  --primary-glow: hsl(357 82% 58%);
+
+  --cream: hsl(45 65% 90%);
+  --cream-foreground: hsl(0 0% 12%);
+
+  --ink: hsl(0 0% 9%);
+  --ink-foreground: hsl(42 48% 96%);
+
+  --secondary: hsl(45 50% 92%);
+  --secondary-foreground: hsl(0 0% 12%);
+
+  --muted: hsl(42 30% 92%);
+  --muted-foreground: hsl(0 0% 38%);
+
+  --accent: hsl(357 72% 45%);
+  --accent-foreground: hsl(0 0% 100%);
+
+  --destructive: hsl(0 84% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --border: hsl(36 18% 86%);
+  --input: hsl(36 18% 86%);
+  --ring: hsl(357 72% 45%);
+
+  --whatsapp: hsl(142 70% 42%);
+  --whatsapp-foreground: hsl(0 0% 100%);
+
+  --success: hsl(142 60% 36%);
+  --success-foreground: hsl(0 0% 100%);
+
+  --radius: 1rem;
+
+  --gradient-crimson: linear-gradient(135deg, hsl(357 72% 45%), hsl(357 85% 58%));
+  --gradient-warm: linear-gradient(180deg, hsl(45 70% 94%) 0%, hsl(42 48% 96%) 100%);
+  --gradient-ink: linear-gradient(180deg, hsl(0 0% 11%), hsl(0 0% 6%));
+
+  --shadow-soft: 0 1px 0 hsl(0 0% 0% / 0.04), 0 8px 24px -12px hsl(0 0% 0% / 0.10);
+  --shadow-card: 0 1px 0 hsl(0 0% 0% / 0.03), 0 18px 40px -20px hsl(0 0% 0% / 0.20);
+  --shadow-glow-crimson: 0 18px 50px -16px hsl(357 72% 45% / 0.45);
+  --shadow-elegant: 0 24px 60px -28px hsl(0 0% 0% / 0.35);
+
+  --glass-bg: hsla(45, 60%, 96%, 0.65);
+  --glass-border: hsla(0, 0%, 100%, 0.6);
+
+  --sidebar-background: hsl(42 48% 96%);
+  --sidebar-foreground: hsl(0 0% 20%);
+  --sidebar-primary: hsl(357 72% 45%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(45 50% 92%);
+  --sidebar-accent-foreground: hsl(0 0% 12%);
+  --sidebar-border: hsl(36 18% 86%);
+  --sidebar-ring: hsl(357 72% 45%);
+}
+
+.dark {
+  --background: hsl(0 0% 6%);
+  --foreground: hsl(42 30% 94%);
+
+  --card: hsl(0 0% 10%);
+  --card-foreground: hsl(42 30% 94%);
+
+  --popover: hsl(0 0% 10%);
+  --popover-foreground: hsl(42 30% 94%);
+
+  --primary: hsl(357 82% 58%);
+  --primary-foreground: hsl(0 0% 100%);
+  --primary-glow: hsl(357 88% 68%);
+
+  --cream: hsl(45 30% 18%);
+  --cream-foreground: hsl(42 30% 94%);
+
+  --ink: hsl(42 30% 94%);
+  --ink-foreground: hsl(0 0% 9%);
+
+  --secondary: hsl(0 0% 12%);
+  --secondary-foreground: hsl(42 30% 94%);
+
+  --muted: hsl(0 0% 14%);
+  --muted-foreground: hsl(42 12% 65%);
+
+  --accent: hsl(357 82% 58%);
+  --accent-foreground: hsl(0 0% 100%);
+
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --border: hsl(0 0% 18%);
+  --input: hsl(0 0% 18%);
+  --ring: hsl(357 82% 58%);
+
+  --gradient-warm: linear-gradient(180deg, hsl(0 0% 9%) 0%, hsl(0 0% 6%) 100%);
+  --gradient-ink: linear-gradient(180deg, hsl(0 0% 14%), hsl(0 0% 8%));
+
+  --glass-bg: hsla(0, 0%, 9%, 0.6);
+  --glass-border: hsla(42, 30%, 94%, 0.08);
+}
+
+/* Container port: Classic config had center:true, padding 1.25rem, 2xl max 1400px */
+@utility container {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+  max-width: 1400px;
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: "Bricolage Grotesque", "Plus Jakarta Sans", system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    font-optical-sizing: auto;
+  }
+
+  .font-serif-display {
+    font-family: "Instrument Serif", Georgia, serif;
+    letter-spacing: -0.01em;
+    font-style: italic;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar,
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .no-scrollbar, .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .bg-gradient-crimson { background: var(--gradient-crimson); }
+  .bg-gradient-warm { background: var(--gradient-warm); }
+  .bg-gradient-ink { background: var(--gradient-ink); }
+
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-elegant { box-shadow: var(--shadow-elegant); }
+  .shadow-glow-crimson { box-shadow: var(--shadow-glow-crimson); }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+  .glass-strong {
+    background: var(--glass-bg);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 18px 50px -18px hsl(0 0% 0% / 0.18);
+  }
+
+  .text-balance { text-wrap: balance; }
+  .line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+  .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+
+  .animate-marquee { animation: marquee 30s linear infinite; }
+
+  /* Grain overlay — pre-rasterised static noise tile (NOT live SVG turbulence).
+     The previous fractalNoise filter re-rasterised on every scroll/repaint and
+     caused a TV-static flicker on high-DPR mobile screens. */
+  .grain::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.05;
+    background-image:
+      radial-gradient(rgba(0,0,0,0.18) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,0.12) 1px, transparent 1px);
+    background-size: 3px 3px, 7px 7px;
+    background-position: 0 0, 1px 2px;
+    will-change: auto;
+  }
+  @media (max-width: 768px) {
+    /* Mobile: disable entirely — every extra composited layer at dpr 2.75+
+       costs frames and can re-introduce flicker. */
+    .grain::before { display: none; }
+  }
+}
