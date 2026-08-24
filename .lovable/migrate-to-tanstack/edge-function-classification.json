@@ -1,0 +1,40 @@
+{
+  "functions": [
+    {
+      "name": "sitemap",
+      "classification": "fixed URL / external caller",
+      "signal": "referenced by vercel.json rewrite for /sitemap.xml and by robots.txt; crawlers hit the URL directly",
+      "outcome": "left"
+    },
+    {
+      "name": "gemini-chat",
+      "classification": "internal-only (project-pinned to Supabase)",
+      "signal": "called from src/components/GeminiChat.tsx; GEMINI API key stored as a Supabase secret and project rule pins AI features to Supabase Edge Functions",
+      "outcome": "left"
+    },
+    {
+      "name": "analytics-insights",
+      "classification": "internal-only (project-pinned to Supabase)",
+      "signal": "called from src/components/admin/AnalyticsPanel.tsx; same Gemini secret and project rule",
+      "outcome": "left"
+    },
+    {
+      "name": "generate-product",
+      "classification": "internal-only (project-pinned to Supabase)",
+      "signal": "called from src/pages/Admin.tsx; same Gemini secret and project rule",
+      "outcome": "left"
+    },
+    {
+      "name": "upload-image",
+      "classification": "internal-only, service-role",
+      "signal": "called from src/pages/Admin.tsx; writes to Supabase Storage using SUPABASE_SERVICE_ROLE_KEY",
+      "outcome": "left"
+    },
+    {
+      "name": "adminsuper-login",
+      "classification": "internal-only, service-role",
+      "signal": "called from src/pages/AdminSuper.tsx; mints an admin session with SUPABASE_SERVICE_ROLE_KEY",
+      "outcome": "left"
+    }
+  ]
+}

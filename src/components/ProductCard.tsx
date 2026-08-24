@@ -2,7 +2,7 @@ import { Star, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import OptimizedImage from "@/components/OptimizedImage";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { waOrderUrl, waQuoteUrl, formatNaira } from "@/lib/whatsapp";

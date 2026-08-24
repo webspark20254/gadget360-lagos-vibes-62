@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { ShoppingCart, Plus, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 
 interface ProductAddToCartProps {
   productId: string;
