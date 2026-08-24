@@ -6,7 +6,7 @@ import { ShoppingCart, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link } from "@/lib/router-compat";
 import { formatNaira, waCartOrderUrl } from "@/lib/whatsapp";
 import { trackWhatsAppClick } from "@/lib/analytics";
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Search, X, ArrowRight, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "@/lib/router-compat";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES } from "@/lib/categories";
 import { formatNaira } from "@/lib/whatsapp";

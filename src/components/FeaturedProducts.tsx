@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import ProductCard from "./ProductCard";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router-compat";
 import { supabase } from '@/integrations/supabase/client';
 
 const FeaturedProducts = () => {
