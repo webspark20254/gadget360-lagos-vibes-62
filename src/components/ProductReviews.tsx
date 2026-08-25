@@ -10,7 +10,7 @@ import { Star, User } from "lucide-react";
 interface Review {
   id: string;
   rating: number;
-  comment: string;
+  comment: string | null;
   created_at: string;
   profiles: {
     full_name: string;
