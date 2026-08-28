@@ -16,6 +16,26 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://gadgets360.ng/privacy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://gadgets360.ng/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://gadgets360.ng/returns</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://gadgets360.ng/warranty</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://gadgets360.ng/shop?category=Smartphones</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
