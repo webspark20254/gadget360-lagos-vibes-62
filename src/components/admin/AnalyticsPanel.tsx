@@ -406,7 +406,7 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
             </select>
           </label>
           <label className="text-xs text-muted-foreground">Page path contains
-            <Input placeholder="/product/ or /shop" value={pathFilter} onChange={(e) => setPathFilter(e.target.value)} className="mt-1 h-9 text-sm" />
+            <Input aria-label="Filter by page path" placeholder="/product/ or /shop" value={pathFilter} onChange={(e) => setPathFilter(e.target.value)} className="mt-1 h-9 text-sm" />
           </label>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" variant="outline" onClick={() => { setFromDate(d30.toISOString().slice(0,10)); setToDate(todayIso); setSourceFilter(""); setPathFilter(""); setCategoryFilter(""); }}>Reset</Button>

@@ -77,6 +77,8 @@ const AdminSuper = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               type="password"
+              aria-label="Admin password"
+              autoComplete="current-password"
               placeholder="Admin password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

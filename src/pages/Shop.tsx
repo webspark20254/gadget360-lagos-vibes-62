@@ -130,8 +130,8 @@ const Shop = () => {
       <div>
         <h3 className="font-display font-semibold text-sm mb-3 uppercase tracking-wider">Price (₦)</h3>
         <div className="grid grid-cols-2 gap-2">
-          <Input type="number" placeholder="Min" value={priceRange.min || ""} onChange={(e) => setPriceRange({ ...priceRange, min: Number(e.target.value) || 0 })} className="h-10 rounded-xl" />
-          <Input type="number" placeholder="Max" value={priceRange.max || ""} onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) || 5000000 })} className="h-10 rounded-xl" />
+          <Input type="number" aria-label="Minimum price" placeholder="Min" value={priceRange.min || ""} onChange={(e) => setPriceRange({ ...priceRange, min: Number(e.target.value) || 0 })} className="h-10 rounded-xl" />
+          <Input type="number" aria-label="Maximum price" placeholder="Max" value={priceRange.max || ""} onChange={(e) => setPriceRange({ ...priceRange, max: Number(e.target.value) || 5000000 })} className="h-10 rounded-xl" />
         </div>
       </div>
       <div className="flex gap-2">

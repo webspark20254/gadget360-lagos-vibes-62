@@ -308,7 +308,7 @@ const Profile = () => {
                       </div>
                       <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{r.comment}</p>
                     </div>
-                    <Button onClick={() => deleteReview(r.id)} variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10 shrink-0">
+                    <Button onClick={() => deleteReview(r.id)} aria-label="Delete this review" variant="ghost" size="icon" className="rounded-full text-destructive hover:bg-destructive/10 shrink-0">
                       <Trash2 size={16} />
                     </Button>
                   </div>
@@ -325,7 +325,8 @@ const Profile = () => {
               <h2 className="font-display font-bold text-2xl md:text-3xl tracking-tight">Share your experience</h2>
               <p className="text-sm text-muted-foreground mt-1">Posts go live instantly on the homepage testimonials section.</p>
               <div className="grid sm:grid-cols-2 gap-3 mt-5">
-                <Input value={newTesti.location} onChange={(e) => setNewTesti({ ...newTesti, location: e.target.value })} placeholder="City (e.g. Lagos)" className="h-11 rounded-xl" />
+                <Input value={newTesti.location} onChange={(e) => setNewTesti({ ...newTesti, location: e.target.value })} aria-label="Your city"
+                  placeholder="City (e.g. Lagos)" className="h-11 rounded-xl" />
                 <div className="flex items-center gap-1 h-11 px-4 rounded-xl border border-input bg-background">
                   <span className="text-xs text-muted-foreground mr-2">Rating</span>
                   {[1,2,3,4,5].map((n) => (
@@ -353,7 +354,7 @@ const Profile = () => {
                     <p className="text-sm leading-relaxed">{t.quote}</p>
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
                       <div className="text-xs text-muted-foreground">{t.location || "—"} · {new Date(t.created_at).toLocaleDateString()}</div>
-                      <Button onClick={() => deleteTestimonial(t.id)} variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:bg-destructive/10">
+                      <Button onClick={() => deleteTestimonial(t.id)} aria-label="Delete this testimonial" variant="ghost" size="icon" className="rounded-full h-8 w-8 text-destructive hover:bg-destructive/10">
                         <Trash2 size={14} />
                       </Button>
                     </div>
@@ -372,7 +373,7 @@ const Profile = () => {
               <div className="grid sm:grid-cols-2 gap-4 mt-6">
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Full name</label>
-                  <Input value={profile?.full_name || ""} onChange={(e) => setProfile((p) => p ? { ...p, full_name: e.target.value } : p)} className="h-11 rounded-xl" placeholder="Your full name" />
+                  <Input value={profile?.full_name || ""} onChange={(e) => setProfile((p) => p ? { ...p, full_name: e.target.value } : p)} className="h-11 rounded-xl" aria-label="Your full name" placeholder="Your full name" />
                 </div>
                 <div>
                   <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Email</label>

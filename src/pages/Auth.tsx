@@ -170,6 +170,8 @@ const Auth = () => {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="email"
+                        aria-label="Email address"
+                        autoComplete="email"
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -181,6 +183,8 @@ const Auth = () => {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="password"
+                        aria-label="Password"
+                        autoComplete="current-password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -210,6 +214,8 @@ const Auth = () => {
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="text"
+                        aria-label="Full name"
+                        autoComplete="name"
                         placeholder="Full Name"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
@@ -221,6 +227,8 @@ const Auth = () => {
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="email"
+                        aria-label="Email address"
+                        autoComplete="email"
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -232,6 +240,8 @@ const Auth = () => {
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="tel"
+                        aria-label="Phone number"
+                        autoComplete="tel"
                         placeholder="Phone Number"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
@@ -242,6 +252,8 @@ const Auth = () => {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="password"
+                        aria-label="Password"
+                        autoComplete="new-password"
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -253,6 +265,8 @@ const Auth = () => {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                       <Input
                         type="password"
+                        aria-label="Confirm password"
+                        autoComplete="new-password"
                         placeholder="Confirm Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
