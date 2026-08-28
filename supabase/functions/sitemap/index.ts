@@ -11,6 +11,10 @@ const STATIC: Array<{ path: string; changefreq: string; priority: string }> = [
   { path: "/", changefreq: "daily", priority: "1.0" },
   { path: "/shop", changefreq: "daily", priority: "0.9" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+  { path: "/terms", changefreq: "yearly", priority: "0.3" },
+  { path: "/returns", changefreq: "yearly", priority: "0.4" },
+  { path: "/warranty", changefreq: "yearly", priority: "0.4" },
 ];
 
 const CATEGORIES = ["Smartphones", "Laptops", "Apple", "Gaming", "Audio", "Accessories"];
