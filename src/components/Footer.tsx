@@ -2,7 +2,7 @@ import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import BrandLogo from "@/components/BrandLogo";
 import { Link } from "@/lib/router-compat";
-import { LEGAL_PAGES } from "@/pages/legal/LegalLayout";
+import { LEGAL_PAGES } from "@/lib/legal";
 
 
 

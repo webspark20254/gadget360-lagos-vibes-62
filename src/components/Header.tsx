@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "@/lib/router-compat";
-import { LEGAL_PAGES } from "@/pages/legal/LegalLayout";
+import { LEGAL_PAGES } from "@/lib/legal";
 
 import { useAuth } from "@/hooks/useAuth";
 import MiniCart from "@/components/MiniCart";
