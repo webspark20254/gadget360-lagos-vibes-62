@@ -1,6 +1,10 @@
 import { Phone, Mail, MapPin, ArrowUpRight } from "lucide-react";
 import WhatsAppIcon from "@/components/WhatsAppIcon";
 import BrandLogo from "@/components/BrandLogo";
+import { Link } from "@/lib/router-compat";
+import { LEGAL_PAGES } from "@/pages/legal/LegalLayout";
+
+
 
 
 const Footer = () => (
@@ -60,12 +64,34 @@ const Footer = () => (
           </a>
 
         </div>
+
+        <div className="space-y-3">
+          <h3 className="text-[11px] uppercase tracking-[0.2em] text-ink-foreground/50">Policies</h3>
+          <nav className="flex flex-col gap-2.5 text-sm">
+            {LEGAL_PAGES.map((p) => (
+              <Link
+                key={p.to}
+                to={p.to}
+                className="text-ink-foreground/75 hover:text-primary-glow transition-colors w-fit"
+              >
+                {p.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </div>
 
       <div className="mt-14 pt-6 border-t border-ink-foreground/15 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-ink-foreground/50">
         <p>© 2026 Gadget360.ng — All rights reserved.</p>
-        <div className="flex gap-5"><span>Privacy</span><span>Terms</span><span>Returns & Warranty</span></div>
+        <div className="flex flex-wrap justify-center gap-5">
+          {LEGAL_PAGES.map((p) => (
+            <Link key={p.to} to={p.to} className="hover:text-primary-glow transition-colors">
+              {p.label}
+            </Link>
+          ))}
+        </div>
       </div>
+
     </div>
   </footer>
 );
