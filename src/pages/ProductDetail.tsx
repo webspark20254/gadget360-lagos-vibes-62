@@ -119,7 +119,21 @@ const ProductDetail = () => {
       url: `https://gadgets360.ng/product/${product.id}`,
       seller: { "@type": "Organization", name: "Gadget360.ng" },
     },
+    // Only emit aggregateRating when genuine reviews exist — Google penalises
+    // rating markup that isn't visible on the page.
+    ...(reviewStats.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviewStats.average,
+            reviewCount: reviewStats.count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
+
 
   const addToCart = async () => {
     if (authLoading) {
