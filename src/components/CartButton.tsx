@@ -53,8 +53,9 @@ const CartButton = () => {
     <Button
       variant="ghost"
       size="icon"
-      className="relative rounded-full h-9 w-9"
+      className="relative rounded-full h-11 w-11 md:h-9 md:w-9"
       onClick={handleCartClick}
+      aria-label={cartCount > 0 ? `Open cart, ${cartCount} item${cartCount === 1 ? "" : "s"}` : "Open cart"}
     >
       <ShoppingCart className="h-4 w-4" />
       {cartCount > 0 && (

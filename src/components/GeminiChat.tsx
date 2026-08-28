@@ -264,6 +264,7 @@ const GeminiChat = () => {
                 </p>
                 <div className="w-full max-w-xs mt-5 space-y-2">
                   <Input
+                    aria-label="Your name"
                     placeholder="e.g. Tunde"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
@@ -324,6 +325,7 @@ const GeminiChat = () => {
                       <Input
                         type="tel"
                         inputMode="tel"
+                        aria-label="Your phone number"
                         placeholder="e.g. 0810 841 8727"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
@@ -345,6 +347,7 @@ const GeminiChat = () => {
                   </a>
                   <div className="flex gap-2">
                     <Input
+                      aria-label="Type your message"
                       placeholder="Type a message…"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
@@ -352,7 +355,7 @@ const GeminiChat = () => {
                       disabled={loading}
                       className="flex-1 h-10 rounded-full bg-muted border-transparent focus:bg-background focus:border-border text-sm"
                     />
-                    <Button onClick={handleSendMessage} disabled={loading || !inputValue.trim()} size="icon" className="h-10 w-10 rounded-full bg-foreground hover:bg-foreground/90 text-background shrink-0">
+                    <Button onClick={handleSendMessage} aria-label="Send message" disabled={loading || !inputValue.trim()} size="icon" className="h-10 w-10 rounded-full bg-foreground hover:bg-foreground/90 text-background shrink-0">
                       <Send size={14} />
                     </Button>
                   </div>

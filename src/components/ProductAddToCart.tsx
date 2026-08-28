@@ -118,12 +118,14 @@ const ProductAddToCart = ({ productId, stockQuantity, className = "" }: ProductA
           variant="ghost"
           size="icon"
           onClick={() => setQuantity(Math.max(1, quantity - 1))}
+          aria-label="Decrease quantity"
           className="h-8 w-8"
         >
           <Minus className="h-4 w-4" />
         </Button>
         <Input
           type="number"
+          aria-label="Quantity"
           value={quantity}
           onChange={(e) => setQuantity(Math.max(1, Math.min(stockQuantity, parseInt(e.target.value) || 1)))}
           className="h-8 w-16 text-center border-0 focus-visible:ring-0"
@@ -134,6 +136,7 @@ const ProductAddToCart = ({ productId, stockQuantity, className = "" }: ProductA
           variant="ghost"
           size="icon"
           onClick={() => setQuantity(Math.min(stockQuantity, quantity + 1))}
+          aria-label="Increase quantity"
           className="h-8 w-8"
         >
           <Plus className="h-4 w-4" />

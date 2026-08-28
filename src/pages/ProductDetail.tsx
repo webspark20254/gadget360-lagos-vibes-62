@@ -436,7 +436,7 @@ const ProductDetail = () => {
                       <WhatsAppIcon size={16} /> Quote
                     </Button>
                   </a>
-                  <Button variant="outline" size="icon" className="h-12 w-12 rounded-full border-foreground/20"><Heart size={18} /></Button>
+                  <Button variant="outline" size="icon" aria-label={`Save ${product.name} to wishlist`} className="h-12 w-12 rounded-full border-foreground/20"><Heart size={18} /></Button>
                 </div>
 
                 <ProductAddToCart productId={product.id} stockQuantity={product.stock_quantity} className="w-full" />
