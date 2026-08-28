@@ -7,15 +7,8 @@ import WhatsAppIcon from "@/components/WhatsAppIcon";
 import { Button } from "@/components/ui/button";
 import { waGeneralUrl } from "@/lib/whatsapp";
 import { ChevronRight } from "lucide-react";
+import { LEGAL_PAGES, LAST_UPDATED } from "@/lib/legal";
 
-export const LEGAL_PAGES = [
-  { to: "/privacy", label: "Privacy Policy" },
-  { to: "/terms", label: "Terms of Service" },
-  { to: "/returns", label: "Returns & Refunds" },
-  { to: "/warranty", label: "Warranty" },
-] as const;
-
-export const LAST_UPDATED = "26 August 2026";
 
 interface LegalLayoutProps {
   title: string;

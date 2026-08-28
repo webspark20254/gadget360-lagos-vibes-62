@@ -28,7 +28,10 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [activeTab, setActiveTab] = useState<"about" | "specs" | "reviews">("about");
+  // Aggregated review stats — feeds the Product JSON-LD so Google can render stars.
+  const [reviewStats, setReviewStats] = useState<{ count: number; average: number }>({ count: 0, average: 0 });
   const { toast } = useToast();
+
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -46,6 +49,19 @@ const ProductDetail = () => {
         return;
       }
       setProduct(data);
+
+      // Review aggregate for rich-result stars.
+      const { data: ratings } = await supabase
+        .from("product_reviews")
+        .select("rating")
+        .eq("product_id", data.id);
+      if (ratings && ratings.length > 0) {
+        const sum = ratings.reduce((s: number, r: any) => s + (Number(r.rating) || 0), 0);
+        setReviewStats({ count: ratings.length, average: Math.round((sum / ratings.length) * 10) / 10 });
+      } else {
+        setReviewStats({ count: 0, average: 0 });
+      }
+
       // Related items by category
       if (data.category) {
         const { data: rel } = await supabase
@@ -56,6 +72,7 @@ const ProductDetail = () => {
           .limit(4);
         setRelated(rel || []);
       }
+
     } catch (e) {
       console.error(e);
       navigate("/shop");
@@ -102,7 +119,21 @@ const ProductDetail = () => {
       url: `https://gadgets360.ng/product/${product.id}`,
       seller: { "@type": "Organization", name: "Gadget360.ng" },
     },
+    // Only emit aggregateRating when genuine reviews exist — Google penalises
+    // rating markup that isn't visible on the page.
+    ...(reviewStats.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviewStats.average,
+            reviewCount: reviewStats.count,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        }
+      : {}),
   };
+
 
   const addToCart = async () => {
     if (authLoading) {

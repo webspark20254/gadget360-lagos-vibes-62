@@ -17,6 +17,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import PageViewTracker from "@/components/PageViewTracker";
 import WhatsAppClickTracker from "@/components/WhatsAppClickTracker";
+import AbandonedCartNudge from "@/components/AbandonedCartNudge";
+
 import { reportLovableError } from "@/lib/lovable-error-reporting";
 import appCss from "../styles.css?url";
 
@@ -126,7 +128,9 @@ function RootComponent() {
             <Sonner />
             <PageViewTracker />
             <WhatsAppClickTracker />
+            <AbandonedCartNudge />
             <Outlet />
+
           </TooltipProvider>
         </AuthProvider>
       </HelmetProvider>

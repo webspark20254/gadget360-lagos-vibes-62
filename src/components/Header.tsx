@@ -7,6 +7,8 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Link, useNavigate } from "@/lib/router-compat";
+import { LEGAL_PAGES } from "@/lib/legal";
+
 import { useAuth } from "@/hooks/useAuth";
 import MiniCart from "@/components/MiniCart";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -129,6 +131,20 @@ const Header = () => {
                       </Link>
                     ))}
                   </div>
+                  <h3 className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-6 mb-2">Policies</h3>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+                    {LEGAL_PAGES.map((p) => (
+                      <Link
+                        key={p.to}
+                        to={p.to}
+                        onClick={() => setIsOpen(false)}
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {p.label}
+                      </Link>
+                    ))}
+                  </div>
+
                   <a href={waGeneralUrl()} target="_blank" rel="noopener noreferrer" className="mt-6">
                     <Button className="w-full h-12 rounded-full bg-whatsapp hover:bg-whatsapp/90 text-white font-semibold gap-2">
                       <WhatsAppIcon size={16} /> Order on WhatsApp
