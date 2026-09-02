@@ -183,8 +183,8 @@ const Contact = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Message *</label>
-              <Textarea name="message" value={formData.message} onChange={handleInputChange} required rows={5} placeholder="What gadget are you looking for?" className="rounded-xl" />
+              <label htmlFor="contact-message" className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Message *</label>
+              <Textarea id="contact-message" name="message" value={formData.message} onChange={handleInputChange} required rows={5} placeholder="What gadget are you looking for?" className="rounded-xl" />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-full bg-foreground hover:bg-foreground/90 text-background gap-2 font-semibold">
               {isSubmitting ? "Sending…" : (<><Send size={15} /> Send message</>)}
