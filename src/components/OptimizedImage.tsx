@@ -31,7 +31,7 @@ const OptimizedImage = ({ src, alt, priority = false, className, ...props }: Opt
       />
       {hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-muted">
-          <span className="text-muted-foreground text-sm">Image not available</span>
+          <span className="sr-only">{alt}</span>
         </div>
       )}
     </div>
