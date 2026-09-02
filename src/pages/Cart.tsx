@@ -85,7 +85,7 @@ const Cart = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center text-sm text-muted-foreground">Loading cart…</div>
+        <main className="container mx-auto px-4 py-16 text-center text-sm text-muted-foreground" aria-live="polite">Loading cart…</main>
         <Footer />
       </div>
     );
@@ -96,12 +96,12 @@ const Cart = () => {
       <div className="min-h-screen bg-background">
         <Seo title="Your Cart — Gadget360.ng" description="Review the gadgets in your Gadget360.ng cart and send your order to our Lagos team on WhatsApp for fast checkout." canonical="/cart" />
         <Header />
-        <div className="container mx-auto px-5 py-20 text-center">
-          <ShoppingBag className="mx-auto h-14 w-14 text-muted-foreground mb-4" />
-          <h2 className="font-display font-bold text-3xl mb-2">Your cart is empty</h2>
+        <main className="container mx-auto px-5 py-20 text-center">
+          <ShoppingBag aria-hidden="true" className="mx-auto h-14 w-14 text-muted-foreground mb-4" />
+          <h1 className="font-display font-bold text-3xl mb-2">Your cart is empty</h1>
           <p className="text-muted-foreground mb-6 text-sm">Add a gadget you love to get started.</p>
           <Button onClick={() => navigate("/shop")} className="rounded-full h-11 px-6">Browse Shop</Button>
-        </div>
+        </main>
         <Footer />
       </div>
     );
