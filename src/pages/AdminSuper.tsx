@@ -67,7 +67,8 @@ const AdminSuper = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <meta name="robots" content="noindex,nofollow" />
-      <Card className="max-w-md w-full">
+      <main className="max-w-md w-full">
+      <Card className="w-full">
         <CardHeader className="text-center">
           <Lock className="w-10 h-10 mx-auto text-primary mb-3" />
           <CardTitle>Admin Access</CardTitle>

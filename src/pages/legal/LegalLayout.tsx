@@ -45,6 +45,7 @@ const LegalLayout = ({
       }}
     />
     <Header />
+    <main>
 
     {/* Editorial masthead — same scale language as the rest of the site */}
     <section className="border-b border-border/60 bg-cream text-cream-foreground">
@@ -100,6 +101,7 @@ const LegalLayout = ({
         </article>
       </div>
     </div>
+    </main>
 
     <Footer />
   </div>

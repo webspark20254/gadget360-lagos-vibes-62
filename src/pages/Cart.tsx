@@ -111,7 +111,7 @@ const Cart = () => {
     <div className="min-h-screen bg-background pb-36 lg:pb-0">
       <Seo title="Your Cart — Gadget360.ng" description="Review the gadgets in your Gadget360.ng cart and send your order to our Lagos team on WhatsApp for fast checkout." canonical="/cart" />
       <Header />
-      <div className="container mx-auto px-5 md:px-8 py-6 md:py-10">
+      <main className="container mx-auto px-5 md:px-8 py-6 md:py-10">
         <Link to="/shop" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4">
           <ArrowLeft size={14} /> Continue shopping
         </Link>
