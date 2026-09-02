@@ -749,7 +749,7 @@ const Admin = () => {
         </div>
       </section>
 
-      <div className="container mx-auto px-5 md:px-8 py-8">
+      <main className="container mx-auto px-5 md:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
           <div className="rounded-2xl bg-cream text-cream-foreground p-5">
@@ -1511,7 +1511,7 @@ const Admin = () => {
           </TabsContent>
 
         </Tabs>
-      </div>
+      </main>
 
       {/* Preview Dialog */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
