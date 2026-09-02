@@ -189,7 +189,7 @@ const Cart = () => {
             </div>
           </aside>
         </div>
-      </div>
+      </main>
 
       {/* Mobile sticky checkout bar */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-border/60 px-4 py-3">

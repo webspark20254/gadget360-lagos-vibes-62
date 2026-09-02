@@ -98,6 +98,7 @@ const AdminSuper = () => {
           </form>
         </CardContent>
       </Card>
+      </main>
     </div>
   );
 };
