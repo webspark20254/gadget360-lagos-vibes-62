@@ -85,7 +85,7 @@ const Cart = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-16 text-center text-sm text-muted-foreground">Loading cart…</div>
+        <main className="container mx-auto px-4 py-16 text-center text-sm text-muted-foreground" aria-live="polite">Loading cart…</main>
         <Footer />
       </div>
     );
@@ -96,12 +96,12 @@ const Cart = () => {
       <div className="min-h-screen bg-background">
         <Seo title="Your Cart — Gadget360.ng" description="Review the gadgets in your Gadget360.ng cart and send your order to our Lagos team on WhatsApp for fast checkout." canonical="/cart" />
         <Header />
-        <div className="container mx-auto px-5 py-20 text-center">
-          <ShoppingBag className="mx-auto h-14 w-14 text-muted-foreground mb-4" />
-          <h2 className="font-display font-bold text-3xl mb-2">Your cart is empty</h2>
+        <main className="container mx-auto px-5 py-20 text-center">
+          <ShoppingBag aria-hidden="true" className="mx-auto h-14 w-14 text-muted-foreground mb-4" />
+          <h1 className="font-display font-bold text-3xl mb-2">Your cart is empty</h1>
           <p className="text-muted-foreground mb-6 text-sm">Add a gadget you love to get started.</p>
           <Button onClick={() => navigate("/shop")} className="rounded-full h-11 px-6">Browse Shop</Button>
-        </div>
+        </main>
         <Footer />
       </div>
     );
@@ -111,7 +111,7 @@ const Cart = () => {
     <div className="min-h-screen bg-background pb-36 lg:pb-0">
       <Seo title="Your Cart — Gadget360.ng" description="Review the gadgets in your Gadget360.ng cart and send your order to our Lagos team on WhatsApp for fast checkout." canonical="/cart" />
       <Header />
-      <div className="container mx-auto px-5 md:px-8 py-6 md:py-10">
+      <main className="container mx-auto px-5 md:px-8 py-6 md:py-10">
         <Link to="/shop" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mb-4">
           <ArrowLeft size={14} /> Continue shopping
         </Link>
@@ -189,7 +189,7 @@ const Cart = () => {
             </div>
           </aside>
         </div>
-      </div>
+      </main>
 
       {/* Mobile sticky checkout bar */}
       <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-border/60 px-4 py-3">

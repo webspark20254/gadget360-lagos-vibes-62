@@ -16,13 +16,13 @@ const NotFound = () => {
         description="The page you're looking for doesn't exist on Gadget360.ng. Head back to the home page or browse our shop for authentic gadgets in Lagos."
         canonical="/404"
       />
-      <div className="text-center px-6">
+      <main className="text-center px-6">
         <h1 className="font-display font-bold text-6xl md:text-8xl tracking-tight mb-3">404</h1>
         <p className="text-lg text-muted-foreground mb-6">We couldn't find that page.</p>
         <Link to="/" className="inline-flex h-11 px-6 items-center rounded-full bg-foreground text-background text-sm font-semibold hover:bg-foreground/90">
           Return home
         </Link>
-      </div>
+      </main>
     </div>
   );
 };

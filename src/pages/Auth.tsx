@@ -148,10 +148,10 @@ const Auth = () => {
     <div className="min-h-screen bg-background">
       <Seo title="Sign In or Create Account — Gadget360.ng" description="Sign in to your Gadget360.ng account or register to track orders, save favourites and check out faster on Nigeria's trusted gadget store." canonical="/auth" />
       <Header />
-      <div className="container mx-auto px-4 py-16">
+      <main className="container mx-auto px-4 py-16">
         <Card className="max-w-md mx-auto">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome to Gadget360.ng</CardTitle>
+            <h1 className="text-2xl font-semibold leading-none tracking-tight">Welcome to Gadget360.ng</h1>
             <CardDescription>
               Sign in to your account or create a new one to start shopping
             </CardDescription>
@@ -291,7 +291,7 @@ const Auth = () => {
             </Tabs>
           </CardContent>
         </Card>
-      </div>
+      </main>
       <Footer />
     </div>
   );

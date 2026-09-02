@@ -159,17 +159,17 @@ const Contact = () => {
           <form onSubmit={handleSubmit} className="md:col-span-7 rounded-[28px] border border-border bg-card p-6 md:p-8 space-y-4">
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Name *</label>
-                <Input name="name" value={formData.name} onChange={handleInputChange} required placeholder="Your full name" className="h-11 rounded-xl" />
+                <label htmlFor="contact-name" className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Name *</label>
+                <Input id="contact-name" name="name" value={formData.name} onChange={handleInputChange} required placeholder="Your full name" className="h-11 rounded-xl" />
               </div>
               <div>
-                <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Phone *</label>
-                <Input name="phone" type="tel" value={formData.phone} onChange={handleInputChange} required placeholder="+234 …" className="h-11 rounded-xl" />
+                <label htmlFor="contact-phone" className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Phone *</label>
+                <Input id="contact-phone" name="phone" type="tel" value={formData.phone} onChange={handleInputChange} required placeholder="+234 …" className="h-11 rounded-xl" />
               </div>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Email</label>
-              <Input name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="you@example.com" className="h-11 rounded-xl" />
+              <label htmlFor="contact-email" className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Email</label>
+              <Input id="contact-email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="you@example.com" className="h-11 rounded-xl" />
             </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Preferred reply</label>
@@ -183,8 +183,8 @@ const Contact = () => {
               </Select>
             </div>
             <div>
-              <label className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Message *</label>
-              <Textarea name="message" value={formData.message} onChange={handleInputChange} required rows={5} placeholder="What gadget are you looking for?" className="rounded-xl" />
+              <label htmlFor="contact-message" className="block text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Message *</label>
+              <Textarea id="contact-message" name="message" value={formData.message} onChange={handleInputChange} required rows={5} placeholder="What gadget are you looking for?" className="rounded-xl" />
             </div>
             <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-full bg-foreground hover:bg-foreground/90 text-background gap-2 font-semibold">
               {isSubmitting ? "Sending…" : (<><Send size={15} /> Send message</>)}
