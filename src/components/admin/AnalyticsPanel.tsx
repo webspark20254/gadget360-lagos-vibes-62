@@ -37,27 +37,49 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const { toast } = useToast();
 
-  const load = async () => {
-    const since = new Date(); since.setDate(since.getDate() - 90);
-    const [{ data: visitsData }, { data: waData }, { data: prodData }] = await Promise.all([
-      supabase
-        .from("page_visits")
-        .select("created_at, path, session_id, country, country_code, city")
-        .gte("created_at", since.toISOString())
+  // PostgREST caps a single response at 1000 rows, so a plain .limit(5000) silently
+  // returns only the oldest 1000 — which made recent months read as zero. Page through instead.
+  const PAGE_SIZE = 1000;
+  const fetchAllPages = async (table: "page_visits" | "whatsapp_clicks", columns: string, sinceIso: string, maxRows: number) => {
+    const out: Record<string, unknown>[] = [];
+    for (let from = 0; from < maxRows; from += PAGE_SIZE) {
+      const { data, error } = await supabase
+        .from(table)
+        .select(columns)
+        .gte("created_at", sinceIso)
         .order("created_at", { ascending: true })
-        .limit(5000),
-      supabase
-        .from("whatsapp_clicks")
-        .select("created_at, source, product_name, quantity, total_amount, country, country_code")
-        .gte("created_at", since.toISOString())
-        .order("created_at", { ascending: false })
-        .limit(2000),
-      supabase.from("products").select("id, name, category").limit(500),
-    ]);
-    setRows((visitsData as Row[]) || []);
-    setWaRows((waData as WaRow[]) || []);
-    setProductIndex((prodData as any) || []);
-    setLoading(false);
+        .range(from, from + PAGE_SIZE - 1);
+      if (error) throw error;
+      if (data?.length) out.push(...(data as Record<string, unknown>[]));
+      if (!data || data.length < PAGE_SIZE) break;
+    }
+    return out;
+  };
+
+  const load = async () => {
+    try {
+      const since = new Date(); since.setDate(since.getDate() - 90);
+      const [visitsData, waData, prodData] = await Promise.all([
+        fetchAllPages("page_visits", "created_at, path, session_id, country, country_code, city", since.toISOString(), 5000),
+        fetchAllPages("whatsapp_clicks", "created_at, source, product_name, quantity, total_amount, country, country_code", since.toISOString(), 2000),
+        supabase.from("products").select("id, name, category").limit(500),
+      ]);
+      const waSorted = [...(waData as unknown as WaRow[])].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+      setRows(visitsData as unknown as Row[]);
+      setWaRows(waSorted);
+      setProductIndex((prodData.data as any) || []);
+    } catch (e) {
+      console.error("Analytics load failed:", e);
+      toast({
+        title: "Couldn't load analytics data",
+        description: "The database didn't respond as expected. Check your connection and reopen this page.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
