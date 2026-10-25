@@ -50,7 +50,7 @@ const AnalyticsPanel = ({ autoDownload }: { autoDownload?: "yesterday" | string 
         .order("created_at", { ascending: true })
         .range(from, from + PAGE_SIZE - 1);
       if (error) throw error;
-      if (data?.length) out.push(...(data as Record<string, unknown>[]));
+      if (data?.length) out.push(...(data as unknown as Record<string, unknown>[]));
       if (!data || data.length < PAGE_SIZE) break;
     }
     return out;
